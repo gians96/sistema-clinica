@@ -31,6 +31,10 @@ export default defineNuxtConfig({
       name: "page",
       mode: "out-in" // default
     },
+    layoutTransition: {
+      name: "layout",
+      mode: "out-in" // default
+    },
     head: {
       title: "Vuetify 3 + Nuxt 3 Starter",
       titleTemplate: "%s | Vuetify 3 + Nuxt 3 Starter",

@@ -42,7 +42,7 @@ const expand2 = ref(false);
   <v-main>
     <v-container>
       <!-- <NavBar :links="routeLinks"></NavBar> -->
-      <vRow>
+      <!-- <vRow>
         <vCol lg="12">
           <v-btn class="ma-2" color="secondary" @click="expand2 = !expand2">
             Expand X Transition   
@@ -51,7 +51,7 @@ const expand2 = ref(false);
             <CharacterCard v-show="expand2"></CharacterCard>
           </v-scroll-x-transition>
         </vCol>
-      </vRow>
+      </vRow> -->
 
       <v-scroll-y-transition>
         <VRow>

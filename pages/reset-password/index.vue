@@ -43,11 +43,11 @@
           class="h-100 rounded-xl d-flex align-center justify-center"
         >
           <div class="text-center w-50 text-white mx-auto">
-            <h2 class="mb-4">Start your journey today</h2>
+            <h2 class="mb-4">CENTRO MEDICO ECOCASMA E.I.R.L.</h2>
             <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Asperiores, inventore quia.
-              Dolorum dolores ad ipsum voluptatum rem, hic placeat, odio, odit numquam quod
-              veritatis accusantium assumenda! Sequi, provident in! Iure!
+              Software médico, ideal para clínicas y consultorios. 
+              Ahorra tiempo y mejora la salud de tus pacientes organizando, 
+              llevando tus historias clínicas y realizando videollamadas en una sola plataforma integrada.
             </p>
           </div>
         </VImg>

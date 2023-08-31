@@ -4,33 +4,33 @@
       <VCol cols="12" md="6" lg="5" sm="6">
         <VRow no-gutters align="center" justify="center">
           <VCol cols="12" md="6">
-            <h1>Sign In</h1>
-            <p class="text-medium-emphasis">Enter your details to get started</p>
+            <h1>Iniciar sesión</h1>
+            <p class="text-medium-emphasis">Ingresa tus datos</p>
 
-            <UtilsTextanimate></UtilsTextanimate>
+            <!-- <UtilsTextanimate></UtilsTextanimate> -->
 
-            <VForm @submit.prevent="submit" class="mt-7">
+            <!-- <VForm @submit.prevent="submit" class="mt-7"> -->
               <div class="mt-1">
                 <label class="label text-grey-darken-2" for="email">Email</label>
                 <VTextField :rules="[ruleRequired, ruleEmail]" v-model="email" prepend-inner-icon="fluent:mail-24-regular"
                   id="email" name="email" type="email" />
               </div>
               <div class="mt-1">
-                <label class="label text-grey-darken-2" for="password">Password</label>
+                <label class="label text-grey-darken-2" for="password">Contraseña</label>
                 <VTextField :rules="[ruleRequired, rulePassLen]" v-model="password"
                   prepend-inner-icon="fluent:password-20-regular" id="password" name="password" type="password" />
               </div>
               <div class="mt-5">
-                <VBtn type="submit" block min-height="44" class="gradient primary">Sign In</VBtn>
-                <v-btn block min-height="44" class="gradient primary">Sign In</v-btn>
+                <VBtn block min-height="44" class="gradient primary"  to="/characters">Ingresar</VBtn>
+                <!-- <v-btn block min-height="44" class="gradient primary">Sign In</v-btn> -->
               </div>
-            </VForm>
+            <!-- </VForm> -->
             <p class="text-body-2 mt-10">
-              <NuxtLink to="/reset-password" class="font-weight-bold text-primary">Forgot password?</NuxtLink>
+              <NuxtLink to="/reset-password" class="font-weight-bold text-primary">¿Has olvidado tu contraseña?</NuxtLink>
             </p>
             <p class="text-body-2 mt-4">
-              <span>Don't have an account?
-                <NuxtLink to="/signup" class="font-weight-bold text-primary">Sign Up</NuxtLink>
+              <span>¿No tienes una cuenta?
+                <NuxtLink to="/signup" class="font-weight-bold text-primary">Registrate</NuxtLink>
               </span>
             </p>
           </VCol>
@@ -39,12 +39,17 @@
       <VCol class="hidden-md-and-down fill-height" md="6" lg="7">
         <VImg src="https://wallpaper.dog/large/5557744.jpg" cover
           class="h-100 rounded-xl d-flex align-center justify-center">
-          <div class="text-center w-50 text-white mx-auto">
-            <h2 class="mb-4">Start your journey today</h2>
+          <div class="text-center w-50 text-white mx-auto align-center">
+            <div class=" d-flex align-center justify-center my-4">
+              <v-img src="https://cmecocasma.nt-suite.one/storage/uploads/logos/logo_20541751832.jpg" cover
+                max-height="130" max-width="130">
+              </v-img>
+            </div>
+            <h2 class="mb-4">CENTRO MEDICO ECOCASMA E.I.R.L.</h2>
             <p>
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Asperiores, inventore quia.
-              Dolorum dolores ad ipsum voluptatum rem, hic placeat, odio, odit numquam quod
-              veritatis accusantium assumenda! Sequi, provident in! Iure!
+              Software médico, ideal para clínicas y consultorios.
+              Ahorra tiempo y mejora la salud de tus pacientes organizando,
+              llevando tus historias clínicas y realizando videollamadas en una sola plataforma integrada.
             </p>
           </div>
         </VImg>
@@ -55,9 +60,12 @@
 </template>
 
 <script setup>
+const route = useRoute()
 const email = ref("");
 const password = ref("");
-
+const SingUp = () => {
+  navigateTo('/characters')
+};
 const { ruleEmail, rulePassLen, ruleRequired } = useFormRules();
 
 const submit = async () => { };

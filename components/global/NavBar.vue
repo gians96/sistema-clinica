@@ -8,23 +8,23 @@ interface Props{
 const props = defineProps<Props>();
 const authBtn = ref([
   {
-    name: "Inciar Sesion",
+    name: "Inciar Sesssion",
     active: true,
-    to: "",
+    to: "/",
     color: "green-accent-4",
     variant: "text",
   },
   {
     name: "Cerrar Sesion",
     active: false,
-    to: "",
+    to: "#",
     color: "default",
     variant: "text",
   },
   {
     name: "Resgistro",
     active: true,
-    to: "",
+    to: "#",
     color: "green-accent-4",
     colorText: "text-white",
     variant: "text",
@@ -46,10 +46,11 @@ const authBtn = ref([
     <v-spacer></v-spacer>
     <div v-for="btn in authBtn" :key="btn.to">
       <v-btn
-        :variant?="btn.variant"
+        :variant="btn.variant"
         v-if="btn.active"
-        :color?="btn.color"
-        :class?="btn.colorText"
+        :color="btn.color"
+        :class="btn.colorText"
+        :to="btn.to"
       >
         {{ btn.name }}
       </v-btn>
