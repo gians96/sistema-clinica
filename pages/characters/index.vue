@@ -9,12 +9,12 @@ definePageMeta({
 // const { pendingRM, errorRM, characters, refreshRM } = await useCharacters()
 //! 2 useFetch
 import type { Character, Result } from '~/interfaces/Character';
-import type { User } from '~/interfaces/User';
+// import type { User } from '~/interfaces/User';
 //Esta API en lado del servidor maneja una configuracion para cache en disco
 const { data: characters, pending: pendingRM, error: errorRM, refresh: refreshRM } = await useFetch<Character>('https://rickandmortyapi.com/api/character', { method: 'GET' })
 
 //Es una API simple
-const { data: usersTS, pending: pendingTS, error: errorTS, refresh: refreshTS } = await useFetch<User[]>('https://template-api-rest-ts-production.up.railway.app/test', { method: 'GET' })
+// const { data: usersTS, pending: pendingTS, error: errorTS, refresh: refreshTS } = await useFetch<User[]>('https://template-api-rest-ts-production.up.railway.app/test', { method: 'GET' })
 
 
 // onUnmounted(() => {
@@ -36,13 +36,38 @@ const refreshAll = async () => {
 }
 const expand2 = ref(false);
 
+import { computed } from 'vue'
+import { useDisplay } from 'vuetify'
+
+const { name, mobile } = useDisplay()
+
+const height = computed(() => {
+  // name is reactive and
+  // must use .value
+  switch (name.value) {
+    case 'xs': return 220
+    case 'sm': return 400
+    case 'md': return 500
+    case 'lg': return 600
+    case 'xl': return 800
+    case 'xxl': return 1200
+  }
+
+  return undefined
+})
+
+
+
+
+
 </script>
 
 <template>
-  <v-main>
-    <v-container>
-      <!-- <NavBar :links="routeLinks"></NavBar> -->
-      <!-- <vRow>
+  <v-container class="mx-2 text-center" >
+    <h1>height: {{ height }}</h1>
+    <h1>Mobile: {{ mobile }}</h1>
+    <!-- <NavBar :links="routeLinks"></NavBar> -->
+    <!-- <vRow>
         <vCol lg="12">
           <v-btn class="ma-2" color="secondary" @click="expand2 = !expand2">
             Expand X Transition   
@@ -53,29 +78,28 @@ const expand2 = ref(false);
         </vCol>
       </vRow> -->
 
-      <v-scroll-y-transition>
-        <VRow>
-          <v-col v-if="!pendingTS" cols="12" sm="2">
-            <div v-if="pendingRM">Loading...</div>
-            <div v-if="errorRM">Error</div>
-            <!-- <v-btn @click="refreshRM">Refresh (con cache)</v-btn> -->
-            <v-btn :disabled="refreshing" @click="refreshAll"> Refetch All Data</v-btn>
-            <ul>
+    <v-scroll-y-transition>
+      <VRow>
+        <v-col v-if="!pendingRM" cols="12" sm="2">
+          <div v-if="pendingRM">Loading...</div>
+          <div v-if="errorRM">Error</div>
+          <!-- <v-btn @click="refreshRM">Refresh (con cache)</v-btn> -->
+          <v-btn :disabled="refreshing" @click="refreshAll"> Refetch All Data</v-btn>
+          <!-- <ul>
               <li v-for="{ name, _id } of usersTS" :key="_id">
                 <pre class="text-left"><code>{{ name }}</code></pre>
               </li>
-            </ul>
-          </v-col>
-          <v-col v-if="!pendingRM" cols="12" sm="2">
-            <ul>
-              <li v-for="{ id, name } of characters?.results" :key="id">
-                <pre class="text-left"><code>{{ name }}</code></pre>
-              </li>
-            </ul>
-          </v-col>
-        </VRow>
-      </v-scroll-y-transition>
-    </v-container>
-  </v-main>
+            </ul> -->
+        </v-col>
+        <v-col v-if="!pendingRM" cols="12" sm="2">
+          <ul>
+            <li v-for="{ id, name } of characters?.results" :key="id">
+              <pre class="text-left"><code>{{ name }}</code></pre>
+            </li>
+          </ul>
+        </v-col>
+      </VRow>
+    </v-scroll-y-transition>
+  </v-container>
 </template>
 <style scoped></style>

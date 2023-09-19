@@ -1,67 +1,91 @@
 <script setup lang="ts">
 import { RouterLink, routeLinks } from '../shared/link-routes';
-
-interface Props{
-  title?:String;
+import { useStore } from '@/store/index'
+const store = useStore()
+interface Props {
+  title?: String;
   links: RouterLink[];
 }
 const props = defineProps<Props>();
-const authBtn = ref([
-  {
-    name: "Inciar Sesssion",
-    active: true,
-    to: "/",
-    color: "green-accent-4",
-    variant: "text",
-  },
-  {
-    name: "Cerrar Sesion",
-    active: false,
-    to: "#",
-    color: "default",
-    variant: "text",
-  },
-  {
-    name: "Resgistro",
-    active: true,
-    to: "#",
-    color: "green-accent-4",
-    colorText: "text-white",
-    variant: "text",
-  },
-]);
+// const authBtn = ref([
+//   {
+//     name: "Inciar Sesssion",
+//     active: true,
+//     to: "/",
+//     color: "green-accent-4",
+//     variant: "text",
+//   },
+//   {
+//     name: "Cerrar Sesion",
+//     active: false,
+//     to: "#",
+//     color: "default",
+//     variant: "text",
+//   },
+//   {
+//     name: "Resgistro",
+//     active: true,
+//     to: "#",
+//     color: "green-accent-4",
+//     colorText: "text-white",
+//     variant: "text",
+//   },
+// ]);
+
+const user = ref({
+  initials: 'GA',
+  fullName: 'Gianmarcos Daniel Arias Bonifacio',
+  shorName: 'Gianmarcos',
+  rule: "Administrador",
+  email: 'john.doe@doe.com',
+})
+
+import { useDisplay } from 'vuetify'
+const { mobile } = useDisplay()
 </script>
 
 <template>
-  <v-app-bar class="px-3" color="transparent" flat density="compact" append>
-    <v-avatar color="grey-darken-1" size="32"></v-avatar>
-
+  <v-app-bar class="" color="transparent" flat append elevation="2">
+    <v-btn variant="text" icon="mdi-menu" @click.stop="mobile ? store.setChangeDrawer() : store.setChangeRail()"></v-btn>
     <v-spacer></v-spacer>
 
-    <v-tabs centered color="grey-darken-2">
-      <v-tab v-for="link in props.links" :key="link.path" :to="link.path">
-        {{ link.title }}
-      </v-tab>
-    </v-tabs>
-    <v-spacer></v-spacer>
-    <div v-for="btn in authBtn" :key="btn.to">
-      <v-btn
-        :variant="btn.variant"
-        v-if="btn.active"
-        :color="btn.color"
-        :class="btn.colorText"
-        :to="btn.to"
-      >
-        {{ btn.name }}
-      </v-btn>
-    </div>
-
-    <v-avatar
-      class="hidden-sm-and-down"
-      color="grey-darken-1"
-      size="32"
-      v-if="false"
-    ></v-avatar>
+    <v-avatar class="hidden-sm-and-down" color="grey-darken-1" size="32" v-if="false"></v-avatar>
+    <!-- LIST -->
+    <v-menu rounded :close-on-content-click="false">
+      <template v-slot:activator="{ props }">
+        <v-list v-if="!mobile" class="hidden-sm-and-down" v-bind="props" style="cursor: pointer">
+          <v-list-item prepend-avatar="https://cdn.vuetifyjs.com/images/john.png" :title="user.shorName"
+            :subtitle="user.email">
+          </v-list-item>
+        </v-list>
+        <v-btn v-if="mobile" icon v-bind="props">
+          <v-avatar color="brown" size="default">
+            <span class="text-h5">{{ user.initials }}</span>
+          </v-avatar>
+        </v-btn>
+      </template>
+      <v-card>
+        <v-card-text>
+          <div class="mx-auto text-center">
+            <v-avatar color="brown">
+              <span class="text-h5">{{ user.initials }}</span>
+            </v-avatar>
+            <h3>{{ user.fullName }}</h3>
+            <p class="text-caption mt-1">
+              {{ user.email }}
+            </p>
+            <v-divider class="my-3"></v-divider>
+            <v-btn block rounded variant="text">
+              Editar Cuenta
+            </v-btn>
+            <v-divider class="my-3"></v-divider>
+            <v-btn block rounded variant="text">
+              Salir
+            </v-btn>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-menu>
   </v-app-bar>
 </template>
 

@@ -19,7 +19,12 @@
     "sass": "^1.63.6",
     "vuetify": "^3.3.7"
   },
+  "overrides": {
+    "vue": "latest"
+  },
   "dependencies": {
+    "@pinia/nuxt": "^0.4.11",
+    "pinia": "^2.1.6",
     "vite-plugin-vuetify": "^1.0.2"
   }
 }
