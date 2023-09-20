@@ -36,26 +36,8 @@ const refreshAll = async () => {
 }
 const expand2 = ref(false);
 
-import { computed } from 'vue'
 import { useDisplay } from 'vuetify'
-
-const { name, mobile } = useDisplay()
-
-const height = computed(() => {
-  // name is reactive and
-  // must use .value
-  switch (name.value) {
-    case 'xs': return 220
-    case 'sm': return 400
-    case 'md': return 500
-    case 'lg': return 600
-    case 'xl': return 800
-    case 'xxl': return 1200
-  }
-
-  return undefined
-})
-
+const { mobile } = useDisplay()
 
 
 
@@ -64,8 +46,9 @@ const height = computed(() => {
 
 <template>
   <v-container class="mx-2 text-center" >
-    <h1>height: {{ height }}</h1>
-    <h1>Mobile: {{ mobile }}</h1>
+    
+      
+
     <!-- <NavBar :links="routeLinks"></NavBar> -->
     <!-- <vRow>
         <vCol lg="12">
