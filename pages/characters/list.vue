@@ -30,9 +30,7 @@ const height = computed(() => {
   return undefined
 })
 
-definePageMeta({
-  layout: "pj",
-});
+
 </script>
 
 <style scoped></style>

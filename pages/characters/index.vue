@@ -1,7 +1,5 @@
 <script setup lang="ts">
-definePageMeta({
-  layout: "pj",
-});
+
 //const { data: mountains, pending, error, refresh } = await useFetch('https://api.nuxtjs.dev/mountains')
 ///////////////////////////////////////////////////////////////////////
 //! 1 uso de Componibles, se puede usar con el fecth

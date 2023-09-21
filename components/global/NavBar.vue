@@ -2,11 +2,11 @@
 import { RouterLink, routeLinks } from '../shared/link-routes';
 import { useStore } from '@/store/index'
 const store = useStore()
-interface Props {
-  title?: String;
-  links: RouterLink[];
-}
-const props = defineProps<Props>();
+// interface Props {
+//   title?: String;
+//   links: RouterLink[];
+// }
+// const props = defineProps<Props>();
 // const authBtn = ref([
 //   {
 //     name: "Inciar Sesssion",

@@ -56,7 +56,11 @@
   </VContainer>
 </template>
 
-<script setup lang="ts">
+<script setup>
+
+definePageMeta({
+  layout: "auth"
+});
 const email = ref("");
 const password = ref("");
 

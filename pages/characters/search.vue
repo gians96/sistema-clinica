@@ -19,9 +19,6 @@ const increase = () => {
   counter.value++;
 };
 
-definePageMeta({
-  layout: "pj",
-});
 </script>
 
 <style scoped></style>

@@ -76,6 +76,9 @@
 </template>
 
 <script setup>
+definePageMeta({
+  layout: "auth",
+});
 const name = ref("");
 const email = ref("");
 const password = ref("");

@@ -60,7 +60,8 @@
   </VContainer>
 </template>
 
-<script setup>
+<script setup lang="ts">
+
 const route = useRoute()
 const email = ref("");
 const password = ref("");
@@ -70,4 +71,8 @@ const SingUp = () => {
 const { ruleEmail, rulePassLen, ruleRequired } = useFormRules();
 
 const submit = async () => { };
+
+definePageMeta({
+  layout: "auth",
+});
 </script>
