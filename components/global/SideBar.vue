@@ -13,7 +13,8 @@ const menus = ref([
   {
     icon: "mdi-pill-multiple", title: "Productos/Servicios", value: "items", to: "#", view: true,
     toSub: [
-      { title: "Especialidad", value: "specialty", to: "/items/specialty", view: true },
+    { title: "Categoría", value: "category", to: "/items/category", view: true },  
+    { title: "Especialidad", value: "specialty", to: "/items/speciality", view: true },
       { title: "Productos", value: "productos", to: "/items/products", view: true }
     ]
   },

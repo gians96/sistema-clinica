@@ -2,14 +2,11 @@
 </script>
 <template >
 	<v-app>
-		<v-layout>
-			<SideBar></SideBar>
-			<NavBar></NavBar>
-			<VMain>
-				<slot />
-			</VMain>
-		</v-layout>
-		<!-- <NuxtLink to="/"> Back to home </NuxtLink> -->
+		<SideBar></SideBar>
+		<NavBar></NavBar>
+		<VMain>
+			<slot />
+		</VMain>
 	</v-app>
 </template>
 <style>

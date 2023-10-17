@@ -45,7 +45,7 @@ const { mobile } = useDisplay()
 </script>
 
 <template>
-  <v-app-bar class="" color="transparent" flat append elevation="2">
+  <v-app-bar >
     <v-btn variant="text" icon="mdi-menu" @click.stop="mobile ? store.setChangeDrawer() : store.setChangeRail()"></v-btn>
     <v-spacer></v-spacer>
 
