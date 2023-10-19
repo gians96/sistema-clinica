@@ -32,43 +32,71 @@ const itemsPerPage = ref(15)
 const search = ref('')
 const selected = ref([])
 
+const dialog = ref(false)
+const dialogDelete = ref(false)
+const editedItem = ref<Specialty>({
+  id: 0,
+  name: "",
+  description: "",
+  category: "",
+  price: 0,
+  type_commission: "money",
+  commission: 0,
+  status: true
+})
+const defaultItem = ref<Specialty>({
+  id: 0,
+  name: "",
+  description: "",
+  category: "",
+  price: 0,
+  type_commission: "money",
+  commission: 0,
+  status: true
+})
+
 import { computed } from 'vue'
 const pageCount = computed(() => {
   return Math.ceil(data.value.length / itemsPerPage.value)
 })
+const nameTitleDialog = ref("")
+const openDialogNewItem = () => {
+  dialog.value = true
+  nameTitleDialog.value = "Nueva Especialidad"
+  editedItem.value = Object.assign({}, defaultItem.value)
 
-const editar = async (id: String) => {
-  try {
+}
 
-    console.log(id)
+const openDialogEditItem = (item: Specialty) => {
+  dialog.value = true
+  nameTitleDialog.value = "Editar Especialidad"
+  editedItem.value = item
 
-  } catch (error) {
-    console.log("error")
-  }
-};
+}
 
-const eliminar = async (id: String) => {
-  try {
+const openDialogDeleteItem = (item: Specialty) => {
+  dialog.value = true
+  nameTitleDialog.value = "Eliminar Especialidad"
 
-    console.log(id)
+}
 
-  } catch (error) {
-    console.log("error")
-  }
-};
+const closeDialogItem = () => {
+  dialog.value = false
+}
+
 const data = ref(specialistsData)
 
 </script>
 
 <template>
   <v-container fluid>
-    <v-app-bar class="justify-center " flat append>
+    <v-app-bar class="justify-center" flat append>
       <div class="justify-center mx-4">
         <v-icon class="me-1" icon="mdi-pill-multiple"></v-icon>
-        <span class="subheading me-2">Especialidades</span>
+        <span class="subheading">Especialidades</span>
       </div>
       <v-spacer></v-spacer>
-      <v-btn append-icon="mdi-plus-circle" color="primary" variant="flat">Nuevo</v-btn>
+      <v-btn append-icon="mdi-plus-circle" color="primary" variant="flat" @click="openDialogNewItem()">Nuevo</v-btn>
     </v-app-bar>
     <v-card class="justify-self-end mx-4" elevation="0">
       <v-container fluid>
@@ -77,6 +105,58 @@ const data = ref(specialistsData)
             <v-text-field v-model="search" append-inner-icon="mdi-magnify" label="Buscar"></v-text-field>
           </v-col>
         </v-row>
+        <!-- CUADRO DIALOGO -->
+        <v-dialog v-model="dialog" max-width="800px" transition="dialog-bottom-transition">
+          <v-card>
+
+            <v-toolbar color="primary" :title="nameTitleDialog">
+            </v-toolbar>
+
+
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col cols="12" sm="6" md="8">
+                    <v-text-field v-model="editedItem.name" label="Nombre(*)"></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field v-model="editedItem.price" label="Precio(*)"></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="8">
+                    <v-text-field v-model="editedItem.description" label="Descripción"></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field v-model="editedItem.category" label="Categoría"></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <!-- <v-text-field v-model="editedItem.type_commission" label="Tipo de comisión"></v-text-field> -->
+                    <v-combobox v-model="nameCommission[editedItem.type_commission]" :items="['Dinero', 'Porcentaje']"
+                      label="Tipo de comisión"></v-combobox>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field v-model="editedItem.commission" label="Comisión"></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-switch v-model="editedItem.status" color="success" label="Habilitado"></v-switch>
+
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions class="mb-2">
+              <v-spacer></v-spacer>
+              <v-btn class="mx-2" color="blue-darken-1" variant="text" @click="closeDialogItem()">
+                Cancelar
+              </v-btn>
+              <v-btn color="blue-darken-1" variant="elevated" @click="closeDialogItem()">
+                Guardar
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+        <!-- DIALOG -->
         <v-row dense>
           <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="data"
             :items-per-page="itemsPerPage" item-value=name :search="search" show-select class="elevation-1">
@@ -102,8 +182,9 @@ const data = ref(specialistsData)
 
             <template v-slot:item.actions="{ item }">
               <div class="justify-center ">
-                <v-btn class="me-2" rounded icon="mdi-pencil" color="yellow" @click="editar(item.raw.id)"> </v-btn>
-                <v-btn color="red" rounded icon="mdi-delete" @click="eliminar(item.raw.id)"> </v-btn>
+                <v-btn class="me-2" rounded icon="mdi-pencil" color="yellow" @click="openDialogEditItem(item.raw)">
+                </v-btn>
+                <v-btn color="red" rounded icon="mdi-delete" @click="openDialogDeleteItem(item.raw)"> </v-btn>
               </div>
             </template>
             <template v-slot:bottom>
