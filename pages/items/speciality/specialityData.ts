@@ -5,7 +5,7 @@ const especialityData: Specialty[] = [
     id: 1,
     name: "AD PACK GEST.",
     description: "",
-    category: "",
+    category: null,
     price: 0,
     type_commission: "Porcentaje",
     commission: 0,
@@ -15,7 +15,8 @@ const especialityData: Specialty[] = [
     id: 2,
     name: "ADM. DOMICILIARIA",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0.3,
@@ -25,7 +26,8 @@ const especialityData: Specialty[] = [
     id: 3,
     name: "ADM. MEDICAMENTO",
     description: "",
-    category: "",
+    category: null,
+
     price: 120,
     type_commission: "Porcentaje",
     commission: 0.3,
@@ -35,7 +37,8 @@ const especialityData: Specialty[] = [
     id: 4,
     name: "ALQUILER SALA",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0,
@@ -45,7 +48,8 @@ const especialityData: Specialty[] = [
     id: 5,
     name: "CAPTACIÓN PROCEDIMIENTO",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0.15,
@@ -55,7 +59,8 @@ const especialityData: Specialty[] = [
     id: 6,
     name: "CAPTACIÓN ECO",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Dinero",
     commission: 8,
@@ -65,7 +70,8 @@ const especialityData: Specialty[] = [
     id: 7,
     name: "CAPTACIÓN FÉRULA DE YESO",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0.1,
@@ -75,7 +81,8 @@ const especialityData: Specialty[] = [
     id: 8,
     name: "CAPTACIÓN QX",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0.1,
@@ -85,7 +92,8 @@ const especialityData: Specialty[] = [
     id: 9,
     name: "CERT. LICENCIA",
     description: "",
-    category: "",
+    category: null,
+
     price: 35,
     type_commission: "Dinero",
     commission: 15,
@@ -95,7 +103,8 @@ const especialityData: Specialty[] = [
     id: 10,
     name: "CERT. MATRIMONIO",
     description: "",
-    category: "",
+    category: null,
+
     price: 50,
     type_commission: "Porcentaje",
     commission: 0,
@@ -105,7 +114,8 @@ const especialityData: Specialty[] = [
     id: 11,
     name: "CERT. MÉDICO CMP",
     description: "",
-    category: "",
+    category: null,
+
     price: 40,
     type_commission: "Dinero",
     commission: 18,
@@ -115,7 +125,8 @@ const especialityData: Specialty[] = [
     id: 12,
     name: "CERT. MÉDICO EC",
     description: "",
-    category: "",
+    category: null,
+
     price: 40,
     type_commission: "Dinero",
     commission: 15,
@@ -125,7 +136,8 @@ const especialityData: Specialty[] = [
     id: 13,
     name: "CERT. MOTO",
     description: "",
-    category: "",
+    category: null,
+
     price: 35,
     type_commission: "Dinero",
     commission: 15,
@@ -135,7 +147,8 @@ const especialityData: Specialty[] = [
     id: 14,
     name: "CIRUGÍA",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0.1,
@@ -145,7 +158,8 @@ const especialityData: Specialty[] = [
     id: 15,
     name: "CM DOMICILIARIA COVID",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Dinero",
     commission: 100,
@@ -155,7 +169,8 @@ const especialityData: Specialty[] = [
     id: 16,
     name: "CM COVID",
     description: "",
-    category: "",
+    category: null,
+
     price: 80,
     type_commission: "Dinero",
     commission: 50,
@@ -165,7 +180,8 @@ const especialityData: Specialty[] = [
     id: 17,
     name: "CM DOMICILIARIA  ",
     description: "",
-    category: "",
+    category: null,
+
     price: 130,
     type_commission: "Porcentaje",
     commission: 0.6,
@@ -175,7 +191,8 @@ const especialityData: Specialty[] = [
     id: 18,
     name: "COLONOSCOPÍA",
     description: "",
-    category: "",
+    category: null,
+
     price: 380,
     type_commission: "Porcentaje",
     commission: 0.75,
@@ -185,7 +202,8 @@ const especialityData: Specialty[] = [
     id: 19,
     name: "CONSULTA EMERG.",
     description: "",
-    category: "",
+    category: null,
+
     price: 50,
     type_commission: "Porcentaje",
     commission: 0.5,
@@ -195,7 +213,8 @@ const especialityData: Specialty[] = [
     id: 20,
     name: "CONSULTA GASTRO",
     description: "",
-    category: "",
+    category: null,
+
     price: 70,
     type_commission: "Porcentaje",
     commission: 0.75,
@@ -205,7 +224,8 @@ const especialityData: Specialty[] = [
     id: 21,
     name: "CONSULTA GINECOLÓGICA",
     description: "",
-    category: "",
+    category: null,
+
     price: 50,
     type_commission: "Porcentaje",
     commission: 0.6,
@@ -215,7 +235,8 @@ const especialityData: Specialty[] = [
     id: 22,
     name: "CONSULTA MÉDICA I",
     description: "",
-    category: "",
+    category: null,
+
     price: 40,
     type_commission: "Porcentaje",
     commission: 0.5,
@@ -225,7 +246,8 @@ const especialityData: Specialty[] = [
     id: 23,
     name: "CONSULTA MÉDICA II",
     description: "",
-    category: "",
+    category: null,
+
     price: 30,
     type_commission: "Porcentaje",
     commission: 0.5,
@@ -235,7 +257,8 @@ const especialityData: Specialty[] = [
     id: 24,
     name: "CONSULTA OBSTETRICIA",
     description: "",
-    category: "",
+    category: null,
+
     price: 20,
     type_commission: "Porcentaje",
     commission: 0,
@@ -245,7 +268,8 @@ const especialityData: Specialty[] = [
     id: 25,
     name: "CONSULTA OFTÁLMICA",
     description: "",
-    category: "",
+    category: null,
+
     price: 50,
     type_commission: "Porcentaje",
     commission: 0.6,
@@ -255,7 +279,8 @@ const especialityData: Specialty[] = [
     id: 26,
     name: "CONSULTA PACK",
     description: "",
-    category: "",
+    category: null,
+
     price: 10,
     type_commission: "Porcentaje",
     commission: 0,
@@ -265,7 +290,8 @@ const especialityData: Specialty[] = [
     id: 27,
     name: "CONSULTA PEDIÁTRICA",
     description: "",
-    category: "",
+    category: null,
+
     price: 50,
     type_commission: "Porcentaje",
     commission: 0.6,
@@ -275,7 +301,8 @@ const especialityData: Specialty[] = [
     id: 28,
     name: "CONSULTA M. INTERNA",
     description: "",
-    category: "",
+    category: null,
+
     price: 50,
     type_commission: "Porcentaje",
     commission: 0.6,
@@ -285,7 +312,8 @@ const especialityData: Specialty[] = [
     id: 29,
     name: "CONSULTA TRAUMATOLOGÍA",
     description: "",
-    category: "",
+    category: null,
+
     price: 50,
     type_commission: "Porcentaje",
     commission: 0.6,
@@ -295,7 +323,8 @@ const especialityData: Specialty[] = [
     id: 30,
     name: "CONTROL EMBARAZO",
     description: "",
-    category: "",
+    category: null,
+
     price: 50,
     type_commission: "Porcentaje",
     commission: 0,
@@ -305,7 +334,8 @@ const especialityData: Specialty[] = [
     id: 31,
     name: "ECO PACK",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0,
@@ -315,7 +345,8 @@ const especialityData: Specialty[] = [
     id: 32,
     name: "ECOGRAFÍA",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0.4,
@@ -325,7 +356,8 @@ const especialityData: Specialty[] = [
     id: 33,
     name: "FONDO DE OJO ",
     description: "",
-    category: "",
+    category: null,
+
     price: 80,
     type_commission: "Porcentaje",
     commission: 0.6,
@@ -335,7 +367,8 @@ const especialityData: Specialty[] = [
     id: 34,
     name: "EKG",
     description: "",
-    category: "",
+    category: null,
+
     price: 40,
     type_commission: "Dinero",
     commission: 5,
@@ -345,7 +378,8 @@ const especialityData: Specialty[] = [
     id: 35,
     name: "EKG DOMICILIO",
     description: "",
-    category: "",
+    category: null,
+
     price: 100,
     type_commission: "Porcentaje",
     commission: 0,
@@ -355,7 +389,8 @@ const especialityData: Specialty[] = [
     id: 36,
     name: "ENDOSCOPÍA",
     description: "",
-    category: "",
+    category: null,
+
     price: 280,
     type_commission: "Porcentaje",
     commission: 0.75,
@@ -365,7 +400,8 @@ const especialityData: Specialty[] = [
     id: 37,
     name: "EX.MÉDICO OCUP.",
     description: "",
-    category: "",
+    category: null,
+
     price: 300,
     type_commission: "Porcentaje",
     commission: 0,
@@ -375,7 +411,8 @@ const especialityData: Specialty[] = [
     id: 38,
     name: "FARMACIA",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0,
@@ -385,7 +422,8 @@ const especialityData: Specialty[] = [
     id: 39,
     name: "HEMOGLUCOTEST",
     description: "",
-    category: "",
+    category: null,
+
     price: 10,
     type_commission: "Porcentaje",
     commission: 0,
@@ -395,7 +433,8 @@ const especialityData: Specialty[] = [
     id: 40,
     name: "HOSPITALIZACIÓN",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0.2,
@@ -405,7 +444,8 @@ const especialityData: Specialty[] = [
     id: 41,
     name: "INFORME MÉDICO",
     description: "",
-    category: "",
+    category: null,
+
     price: 40,
     type_commission: "Porcentaje",
     commission: 0.4,
@@ -415,7 +455,8 @@ const especialityData: Specialty[] = [
     id: 42,
     name: "NST",
     description: "",
-    category: "",
+    category: null,
+
     price: 40,
     type_commission: "Porcentaje",
     commission: 0,
@@ -425,7 +466,8 @@ const especialityData: Specialty[] = [
     id: 43,
     name: "PACK - GESTANTE I",
     description: "",
-    category: "",
+    category: null,
+
     price: 350,
     type_commission: "Porcentaje",
     commission: 0,
@@ -435,7 +477,8 @@ const especialityData: Specialty[] = [
     id: 44,
     name: "NEUMOLOGIA ",
     description: "",
-    category: "",
+    category: null,
+
     price: 180,
     type_commission: "Porcentaje",
     commission: 0,
@@ -445,7 +488,8 @@ const especialityData: Specialty[] = [
     id: 45,
     name: "PACK - GESTANTE II",
     description: "",
-    category: "",
+    category: null,
+
     price: 300,
     type_commission: "Porcentaje",
     commission: 0,
@@ -455,7 +499,8 @@ const especialityData: Specialty[] = [
     id: 46,
     name: "CONSULTA REUMATOLOGÍA",
     description: "",
-    category: "",
+    category: null,
+
     price: 70,
     type_commission: "Porcentaje",
     commission: 0.5,
@@ -465,7 +510,8 @@ const especialityData: Specialty[] = [
     id: 47,
     name: "PACK - GESTANTE III",
     description: "",
-    category: "",
+    category: null,
+
     price: 250,
     type_commission: "Porcentaje",
     commission: 0,
@@ -475,7 +521,8 @@ const especialityData: Specialty[] = [
     id: 48,
     name: "PAQUETE  GINECOLOGIA ",
     description: "",
-    category: "",
+    category: null,
+
     price: 120,
     type_commission: "Porcentaje",
     commission: 0.4,
@@ -485,7 +532,8 @@ const especialityData: Specialty[] = [
     id: 49,
     name: "PP.FF",
     description: "",
-    category: "",
+    category: null,
+
     price: 5,
     type_commission: "Porcentaje",
     commission: 0,
@@ -495,7 +543,8 @@ const especialityData: Specialty[] = [
     id: 50,
     name: "PROCED. AMPUTACIÓN",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0,
@@ -505,7 +554,8 @@ const especialityData: Specialty[] = [
     id: 51,
     name: "PROCED. CAUTERIZACIÓN",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0,
@@ -515,7 +565,8 @@ const especialityData: Specialty[] = [
     id: 52,
     name: "PAQUETE CORNIA ",
     description: "",
-    category: "",
+    category: null,
+
     price: 100,
     type_commission: "Porcentaje",
     commission: 0.4,
@@ -525,7 +576,8 @@ const especialityData: Specialty[] = [
     id: 53,
     name: "PAQUETE MACULA ",
     description: "",
-    category: "",
+    category: null,
+
     price: 100,
     type_commission: "Porcentaje",
     commission: 0.4,
@@ -535,7 +587,8 @@ const especialityData: Specialty[] = [
     id: 54,
     name: "PAQUETE GLAUCOMA ",
     description: "",
-    category: "",
+    category: null,
+
     price: 120,
     type_commission: "Porcentaje",
     commission: 0.4,
@@ -545,7 +598,8 @@ const especialityData: Specialty[] = [
     id: 55,
     name: "PROCED. FÉRULA YESO",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0.2,
@@ -555,7 +609,8 @@ const especialityData: Specialty[] = [
     id: 56,
     name: "INSULINA ",
     description: "",
-    category: "",
+    category: null,
+
     price: 35,
     type_commission: "Porcentaje",
     commission: 0,
@@ -565,7 +620,8 @@ const especialityData: Specialty[] = [
     id: 57,
     name: "PROCED. LAVADO OIDO",
     description: "",
-    category: "",
+    category: null,
+
     price: 40,
     type_commission: "Porcentaje",
     commission: 0.4,
@@ -575,7 +631,8 @@ const especialityData: Specialty[] = [
     id: 58,
     name: "PROCED. LU",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0,
@@ -585,7 +642,8 @@ const especialityData: Specialty[] = [
     id: 59,
     name: "QUERATROMETRÍA",
     description: "",
-    category: "",
+    category: null,
+
     price: 50,
     type_commission: "Porcentaje",
     commission: 0.4,
@@ -595,7 +653,8 @@ const especialityData: Specialty[] = [
     id: 60,
     name: "PROCED. RETIRO IMPLANTE",
     description: "",
-    category: "",
+    category: null,
+
     price: 60,
     type_commission: "Porcentaje",
     commission: 0,
@@ -605,7 +664,8 @@ const especialityData: Specialty[] = [
     id: 61,
     name: "ALTA EPIDEMIOLOGICA",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0,
@@ -615,7 +675,8 @@ const especialityData: Specialty[] = [
     id: 62,
     name: " RETIRO C. E CORNIA ",
     description: "",
-    category: "",
+    category: null,
+
     price: 120,
     type_commission: "Porcentaje",
     commission: 0.4,
@@ -625,7 +686,8 @@ const especialityData: Specialty[] = [
     id: 63,
     name: "PROCED. SONDA",
     description: "",
-    category: "",
+    category: null,
+
     price: 50,
     type_commission: "Dinero",
     commission: 14,
@@ -635,7 +697,8 @@ const especialityData: Specialty[] = [
     id: 64,
     name: "SACO DE VISTA RETIRO C.E",
     description: "",
-    category: "",
+    category: null,
+
     price: 50,
     type_commission: "Porcentaje",
     commission: 0.4,
@@ -645,7 +708,8 @@ const especialityData: Specialty[] = [
     id: 65,
     name: "PROCEDIMIENTO",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0.4,
@@ -655,7 +719,8 @@ const especialityData: Specialty[] = [
     id: 66,
     name: "GONIOSCOPIA ",
     description: "",
-    category: "",
+    category: null,
+
     price: 170,
     type_commission: "Porcentaje",
     commission: 0.75,
@@ -665,7 +730,8 @@ const especialityData: Specialty[] = [
     id: 67,
     name: "RX - NASAL",
     description: "",
-    category: "",
+    category: null,
+
     price: 100,
     type_commission: "Dinero",
     commission: 8,
@@ -675,7 +741,8 @@ const especialityData: Specialty[] = [
     id: 68,
     name: "RX - TÓRAX",
     description: "",
-    category: "",
+    category: null,
+
     price: 60,
     type_commission: "Dinero",
     commission: 8,
@@ -685,7 +752,8 @@ const especialityData: Specialty[] = [
     id: 69,
     name: "RX - VARIOS",
     description: "",
-    category: "",
+    category: null,
+
     price: 47.5,
     type_commission: "Dinero",
     commission: 8,
@@ -695,7 +763,8 @@ const especialityData: Specialty[] = [
     id: 70,
     name: "TRASLADO AMBULANCIA",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0,
@@ -705,7 +774,8 @@ const especialityData: Specialty[] = [
     id: 71,
     name: "VENTA VARIOS",
     description: "",
-    category: "",
+    category: null,
+
     price: 0,
     type_commission: "Porcentaje",
     commission: 0,
@@ -715,7 +785,8 @@ const especialityData: Specialty[] = [
     id: 72,
     name: "CONSULTA NOCHE ",
     description: "",
-    category: "",
+    category: null,
+
     price: 50,
     type_commission: "Porcentaje",
     commission: 0.5,
@@ -725,7 +796,8 @@ const especialityData: Specialty[] = [
     id: 73,
     name: "ADN ECOCASMA",
     description: "",
-    category: "",
+    category: null,
+
     price: 950,
     type_commission: "Porcentaje",
     commission: 0,
@@ -735,7 +807,8 @@ const especialityData: Specialty[] = [
     id: 74,
     name: "ADN JUZGADO",
     description: "",
-    category: "",
+    category: null,
+
     price: 1150,
     type_commission: "Porcentaje",
     commission: 0,
@@ -745,7 +818,8 @@ const especialityData: Specialty[] = [
     id: 75,
     name: "CONSULTA CARDIOLOGIA ",
     description: "",
-    category: "",
+    category: null,
+
     price: 70,
     type_commission: "Porcentaje",
     commission: 0.6,
@@ -755,7 +829,8 @@ const especialityData: Specialty[] = [
     id: 76,
     name: "PAQUET. CARDIOLOGIA ( CON.+ EKG)",
     description: "",
-    category: "",
+    category: null,
+
     price: 180,
     type_commission: "Porcentaje",
     commission: 0.4,
@@ -765,7 +840,8 @@ const especialityData: Specialty[] = [
     id: 77,
     name: "PAQUET. INFILTRACION UN SOLO LUGAR ",
     description: "",
-    category: "",
+    category: null,
+
     price: 154,
     type_commission: "Dinero",
     commission: 80,
@@ -775,7 +851,8 @@ const especialityData: Specialty[] = [
     id: 78,
     name: "PAQUET. INFILTRACION DOS LUGARES ",
     description: "",
-    category: "",
+    category: null,
+
     price: 240,
     type_commission: "Dinero",
     commission: 100,
@@ -785,7 +862,8 @@ const especialityData: Specialty[] = [
     id: 79,
     name: "PAQUET. INFILTRACION TRES LUGARES ",
     description: "",
-    category: "",
+    category: null,
+
     price: 314,
     type_commission: "Dinero",
     commission: 100,
@@ -795,7 +873,8 @@ const especialityData: Specialty[] = [
     id: 80,
     name: "RIESGO QUIRURGICO + ELECTROCARDIOGRAMA ",
     description: "",
-    category: "",
+    category: null,
+
     price: 150,
     type_commission: "Porcentaje",
     commission: 0.6,
@@ -805,7 +884,10 @@ const especialityData: Specialty[] = [
     id: 81,
     name: "ABDOMINAL",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 50,
     type_commission: "Porcentaje",
     commission: 40,
@@ -815,7 +897,10 @@ const especialityData: Specialty[] = [
     id: 82,
     name: "3D-4D",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 120,
     type_commission: "Porcentaje",
     commission: 40,
@@ -825,7 +910,10 @@ const especialityData: Specialty[] = [
     id: 83,
     name: "ABDOMINAL TOTAL",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 100,
     type_commission: "Porcentaje",
     commission: 40,
@@ -835,7 +923,10 @@ const especialityData: Specialty[] = [
     id: 84,
     name: "DOPPLER",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 0,
     type_commission: "Porcentaje",
     commission: 40,
@@ -845,7 +936,10 @@ const especialityData: Specialty[] = [
     id: 85,
     name: "GENÉTICA",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 180,
     type_commission: "Porcentaje",
     commission: 40,
@@ -855,7 +949,10 @@ const especialityData: Specialty[] = [
     id: 86,
     name: "MAMAS",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 50,
     type_commission: "Porcentaje",
     commission: 40,
@@ -865,7 +962,10 @@ const especialityData: Specialty[] = [
     id: 87,
     name: "MORFOLÓGICA",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 180,
     type_commission: "Porcentaje",
     commission: 40,
@@ -875,7 +975,10 @@ const especialityData: Specialty[] = [
     id: 88,
     name: "APENDILAP",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 3500,
     type_commission: "Porcentaje",
     commission: 40,
@@ -885,7 +988,10 @@ const especialityData: Specialty[] = [
     id: 89,
     name: "HERNIA INGUINAL ",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 0,
     type_commission: "Porcentaje",
     commission: 40,
@@ -895,7 +1001,10 @@ const especialityData: Specialty[] = [
     id: 90,
     name: "HERNIA UMBILICAL ",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 0,
     type_commission: "Porcentaje",
     commission: 40,
@@ -905,7 +1014,10 @@ const especialityData: Specialty[] = [
     id: 91,
     name: "HEMORROIDES / FISTULA ",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 0,
     type_commission: "Porcentaje",
     commission: 40,
@@ -915,7 +1027,10 @@ const especialityData: Specialty[] = [
     id: 92,
     name: "CX PROSTÁTA ",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 0,
     type_commission: "Porcentaje",
     commission: 40,
@@ -925,7 +1040,10 @@ const especialityData: Specialty[] = [
     id: 93,
     name: "HISTERECTOMIA ",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 0,
     type_commission: "Porcentaje",
     commission: 40,
@@ -935,7 +1053,10 @@ const especialityData: Specialty[] = [
     id: 94,
     name: "PARTO ",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 1700,
     type_commission: "Porcentaje",
     commission: 40,
@@ -945,7 +1066,10 @@ const especialityData: Specialty[] = [
     id: 95,
     name: "CESAREA ",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 3000,
     type_commission: "Porcentaje",
     commission: 40,
@@ -955,7 +1079,10 @@ const especialityData: Specialty[] = [
     id: 96,
     name: "COLELAP ",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 3500,
     type_commission: "Porcentaje",
     commission: 40,
@@ -965,7 +1092,10 @@ const especialityData: Specialty[] = [
     id: 97,
     name: "NST",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 40,
     type_commission: "Porcentaje",
     commission: 40,
@@ -975,7 +1105,10 @@ const especialityData: Specialty[] = [
     id: 98,
     name: "OBSTÉTRICA III",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 50,
     type_commission: "Porcentaje",
     commission: 40,
@@ -985,7 +1118,10 @@ const especialityData: Specialty[] = [
     id: 99,
     name: "OBSTÉTRICA I-II",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 50,
     type_commission: "Porcentaje",
     commission: 40,
@@ -995,7 +1131,10 @@ const especialityData: Specialty[] = [
     id: 100,
     name: "PARTES BLANDAS I",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 50,
     type_commission: "Porcentaje",
     commission: 40,
@@ -1005,7 +1144,10 @@ const especialityData: Specialty[] = [
     id: 101,
     name: "PARTES BLANDAS II",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 90,
     type_commission: "Porcentaje",
     commission: 40,
@@ -1015,7 +1157,10 @@ const especialityData: Specialty[] = [
     id: 102,
     name: "PÉLVICA GINECOLÓGICA",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 50,
     type_commission: "Porcentaje",
     commission: 40,
@@ -1025,7 +1170,10 @@ const especialityData: Specialty[] = [
     id: 103,
     name: "PROSTÁTICA",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 50,
     type_commission: "Porcentaje",
     commission: 40,
@@ -1035,7 +1183,10 @@ const especialityData: Specialty[] = [
     id: 104,
     name: "RENO VESICAL",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 50,
     type_commission: "Porcentaje",
     commission: 40,
@@ -1045,7 +1196,10 @@ const especialityData: Specialty[] = [
     id: 105,
     name: "RENO VÉSICO PROSTÁTICO",
     description: "",
-    category: "Ecografía",
+    category: {
+      id: 1,
+      name: "Ecografía"
+    },
     price: 100,
     type_commission: "Porcentaje",
     commission: 40,

@@ -5,13 +5,14 @@ const specialistsData: Specialty[] = specialities.especialityData
 const headers = ref([
   { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
   { key: 'description', title: 'Descripción' },
-  { key: 'category', title: 'Categoria' },
+  { key: 'category.name', title: 'Categoria' },
   { key: 'price', title: 'Precio' },
   { key: 'type_commission', title: 'Tipo de comisión' },
   { key: 'commission', title: 'Comisión' },
   { key: 'status', title: 'Habilitado' },
   { key: 'actions', title: 'Acciones' },
 ])
+const categoryData = ref([{ id: null, name: null }, { id: 12, name: "Ecografia" }, { id: 14, name: "Cirugia" }])
 const statusColorCommission: Record<Specialty['type_commission'], string> = {
   Porcentaje: 'purple',
   Dinero: 'green',
@@ -32,7 +33,7 @@ const editedItem = ref<Specialty>({
   id: 0,
   name: "",
   description: "",
-  category: "",
+  category: {},
   price: 0,
   type_commission: "Dinero",
   commission: 0,
@@ -42,12 +43,14 @@ const defaultItem = ref<Specialty>({
   id: 0,
   name: "",
   description: "",
-  category: "",
+  category: null,
+
   price: 0,
   type_commission: "Dinero",
   commission: 0,
   status: true
 })
+
 let editedIndex = ref(-1)
 import { computed } from 'vue'
 const pageCount = computed(() => {
@@ -142,7 +145,8 @@ const data = ref(specialistsData)
                     <v-text-field v-model="editedItem.description" label="Descripción"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="editedItem.category" label="Categoría"></v-text-field>
+                    <v-combobox v-model="editedItem.category" :items="categoryData" item-title="name" item-value="id">
+                    </v-combobox>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-combobox v-model="editedItem.type_commission" :items="['Dinero', 'Porcentaje']"
@@ -153,12 +157,10 @@ const data = ref(specialistsData)
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-switch v-model="editedItem.status" color="success" label="Habilitado"></v-switch>
-
                   </v-col>
                 </v-row>
               </v-container>
             </v-card-text>
-
             <v-card-actions class="mb-2">
               <v-spacer></v-spacer>
               <v-btn class="mx-2" color="blue-darken-1" variant="text" @click="closeDialogItem()">
@@ -170,6 +172,8 @@ const data = ref(specialistsData)
             </v-card-actions>
           </v-card>
         </v-dialog>
+        <!-- DIALOG NEW , EDIT -->
+        <!-- DIALGO DELETE -->
         <v-dialog v-model="dialogDelete" max-width="500px" persistent>
           <v-card>
             <v-card class="text-h5 px-4 py-4 text-center">¿Está seguro de que desea eliminar este elemento?</v-card>
@@ -185,6 +189,7 @@ const data = ref(specialistsData)
         <v-row dense>
           <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="data"
             :items-per-page="itemsPerPage" item-value=name :search="search" show-select class="elevation-1">
+
             <template v-slot:item.type_commission="{ item }">
               <v-chip :color="statusColorCommission[item.raw.type_commission]">
                 {{ item.raw.type_commission }}
