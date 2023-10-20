@@ -1,237 +1,205 @@
 <script lang="ts" setup>
-
-let dialog: any = ref(false)
-let dialogDelete: any = ref(false)
+import { Specialty } from "@/pages/items/speciality/speciality.interface"
+import specialities from '@/pages/items/speciality/specialityData';
+const specialistsData: Specialty[] = specialities.especialityData
 const headers = ref([
-    { title: 'Dessert (100g serving)', align: 'start', sortable: false, key: 'name', },
-    { title: 'Calories', key: 'calories' },
-    { title: 'Fat (g)', key: 'fat' },
-    { title: 'Carbs (g)', key: 'carbs' },
-    { title: 'Protein (g)', key: 'protein' },
-    { title: 'Actions', key: 'actions', sortable: false },
+  { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
+  { key: 'description', title: 'Descripción' },
+  { key: 'category', title: 'Categoria' },
+  { key: 'price', title: 'Precio' },
+  { key: 'type_commission', title: 'Tipo de comisión' },
+  { key: 'commission', title: 'Comisión' },
+  { key: 'status', title: 'Habilitado' },
+  { key: 'actions', title: 'Acciones' },
 ])
-const desserts: any = ref([
-    {
-        name: 'Frozen Yogurt',
-        calories: 159,
-        fat: 6.0,
-        carbs: 24,
-        protein: 4.0,
-    },
-    {
-        name: 'Ice cream sandwich',
-        calories: 237,
-        fat: 9.0,
-        carbs: 37,
-        protein: 4.3,
-    },
-    {
-        name: 'Eclair',
-        calories: 262,
-        fat: 16.0,
-        carbs: 23,
-        protein: 6.0,
-    },
-    {
-        name: 'Cupcake',
-        calories: 305,
-        fat: 3.7,
-        carbs: 67,
-        protein: 4.3,
-    },
-    {
-        name: 'Gingerbread',
-        calories: 356,
-        fat: 16.0,
-        carbs: 49,
-        protein: 3.9,
-    },
-    {
-        name: 'Jelly bean',
-        calories: 375,
-        fat: 0.0,
-        carbs: 94,
-        protein: 0.0,
-    },
-    {
-        name: 'Lollipop',
-        calories: 392,
-        fat: 0.2,
-        carbs: 98,
-        protein: 0,
-    },
-    {
-        name: 'Honeycomb',
-        calories: 408,
-        fat: 3.2,
-        carbs: 87,
-        protein: 6.5,
-    },
-    {
-        name: 'Donut',
-        calories: 452,
-        fat: 25.0,
-        carbs: 51,
-        protein: 4.9,
-    },
-    {
-        name: 'KitKat',
-        calories: 518,
-        fat: 26.0,
-        carbs: 65,
-        protein: 7,
-    }
-])
-let editedIndex: any = ref(-1)
-let editedItem = ref({
-    name: '',
-    calories: 0,
-    fat: 0,
-    carbs: 0,
-    protein: 0,
-})
-const defaultItem = ref({
-    name: '',
-    calories: 0,
-    fat: 0,
-    carbs: 0,
-    protein: 0,
-})
-
-import { computed, watch } from 'vue'
-const formTitle = computed(() => {
-    return editedIndex === -1 ? 'New Item' : 'Edit Item'
-})
-
-
-watch(dialog, (val) => {
-    val || close()
-})
-watch(dialogDelete, (val) => {
-    val || closeDelete()
-})
-
-const editItem = (item: any) => {
-    editedIndex = desserts.indexOf(item)
-    editedItem = Object.assign({}, item)
-    dialog = true
+const statusColorCommission: Record<Specialty['type_commission'], string> = {
+  Porcentaje: 'purple',
+  Dinero: 'green',
 }
 
-const deleteItem = (item: any) => {
-    editedIndex = desserts.indexOf(item)
-    editedItem = Object.assign({}, item)
-    dialogDelete = true
+const symbolCommission: Record<Specialty['type_commission'], string> = {
+  Porcentaje: '%',
+  Dinero: 'S/.',
 }
 
-const deleteItemConfirm = () => {
-    desserts.splice(editedIndex, 1)
-    closeDelete()
+const page = ref(1)
+const itemsPerPage = ref(15)
+const search = ref('')
+const selected = ref([])
+const dialog = ref(false)
+const dialogDelete = ref(false)
+const editedItem = ref<Specialty>({
+  id: 0,
+  name: "",
+  description: "",
+  category: "",
+  price: 0,
+  type_commission: "Dinero",
+  commission: 0,
+  status: true
+})
+const defaultItem = ref<Specialty>({
+  id: 0,
+  name: "",
+  description: "",
+  category: "",
+  price: 0,
+  type_commission: "Dinero",
+  commission: 0,
+  status: true
+})
+let editedIndex = ref(-1)
+import { computed } from 'vue'
+const pageCount = computed(() => {
+  return Math.ceil(data.value.length / itemsPerPage.value)
+})
+
+const nameTitleDialog = ref("")
+const openDialogNewItem = () => {
+  dialog.value = true
+  nameTitleDialog.value = "Nueva Especialidad"
+  editedItem.value = Object.assign({}, defaultItem.value)
 }
 
-const close = () => {
-    dialog = false
-    nextTick(() => {
-        editedItem = Object.assign({}, defaultItem)
-        editedIndex = -1
-    })
+const openDialogEditItem = (item: Specialty) => {
+  dialog.value = true
+  nameTitleDialog.value = "Editar Especialidad"
+  editedItem.value = Object.assign({}, item)
+  editedIndex.value = data.value.indexOf(item)
 }
 
-const closeDelete = () => {
-    dialogDelete = false
-    nextTick(() => {
-        editedItem = Object.assign({}, defaultItem)
-        editedIndex = -1
-    })
+const openDialogDeleteItem = (item: Specialty) => {
+  dialog.value = true
+  nameTitleDialog.value = "Eliminar Especialidad"
+  editedIndex.value = data.value.indexOf(item)
 }
 
+const closeDialogItem = () => {
+  dialog.value = false
+  nextTick(() => {
+    editedItem.value = Object.assign({}, defaultItem.value)
+    editedIndex.value = -1
+  })
+}
 const save = () => {
-    if (editedIndex > -1) {
-        Object.assign(desserts[editedIndex], editedItem)
-    } else {
-        desserts.push(editedItem)
-    }
-    close()
+  if (editedIndex.value > -1) {
+
+    Object.assign(data.value[editedIndex.value], editedItem.value)
+  } else {
+    data.value.push(editedItem.value)
+  }
+  closeDialogItem()
 }
 
-
-
+const data = ref(specialistsData)
 </script>
+
 <template>
-    <v-data-table :headers="headers" :items="desserts" :sort-by="[{ key: 'calories', order: 'asc' }]" class="elevation-1">
-        <template v-slot:top>
-            <v-toolbar flat>
-                <v-toolbar-title>My CRUD</v-toolbar-title>
-                <v-divider class="mx-4" inset vertical></v-divider>
-                <v-spacer></v-spacer>
-                <v-dialog v-model="dialog" max-width="500px">
-                    <template v-slot:activator="{ props }">
-                        <v-btn color="primary" dark class="mb-2" v-bind="props">
-                            New Item
-                        </v-btn>
-                    </template>
-                    <v-card>
-                        <v-card-title>
-                            <span class="text-h5">{{ formTitle }}</span>
-                        </v-card-title>
-
-                        <v-card-text>
-                            <v-container>
-                                <v-row>
-                                    <v-col cols="12" sm="6" md="4">
-                                        <v-text-field v-model="editedItem.name" label="Dessert name"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="4">
-                                        <v-text-field v-model="editedItem.calories" label="Calories"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="4">
-                                        <v-text-field v-model="editedItem.fat" label="Fat (g)"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="4">
-                                        <v-text-field v-model="editedItem.carbs" label="Carbs (g)"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="4">
-                                        <v-text-field v-model="editedItem.protein" label="Protein (g)"></v-text-field>
-                                    </v-col>
-                                </v-row>
-                            </v-container>
-                        </v-card-text>
-
-                        <v-card-actions>
-                            <v-spacer></v-spacer>
-                            <v-btn color="blue-darken-1" variant="text" @click="close">
-                                Cancel
-                            </v-btn>
-                            <v-btn color="blue-darken-1" variant="text" @click="save">
-                                Save
-                            </v-btn>
-                        </v-card-actions>
-                    </v-card>
-                </v-dialog>
-                <v-dialog v-model="dialogDelete" max-width="500px">
-                    <v-card>
-                        <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
-                        <v-card-actions>
-                            <v-spacer></v-spacer>
-                            <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
-                            <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
-                            <v-spacer></v-spacer>
-                        </v-card-actions>
-                    </v-card>
-                </v-dialog>
+  <v-container fluid>
+    <v-app-bar class="justify-center" flat append>
+      <div class="justify-center mx-4">
+        <v-icon class="me-1" icon="mdi-pill-multiple"></v-icon>
+        <span class="subheading">Especialidades</span>
+      </div>
+      <v-spacer></v-spacer>
+      <v-btn append-icon="mdi-plus-circle" color="primary" variant="flat" @click="openDialogNewItem()">Nuevo</v-btn>
+    </v-app-bar>
+    <v-card class="justify-self-end mx-4" elevation="0">
+      <v-container fluid>
+        <v-row>
+          <v-col cols="12" lg="4" md="4" sm="12" xs="12">
+            <v-text-field v-model="search" append-inner-icon="mdi-magnify" label="Buscar"></v-text-field>
+          </v-col>
+        </v-row>
+        <!-- CUADRO DIALOGO -->
+        <v-dialog v-model="dialog" max-width="800px" transition="dialog-bottom-transition">
+          <v-card>
+            <v-toolbar color="primary" :title="nameTitleDialog">
             </v-toolbar>
-        </template>
-        <template v-slot:item.actions="{ item }">
-            <v-icon size="small" class="me-2" @click="editItem(item)">
-                mdi-pencil
-            </v-icon>
-            <v-icon size="small" @click="deleteItem(item)">
-                mdi-delete
-            </v-icon>
-        </template>
-        <template v-slot:no-data>
-            <v-btn color="primary" @click="initialize">
-                Reset
-            </v-btn>
-        </template>
-    </v-data-table>
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col cols="12" sm="6" md="8">
+                    <v-text-field v-model="editedItem.name" label="Nombre(*)"></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field v-model="editedItem.price" label="Precio(*)"></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="8">
+                    <v-text-field v-model="editedItem.description" label="Descripción"></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field v-model="editedItem.category" label="Categoría"></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-combobox v-model="editedItem.type_commission" :items="['Dinero', 'Porcentaje']"
+                      label="Tipo de comisión"></v-combobox>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field v-model="editedItem.commission" label="Comisión"></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-switch v-model="editedItem.status" color="success" label="Habilitado"></v-switch>
+
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions class="mb-2">
+              <v-spacer></v-spacer>
+              <v-btn class="mx-2" color="blue-darken-1" variant="text" @click="closeDialogItem()">
+                Cancelar
+              </v-btn>
+              <v-btn color="blue-darken-1" variant="elevated" @click="save()">
+                Guardar
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
+        <!-- DIALOG -->
+        <v-row dense>
+          <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="data"
+            :items-per-page="itemsPerPage" item-value=name :search="search" show-select class="elevation-1">
+            <template v-slot:item.type_commission="{ item }">
+              <v-chip :color="statusColorCommission[item.raw.type_commission]">
+                {{ item.raw.type_commission }}
+
+              </v-chip>
+            </template>
+            <template v-slot:item.commission="{ item }">
+              <span v-if="symbolCommission[item.raw.type_commission] === 'S/.'">
+                {{ symbolCommission[item.raw.type_commission] }}
+              </span>
+              {{ item.raw.commission }}
+              <span v-if="symbolCommission[item.raw.type_commission] === '%'">
+                {{ symbolCommission[item.raw.type_commission] }}
+              </span>
+
+            </template>
+
+            <template v-slot:item.status="{ item }">
+              <v-checkbox-btn v-model="item.raw.status" disabled></v-checkbox-btn>
+            </template>
+
+            <template v-slot:item.actions="{ item }">
+              <div class="justify-center ">
+                <v-btn class="me-2" rounded icon="mdi-pencil" color="yellow" @click="openDialogEditItem(item.raw)">
+                </v-btn>
+                <v-btn color="red" rounded icon="mdi-delete" @click="openDialogDeleteItem(item.raw)"> </v-btn>
+              </div>
+            </template>
+            <template v-slot:bottom>
+              <div class="text-center pt-2">
+                <v-pagination v-model="page" :length="pageCount"></v-pagination>
+                <!-- <v-text-field :model-value="itemsPerPage" class="pa-2" label="Items per page" type="number" min="-1"
+                max="15" hide-details @update:model-value="itemsPerPage = parseInt($event, 10)"></v-text-field> -->
+              </div>
+            </template>
+          </v-data-table>
+        </v-row>
+      </v-container>
+    </v-card>
+  </v-container>
 </template>

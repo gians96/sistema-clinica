@@ -4,7 +4,7 @@ export interface Specialty {
     description?: string;
     category?: string;
     price: number;
-    type_commission: "percentage" | "money";
+    type_commission: "Porcentaje" | "Dinero";
     commission: number;
     status: boolean;
   }

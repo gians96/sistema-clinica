@@ -13,25 +13,19 @@ const headers = ref([
   { key: 'actions', title: 'Acciones' },
 ])
 const statusColorCommission: Record<Specialty['type_commission'], string> = {
-  percentage: 'purple',
-  money: 'green',
+  Porcentaje: 'purple',
+  Dinero: 'green',
 }
 
 const symbolCommission: Record<Specialty['type_commission'], string> = {
-  percentage: '%',
-  money: 'S/.',
-}
-
-const nameCommission: Record<Specialty['type_commission'], string> = {
-  percentage: 'Porcentaje',
-  money: 'Dinero',
+  Porcentaje: '%',
+  Dinero: 'S/.',
 }
 
 const page = ref(1)
 const itemsPerPage = ref(15)
 const search = ref('')
 const selected = ref([])
-
 const dialog = ref(false)
 const dialogDelete = ref(false)
 const editedItem = ref<Specialty>({
@@ -40,7 +34,7 @@ const editedItem = ref<Specialty>({
   description: "",
   category: "",
   price: 0,
-  type_commission: "money",
+  type_commission: "Dinero",
   commission: 0,
   status: true
 })
@@ -50,42 +44,67 @@ const defaultItem = ref<Specialty>({
   description: "",
   category: "",
   price: 0,
-  type_commission: "money",
+  type_commission: "Dinero",
   commission: 0,
   status: true
 })
-
+let editedIndex = ref(-1)
 import { computed } from 'vue'
 const pageCount = computed(() => {
   return Math.ceil(data.value.length / itemsPerPage.value)
 })
+
 const nameTitleDialog = ref("")
 const openDialogNewItem = () => {
   dialog.value = true
   nameTitleDialog.value = "Nueva Especialidad"
   editedItem.value = Object.assign({}, defaultItem.value)
-
 }
 
 const openDialogEditItem = (item: Specialty) => {
   dialog.value = true
   nameTitleDialog.value = "Editar Especialidad"
-  editedItem.value = item
-
+  editedItem.value = Object.assign({}, item)
+  editedIndex.value = data.value.indexOf(item)
 }
 
 const openDialogDeleteItem = (item: Specialty) => {
-  dialog.value = true
+  dialogDelete.value = true
   nameTitleDialog.value = "Eliminar Especialidad"
-
+  editedIndex.value = data.value.indexOf(item)
 }
 
 const closeDialogItem = () => {
   dialog.value = false
+  nextTick(() => {
+    editedItem.value = Object.assign({}, defaultItem.value)
+    editedIndex.value = -1
+  })
 }
-
+const closeDialogDeleteItem = () => {
+  dialogDelete.value = false
+  nextTick(() => {
+    editedItem.value = Object.assign({}, defaultItem.value)
+    editedIndex.value = -1
+  })
+}
+const save = () => {
+  if (editedIndex.value > -1) {
+    Object.assign(data.value[editedIndex.value], editedItem.value)
+  } else {
+    data.value.push(editedItem.value)
+  }
+  closeDialogItem()
+}
+const deleteItemConfirm = () => {
+  data.value.splice(editedIndex.value, 1)
+  closeDialogDeleteItem()
+  nextTick(() => {
+    editedItem.value = Object.assign({}, defaultItem.value)
+    editedIndex.value = -1
+  })
+}
 const data = ref(specialistsData)
-
 </script>
 
 <template>
@@ -106,13 +125,10 @@ const data = ref(specialistsData)
           </v-col>
         </v-row>
         <!-- CUADRO DIALOGO -->
-        <v-dialog v-model="dialog" max-width="800px" transition="dialog-bottom-transition">
+        <v-dialog v-model="dialog" max-width="800px" transition="dialog-bottom-transition" persistent>
           <v-card>
-
             <v-toolbar color="primary" :title="nameTitleDialog">
             </v-toolbar>
-
-
             <v-card-text>
               <v-container>
                 <v-row>
@@ -129,8 +145,7 @@ const data = ref(specialistsData)
                     <v-text-field v-model="editedItem.category" label="Categoría"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <!-- <v-text-field v-model="editedItem.type_commission" label="Tipo de comisión"></v-text-field> -->
-                    <v-combobox v-model="nameCommission[editedItem.type_commission]" :items="['Dinero', 'Porcentaje']"
+                    <v-combobox v-model="editedItem.type_commission" :items="['Dinero', 'Porcentaje']"
                       label="Tipo de comisión"></v-combobox>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
@@ -149,20 +164,31 @@ const data = ref(specialistsData)
               <v-btn class="mx-2" color="blue-darken-1" variant="text" @click="closeDialogItem()">
                 Cancelar
               </v-btn>
-              <v-btn color="blue-darken-1" variant="elevated" @click="closeDialogItem()">
+              <v-btn color="blue-darken-1" variant="elevated" @click="save()">
                 Guardar
               </v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
-
+        <v-dialog v-model="dialogDelete" max-width="500px" persistent>
+          <v-card>
+            <v-card class="text-h5 px-4 py-4 text-center">¿Está seguro de que desea eliminar este elemento?</v-card>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue-darken-1" variant="text" @click="closeDialogDeleteItem">Cancelar</v-btn>
+              <v-btn color="red-darken-1" variant="flat" @click="deleteItemConfirm">Eliminar</v-btn>
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
         <!-- DIALOG -->
         <v-row dense>
           <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="data"
             :items-per-page="itemsPerPage" item-value=name :search="search" show-select class="elevation-1">
             <template v-slot:item.type_commission="{ item }">
               <v-chip :color="statusColorCommission[item.raw.type_commission]">
-                {{ nameCommission[item.raw.type_commission] }}
+                {{ item.raw.type_commission }}
+
               </v-chip>
             </template>
             <template v-slot:item.commission="{ item }">

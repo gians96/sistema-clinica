@@ -7,7 +7,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -17,7 +17,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.3,
     status: true
   },
@@ -27,7 +27,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 120,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.3,
     status: true
   },
@@ -37,7 +37,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -47,7 +47,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.15,
     status: true
   },
@@ -57,7 +57,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 8,
     status: true
   },
@@ -67,7 +67,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.1,
     status: true
   },
@@ -77,7 +77,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.1,
     status: true
   },
@@ -87,7 +87,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 35,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 15,
     status: true
   },
@@ -97,7 +97,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -107,7 +107,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 40,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 18,
     status: true
   },
@@ -117,7 +117,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 40,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 15,
     status: true
   },
@@ -127,7 +127,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 35,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 15,
     status: true
   },
@@ -137,7 +137,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.1,
     status: true
   },
@@ -147,7 +147,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 100,
     status: true
   },
@@ -157,7 +157,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 80,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 50,
     status: true
   },
@@ -167,7 +167,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 130,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.6,
     status: true
   },
@@ -177,7 +177,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 380,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.75,
     status: true
   },
@@ -187,7 +187,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.5,
     status: true
   },
@@ -197,7 +197,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 70,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.75,
     status: true
   },
@@ -207,7 +207,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.6,
     status: true
   },
@@ -217,7 +217,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 40,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.5,
     status: true
   },
@@ -227,7 +227,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 30,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.5,
     status: true
   },
@@ -237,7 +237,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 20,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -247,7 +247,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.6,
     status: true
   },
@@ -257,7 +257,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 10,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -267,7 +267,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.6,
     status: true
   },
@@ -277,7 +277,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.6,
     status: true
   },
@@ -287,7 +287,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.6,
     status: true
   },
@@ -297,7 +297,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -307,7 +307,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -317,7 +317,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.4,
     status: true
   },
@@ -327,7 +327,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 80,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.6,
     status: true
   },
@@ -337,7 +337,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 40,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 5,
     status: true
   },
@@ -347,7 +347,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 100,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -357,7 +357,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 280,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.75,
     status: true
   },
@@ -367,7 +367,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 300,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -377,7 +377,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -387,7 +387,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 10,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -397,7 +397,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.2,
     status: true
   },
@@ -407,7 +407,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 40,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.4,
     status: true
   },
@@ -417,7 +417,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 40,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -427,7 +427,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 350,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -437,7 +437,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 180,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -447,7 +447,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 300,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -457,7 +457,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 70,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.5,
     status: true
   },
@@ -467,7 +467,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 250,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -477,7 +477,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 120,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.4,
     status: true
   },
@@ -487,7 +487,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 5,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -497,7 +497,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -507,7 +507,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -517,7 +517,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 100,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.4,
     status: true
   },
@@ -527,7 +527,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 100,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.4,
     status: true
   },
@@ -537,7 +537,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 120,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.4,
     status: true
   },
@@ -547,7 +547,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.2,
     status: true
   },
@@ -557,7 +557,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 35,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -567,7 +567,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 40,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.4,
     status: true
   },
@@ -577,7 +577,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -587,7 +587,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.4,
     status: true
   },
@@ -597,7 +597,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 60,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -607,7 +607,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -617,7 +617,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 120,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.4,
     status: true
   },
@@ -627,7 +627,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 50,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 14,
     status: true
   },
@@ -637,7 +637,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.4,
     status: true
   },
@@ -647,7 +647,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.4,
     status: true
   },
@@ -657,7 +657,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 170,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.75,
     status: true
   },
@@ -667,7 +667,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 100,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 8,
     status: true
   },
@@ -677,7 +677,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 60,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 8,
     status: true
   },
@@ -687,7 +687,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 47.5,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 8,
     status: true
   },
@@ -697,7 +697,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -707,7 +707,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -717,7 +717,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.5,
     status: true
   },
@@ -727,7 +727,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 950,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -737,7 +737,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 1150,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0,
     status: true
   },
@@ -747,7 +747,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 70,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.6,
     status: true
   },
@@ -757,7 +757,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 180,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.4,
     status: true
   },
@@ -767,7 +767,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 154,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 80,
     status: true
   },
@@ -777,7 +777,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 240,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 100,
     status: true
   },
@@ -787,7 +787,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 314,
-    type_commission: "money",
+    type_commission: "Dinero",
     commission: 100,
     status: true
   },
@@ -797,7 +797,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "",
     price: 150,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 0.6,
     status: true
   },
@@ -807,7 +807,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -817,7 +817,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 120,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -827,7 +827,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 100,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -837,7 +837,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -847,7 +847,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 180,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -857,7 +857,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -867,7 +867,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 180,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -877,7 +877,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 3500,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -887,7 +887,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -897,7 +897,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -907,7 +907,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -917,7 +917,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -927,7 +927,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 0,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -937,7 +937,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 1700,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -947,7 +947,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 3000,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -957,7 +957,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 3500,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -967,7 +967,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 40,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -977,7 +977,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -987,7 +987,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -997,7 +997,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -1007,7 +1007,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 90,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -1017,7 +1017,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -1027,7 +1027,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -1037,7 +1037,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 50,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   },
@@ -1047,7 +1047,7 @@ const especialityData: Specialty[] = [
     description: "",
     category: "Ecografía",
     price: 100,
-    type_commission: "percentage",
+    type_commission: "Porcentaje",
     commission: 40,
     status: true
   }
