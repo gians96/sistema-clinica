@@ -15,7 +15,7 @@ const menus = ref([
     toSub: [
     { title: "Categoría", value: "category", to: "/items/category", view: true },  
     { title: "Especialidad", value: "specialty", to: "/items/speciality", view: true },
-      { title: "Productos", value: "productos", to: "/items/products", view: true }
+      { title: "Productos", value: "productos", to: "/items/products", view: false }
     ]
   },
   {

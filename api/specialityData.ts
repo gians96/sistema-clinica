@@ -1,6 +1,6 @@
-import { Specialty } from "./speciality.interface";
+import { Specialty } from "@/interfaces/Speciality.interface";
 
-const especialityData: Specialty[] = [
+const data: Specialty[] = [
   {
     id: 1,
     name: "AD PACK GEST.",
@@ -1207,4 +1207,4 @@ const especialityData: Specialty[] = [
   }
 ];
 
-export default { especialityData };
+export default { data };

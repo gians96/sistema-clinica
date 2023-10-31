@@ -1,7 +1,12 @@
 <script lang="ts" setup>
-import { Specialty } from "@/pages/items/speciality/speciality.interface"
-import specialities from '@/pages/items/speciality/specialityData';
-const specialistsData: Specialty[] = specialities.especialityData
+import { Specialty } from "@/interfaces/Speciality.interface"
+import SpecialityFetch from '@/api/specialityData';
+import CategoryFetch from '@/api/categoryData';
+
+const Specialites: Specialty[] = SpecialityFetch.data
+const data = ref(Specialites)
+const categoryData = ref(CategoryFetch.data)
+
 const headers = ref([
   { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
   { key: 'description', title: 'Descripción' },
@@ -12,7 +17,7 @@ const headers = ref([
   { key: 'status', title: 'Habilitado' },
   { key: 'actions', title: 'Acciones' },
 ])
-const categoryData = ref([{ id: null, name: null }, { id: 12, name: "Ecografia" }, { id: 14, name: "Cirugia" }])
+
 const statusColorCommission: Record<Specialty['type_commission'], string> = {
   Porcentaje: 'purple',
   Dinero: 'green',
@@ -107,7 +112,8 @@ const deleteItemConfirm = () => {
     editedIndex.value = -1
   })
 }
-const data = ref(specialistsData)
+
+
 </script>
 
 <template>
@@ -204,13 +210,10 @@ const data = ref(specialistsData)
               <span v-if="symbolCommission[item.raw.type_commission] === '%'">
                 {{ symbolCommission[item.raw.type_commission] }}
               </span>
-
             </template>
-
             <template v-slot:item.status="{ item }">
               <v-checkbox-btn v-model="item.raw.status" disabled></v-checkbox-btn>
             </template>
-
             <template v-slot:item.actions="{ item }">
               <div class="justify-center ">
                 <v-btn class="me-2" rounded icon="mdi-pencil" color="yellow" @click="openDialogEditItem(item.raw)">
@@ -231,3 +234,4 @@ const data = ref(specialistsData)
     </v-card>
   </v-container>
 </template>
+interfaces/speciality.interface
