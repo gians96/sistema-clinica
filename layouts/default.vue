@@ -7,6 +7,7 @@
 		<VMain>
 			<slot />
 		</VMain>
+		<SnackBar></SnackBar>
 	</v-app>
 </template>
 <style>

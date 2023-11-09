@@ -9,7 +9,6 @@ const headers = ref([
   { key: 'actions', title: 'Acciones' },
 ])
 
-
 const page = ref(1)
 const itemsPerPage = ref(15)
 const search = ref('')

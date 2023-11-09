@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { Specialty } from "@/interfaces/Speciality.interface"
+import { Specialty } from "interfaces/Speciality.interface"
+import { Category } from "@/interfaces/Category.interface";
 import SpecialityFetch from '@/api/specialityData';
 import CategoryFetch from '@/api/categoryData';
-
+import { computed } from 'vue'
 const Specialites: Specialty[] = SpecialityFetch.data
 const data = ref(Specialites)
-const categoryData = ref(CategoryFetch.data)
+const categoryData = ref<Category[]>(CategoryFetch.data)
 
 const headers = ref([
   { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
@@ -57,7 +58,7 @@ const defaultItem = ref<Specialty>({
 })
 
 let editedIndex = ref(-1)
-import { computed } from 'vue'
+
 const pageCount = computed(() => {
   return Math.ceil(data.value.length / itemsPerPage.value)
 })
