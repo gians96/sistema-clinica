@@ -6,7 +6,7 @@ const data = {
   number: "20541751832",
   name: "CENTRO MEDICO ECOCASMA E.I.R.L.",
   tradeName: "CENTRO MEDICO ECOCASMA E.I.R.L",
-  code: "",
+  code: "0000",
   idCountry: "PE",
   idDepartments: "11",
   idProvinces: "1102",

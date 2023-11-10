@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import { Category } from "@/interfaces/Category.interface"
 import CategoryFetch from '@/api/categoryData';
+import { useSnackbarStore } from '@/store/index'
+
+const snackbarStore = useSnackbarStore()
 const Categories: Category[] = CategoryFetch.data
 const data = ref(Categories)
 
@@ -65,20 +68,34 @@ const closeDialogDeleteItem = () => {
   })
 }
 const save = () => {
-  if (editedIndex.value > -1) {
-    Object.assign(data.value[editedIndex.value], editedItem.value)
-  } else {
-    data.value.push(editedItem.value)
+  try {
+    if (editedIndex.value > -1) {
+      Object.assign(data.value[editedIndex.value], editedItem.value)
+    } else {
+      data.value.push(editedItem.value)
+    }
+    closeDialogItem()
+  } catch (error) {
+    snackbarStore.setStatus("error", "Error", error)
+  } finally {
+    snackbarStore.setStatus("success", "Guardado correctamente")
   }
-  closeDialogItem()
+
 }
 const deleteItemConfirm = () => {
-  data.value.splice(editedIndex.value, 1)
-  closeDialogDeleteItem()
-  nextTick(() => {
-    editedItem.value = Object.assign({}, defaultItem.value)
-    editedIndex.value = -1
-  })
+  try {
+    data.value.splice(editedIndex.value, 1)
+    closeDialogDeleteItem()
+    nextTick(() => {
+      editedItem.value = Object.assign({}, defaultItem.value)
+      editedIndex.value = -1
+    })
+  } catch (error) {
+    snackbarStore.setStatus("error", "Error", error)
+  } finally {
+    snackbarStore.setStatus("success", "Eliminado correctamente")
+  }
+
 }
 </script>
 <template>

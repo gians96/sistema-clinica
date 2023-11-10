@@ -2,22 +2,20 @@
 import CompaniesFetch from "@/api/companiesData"
 import { Company } from "interfaces/Company.interface";
 import { useSnackbarStore } from '@/store/index'
+import { countries, departments, districts, provinces } from "@/api/locationData"
 
-const snakbarStore = useSnackbarStore()
+const snackbarStore = useSnackbarStore()
 const item = ref<Company>(CompaniesFetch.data)
 const editedItem = ref<Company>(Object.assign({}, item.value))
 
 const save = () => {
     try {
         Object.assign(item.value, editedItem.value)
-        
     } catch (error) {
-        
-        snakbarStore.setStatus("error","Error")
+        snackbarStore.setStatus("error", "Error", error)
     } finally {
-        snakbarStore.setStatus("success","Guardado correctamente")
+        snackbarStore.setStatus("success", "Guardado correctamente")
     }
-
 }
 </script>
 <template>
@@ -40,8 +38,39 @@ const save = () => {
                         <v-col cols="12" sm="6" md="4">
                             <v-text-field v-model="editedItem.logo" label="Logo"></v-text-field>
                         </v-col>
-                        <v-col cols="12" sm="6" md="4">
+                        <v-col cols="12" sm="6" md="3">
+                            <v-text-field v-model="editedItem.code" label="Código Domicilio Fiscal"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="3">
+                            <v-combobox v-model="editedItem.idCountry" :items="countries.rows" item-title="description"
+                                item-value="id" label="País">
+                            </v-combobox>
+                            <!-- <v-text-field v-model="editedItem.idCountry" label="País"></v-text-field> -->
+                        </v-col>
+                        <v-col cols="12" sm="6" md="3">
+                            <v-text-field v-model="editedItem.idDepartments" label="Departamento"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="3">
+                            <v-text-field v-model="editedItem.idProvinces" label="Provincia"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="3">
+                            <v-text-field v-model="editedItem.idDistricts" label="Distrito"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="6">
                             <v-text-field v-model="editedItem.address" label="Dirección"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="3">
+                            <v-text-field v-model="editedItem.telephone" label="Teléfono"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="4">
+                            <v-text-field v-model="editedItem.email" label="Correo de contacto"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="4">
+                            <v-text-field v-model="editedItem.webAddress" label="Dirección web"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="4">
+                            <v-text-field v-model="editedItem.aditionalInformation"
+                                label="Información adicional"></v-text-field>
                         </v-col>
                     </v-row>
                 </v-container>
@@ -53,5 +82,4 @@ const save = () => {
                 </v-btn>
             </v-card-actions>
         </v-card>
-    </v-container>
-</template>
+    </v-container></template>
