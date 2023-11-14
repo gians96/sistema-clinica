@@ -128,8 +128,6 @@ const deleteItemConfirm = () => {
   }
 
 }
-
-
 </script>
 
 <template>
@@ -211,11 +209,9 @@ const deleteItemConfirm = () => {
         <v-row dense>
           <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="data"
             :items-per-page="itemsPerPage" item-value=name :search="search" show-select class="elevation-1">
-
             <template v-slot:item.type_commission="{ item }">
               <v-chip :color="statusColorCommission[item.raw.type_commission]">
                 {{ item.raw.type_commission }}
-
               </v-chip>
             </template>
             <template v-slot:item.commission="{ item }">
@@ -250,4 +246,3 @@ const deleteItemConfirm = () => {
     </v-card>
   </v-container>
 </template>
-interfaces/speciality.interface

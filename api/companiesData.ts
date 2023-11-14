@@ -7,10 +7,22 @@ const data = {
   name: "CENTRO MEDICO ECOCASMA E.I.R.L.",
   tradeName: "CENTRO MEDICO ECOCASMA E.I.R.L",
   code: "0000",
-  idCountry: "PE",
-  idDepartments: "11",
-  idProvinces: "1102",
-  idDistricts: "110201",
+  country: {
+    id: "PE",
+    description: "PERÚ",
+    active: 1
+  },
+  department: {
+    id: "15",
+    description: "LIMA",
+    active: 1
+  },
+  province: null,
+  district: null,
+  // idCountry: "PE",
+  // idDepartments: "11",
+  // idProvinces: "1102",
+  // idDistricts: "110201",
   address:
     "MZA. C LOTE. 1 A.H. MINIST. VIVIENDA (A 1 CDRA DE HOSPITAL, EN AV. PERU)",
   telephone: "",
@@ -18,7 +30,15 @@ const data = {
   aditionalInformation: "",
   webAddress: "",
   logo:
-    "https://cmecocasma.nt-suite.one/storage/uploads/logos/logo_20541751832.jpg"
+    "https://cmecocasma.nt-suite.one/storage/uploads/logos/logo_20541751832.jpg",
+  api_facturacion: {
+    url: "",
+    token: ""
+  },
+  api_search_ruc_dni: {
+    url: "",
+    token: ""
+  }
 };
 
 export default { data };

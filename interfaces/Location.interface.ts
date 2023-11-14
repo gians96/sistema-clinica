@@ -1,22 +1,22 @@
 
-export interface departments {
+export interface Department {
     id:          string;
     description: string;
     active:      number;
 }
-export interface provinces {
+export interface Province {
     id:            string;
-    idDepartment: string;
+    department_id: string;
     description:   string;
     active:        number;
 }
 export interface District {
     id:          string;
-    idProvince: string;
+    province_id: string;
     description: string;
     active:      number;
 }
-export interface countries {
+export interface Country {
     id:          string;
     description: string;
     active:      number;
