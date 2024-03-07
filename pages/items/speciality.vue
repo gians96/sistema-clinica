@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { Specialty } from "interfaces/Speciality.interface"
-import { Category } from "@/interfaces/Category.interface";
+import type { Specialty } from "@/interfaces/Speciality.interface"
+import type { Category } from "@/interfaces/Category.interface";
 import SpecialityFetch from '@/api/specialityData';
 import CategoryFetch from '@/api/categoryData';
 import { computed } from 'vue'
@@ -121,7 +121,7 @@ const deleteItemConfirm = () => {
       editedItem.value = Object.assign({}, defaultItem.value)
       editedIndex.value = -1
     })
-  } catch (error) {
+  } catch (error: any) {
     snackbarStore.setStatus("error", "Error", error)
   } finally {
     snackbarStore.setStatus("success", "Eliminado correctamente")

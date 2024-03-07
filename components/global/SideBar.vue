@@ -5,32 +5,39 @@ const store = useStore()
 const { mobile } = useDisplay()
 
 const menus = ref([
-  { icon: "mdi-view-dashboard", title: "Dasboard", value: "dashboard", to: "/dashboard", toSub: null, view: true },
-  { icon: "mdi-monitor", title: "Escritorio", value: "escritorio", to: "/desktop", toSub: null, view: true },
-  { icon: "mdi-account-plus", title: "Reg. Atención", value: "careRecord", to: "/care_record", toSub: null, view: true },
-  { icon: "mdi-thermometer", title: "Triaje", value: "triage", to: "/triage", toSub: null, view: true },
-  { icon: "mdi-medical-bag", title: "Atención Médica", value: "medicalAttention", to: "/medical_attention", toSub: null, view: true },
+  { icon: "mdi-view-dashboard", title: "Dasboard", value: "dashboard", to: "/dashboard", toSub: null, view: false },
+  { icon: "mdi-monitor", title: "Escritorio", value: "escritorio", to: "/desktop", toSub: null, view: false },
+  { icon: "mdi-account-plus", title: "Reg. Atención", value: "careRecord", to: "/care_record", toSub: null, view: false },
+  { icon: "mdi-thermometer", title: "Triaje", value: "triage", to: "/triage", toSub: null, view: false },
+  { icon: "mdi-medical-bag", title: "Atención Médica", value: "medicalAttention", to: "/medical_attention", toSub: null, view: false },
   {
     icon: "mdi-pill-multiple", title: "Productos/Servicios", value: "items", to: "#", view: true,
     toSub: [
-    { title: "Categoría", value: "category", to: "/items/category", view: true },  
-    { title: "Especialidad", value: "specialty", to: "/items/speciality", view: true },
-      { title: "Productos", value: "productos", to: "/items/products", view: false }
+      { title: "Productos", value: "productos", to: "/items/", view: true },
+      { title: "Categoría", value: "category", to: "/items/category", view: false },
+      { title: "Especialidad", value: "specialty", to: "/items/speciality", view: true },
     ]
   },
   {
-    icon: "mdi-account-injury", title: "Clientes", value: "customers", to: "#", view: true,
+    icon: "mdi-account-injury", title: "Clientes", value: "customers", to: "#", view: false,
     toSub: [
       { title: "Clientes", value: "customers", to: "/customers", view: true },
       { title: "Tipos de Clientes", value: "typesCustomers", to: "/customers/types", view: true },
     ]
   },
   {
+    icon: "mdi-store", title: "Inventario", value: "inventory", to: "#", view: true,
+    toSub: [
+      { title: "Traslados", value: "tran", to: "/inventory/transfers", view: true },
+      // { title: "Tipos de Clientes", value: "typesCustomers", to: "/customers/types", view: true },
+    ]
+  },
+  {
     icon: "mdi-cog-outline", title: "Empresa", value: "companies", to: "/companies", view: true,
     toSub: [
       { title: "Configuración", value: "configuracion", to: "/companies", view: true },
-      { title: "Usuarios", value: "users", to: "/companies/users", view: true },
-      { title: "Lista de diagnósticos", value: "diagnosticList", to: "/companies/diagnostic_list", view: true }
+      { title: "Usuarios", value: "users", to: "/companies/users", view: false },
+      { title: "Lista de diagnósticos", value: "diagnosticList", to: "/companies/diagnostic_list", view: false }
     ]
   },
 ])

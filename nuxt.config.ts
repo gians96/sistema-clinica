@@ -26,7 +26,11 @@ export default defineNuxtConfig({
       );
     }
   ],
-
+  runtimeConfig: {
+    public: {
+      apiURL: process.env.apiURL,
+    }
+  },
   app: {
     pageTransition: {
       name: "page",

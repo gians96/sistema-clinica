@@ -1,6 +1,9 @@
 <script setup lang="ts">
+const config = useRuntimeConfig()
+const apiURL = useCookie("apiURL");
+apiURL.value = config.public.apiURL
 </script>
-<template >
+<template>
 	<v-app>
 		<SideBar></SideBar>
 		<NavBar></NavBar>

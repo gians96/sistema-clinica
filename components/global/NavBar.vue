@@ -1,37 +1,6 @@
 <script setup lang="ts">
-import { RouterLink, routeLinks } from '../shared/link-routes';
 import { useStore } from '@/store/index'
 const store = useStore()
-// interface Props {
-//   title?: String;
-//   links: RouterLink[];
-// }
-// const props = defineProps<Props>();
-// const authBtn = ref([
-//   {
-//     name: "Inciar Sesssion",
-//     active: true,
-//     to: "/",
-//     color: "green-accent-4",
-//     variant: "text",
-//   },
-//   {
-//     name: "Cerrar Sesion",
-//     active: false,
-//     to: "#",
-//     color: "default",
-//     variant: "text",
-//   },
-//   {
-//     name: "Resgistro",
-//     active: true,
-//     to: "#",
-//     color: "green-accent-4",
-//     colorText: "text-white",
-//     variant: "text",
-//   },
-// ]);
-
 const user = ref({
   initials: 'GA',
   fullName: 'Gianmarcos Daniel Arias Bonifacio',
@@ -45,13 +14,14 @@ const { mobile } = useDisplay()
 </script>
 
 <template>
-  <v-app-bar >
-    <v-btn variant="text" icon="mdi-menu" @click.stop="mobile ? store.setChangeDrawer() : store.setChangeRail()"></v-btn>
+  <v-app-bar>
+    <v-btn variant="text" icon="mdi-menu"
+      @click.stop="mobile ? store.setChangeDrawer() : store.setChangeRail()"></v-btn>
     <v-spacer></v-spacer>
 
     <v-avatar class="hidden-sm-and-down" color="grey-darken-1" size="32" v-if="false"></v-avatar>
     <!-- LIST -->
-    <v-menu rounded :close-on-content-click="false">
+    <!-- <v-menu rounded :close-on-content-click="false">
       <template v-slot:activator="{ props }">
         <v-list v-if="!mobile" class="hidden-sm-and-down" v-bind="props" style="cursor: pointer">
           <v-list-item prepend-avatar="https://cdn.vuetifyjs.com/images/john.png" :title="user.shorName"
@@ -85,7 +55,6 @@ const { mobile } = useDisplay()
           </div>
         </v-card-text>
       </v-card>
-    </v-menu>
+    </v-menu> -->
   </v-app-bar>
 </template>
-

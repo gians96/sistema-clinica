@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import CompaniesFetch from "@/api/companiesData"
-import { Company } from "interfaces/Company.interface";
+import type { Company } from "@/interfaces/Company.interface";
 import { useSnackbarStore } from '@/store/index'
 import { countries, departments, districts, provinces } from "@/api/locationData"
-import { Country, Department, Province, District } from "interfaces/Location.interface";
+import type { Country, Department, Province, District } from "@/interfaces/Location.interface";
 
 const snackbarStore = useSnackbarStore()
 const item = ref<Company>(CompaniesFetch.data)
@@ -20,7 +20,7 @@ const districtsFilter = ref(districtsData.value.filter(data => editedItem.value.
 const save = () => {
     try {
         Object.assign(item.value, editedItem.value)
-    } catch (error) {
+    } catch (error: any) {
         snackbarStore.setStatus("error", "Error", error)
     } finally {
         snackbarStore.setStatus("success", "Guardado correctamente")
@@ -71,8 +71,8 @@ const filterDistrits = () => {
                                     </v-col>
                                     <v-col cols="12" sm="6" md="3">
                                         <v-combobox v-model="editedItem.department" :items="departmentsData"
-                                            @update:modelValue="filterProvinces" item-title="description" item-value="id"
-                                            label="Departamento">
+                                            @update:modelValue="filterProvinces" item-title="description"
+                                            item-value="id" label="Departamento">
                                         </v-combobox>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="3">
@@ -93,10 +93,12 @@ const filterDistrits = () => {
                                         <v-text-field v-model="editedItem.telephone" label="Teléfono"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="4">
-                                        <v-text-field v-model="editedItem.email" label="Correo de contacto"></v-text-field>
+                                        <v-text-field v-model="editedItem.email"
+                                            label="Correo de contacto"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="4">
-                                        <v-text-field v-model="editedItem.webAddress" label="Dirección web"></v-text-field>
+                                        <v-text-field v-model="editedItem.webAddress"
+                                            label="Dirección web"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="4">
                                         <v-text-field v-model="editedItem.aditionalInformation"
@@ -124,10 +126,12 @@ const filterDistrits = () => {
                             <v-card-text>
                                 <v-row>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-text-field v-model="editedItem.api_facturacion.url" label="URL"></v-text-field>
+                                        <v-text-field v-model="editedItem.api_facturacion.url"
+                                            label="URL"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-text-field v-model="editedItem.api_facturacion.token" label="Token"></v-text-field>
+                                        <v-text-field v-model="editedItem.api_facturacion.token"
+                                            label="Token"></v-text-field>
                                     </v-col>
                                 </v-row>
                             </v-card-text>
@@ -147,10 +151,12 @@ const filterDistrits = () => {
                             <v-card-text>
                                 <v-row>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-text-field v-model="editedItem.api_search_ruc_dni.url" label="URL"></v-text-field>
+                                        <v-text-field v-model="editedItem.api_search_ruc_dni.url"
+                                            label="URL"></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="6" md="6">
-                                        <v-text-field v-model="editedItem.api_search_ruc_dni.token" label="Token"></v-text-field>
+                                        <v-text-field v-model="editedItem.api_search_ruc_dni.token"
+                                            label="Token"></v-text-field>
                                     </v-col>
                                 </v-row>
                             </v-card-text>

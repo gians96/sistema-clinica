@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 
 const route = useRoute()
@@ -9,10 +8,11 @@ const SingUp = () => {
 };
 const { ruleEmail, rulePassLen, ruleRequired } = useFormRules();
 
-const submit = async () => { 
+const submit = async () => {
   console.log("entra");
-  
+
 };
+navigateTo("/items")
 
 definePageMeta({
   layout: "auth",
@@ -38,8 +38,8 @@ definePageMeta({
             <VForm @submit.prevent="submit" class="mt-7">
               <div class="mt-1">
                 <label class="label text-grey-darken-2" for="email">Email</label>
-                <VTextField :rules="[ruleRequired, ruleEmail]" v-model="email" prepend-inner-icon="fluent:mail-24-regular"
-                  id="email" name="email" type="email" />
+                <VTextField :rules="[ruleRequired, ruleEmail]" v-model="email"
+                  prepend-inner-icon="fluent:mail-24-regular" id="email" name="email" type="email" />
               </div>
               <div class="mt-1">
                 <label class="label text-grey-darken-2" for="password">Contraseña</label>
