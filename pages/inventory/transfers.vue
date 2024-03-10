@@ -58,21 +58,31 @@ const defaultItem = ref<Transfer>({
 })
 
 
-const idItem = ref<number>()
-const idLote = ref()
-const findItem = (id: number) => {
-    return itemsFetch.value?.response.filter(item => item.id === id)[0]
-}
-const cant = ref()
-const findLote = () => {
-    if (!idItem.value) return {}
-    if (!findItem(idItem.value)) return {}
-    let item = findItem(idItem.value)
-    let lot = item?.item_lots_group?.filter(lot => lot.id === idLote.value)[0]
+const idItem = ref<number | null>()
+const idLote = ref<number | null>()
+const cantTransfer = ref<number>(0)
+const itemSelected = computed<Item | null>(() => {
+    if (!idItem.value) return null
+    return itemsFetch.value?.response.filter(item => item.id === idItem.value)[0] as Item
+})
 
-    cant.value = lot?.quantity
-    return lot?.quantity
-}
+const lotSelected = computed<ItemLotsGroup | null>(() => {
+    if (!itemSelected.value?.item_lots_group) return null
+    if (!idLote.value || !itemSelected.value?.lots_enabled) return null
+    return itemSelected.value?.item_lots_group.filter(item => item.id === idLote.value)[0] as ItemLotsGroup
+})
+const stockSelected = computed<number | 0>(() => {
+    if (!itemSelected.value) return 0
+    if (itemSelected.value.lots_enabled) {
+        if (!lotSelected.value) return 0
+        return lotSelected.value.quantity
+    } else {
+        return itemSelected.value.stock
+    }
+    return 0
+})
+
+
 let editedIndex = ref(-1)
 
 const pageCount = computed(() => {
@@ -84,6 +94,9 @@ const nameTitleDialog = ref("")
 const openDialogNewItem = () => {
     dialog.value = true
     nameTitleDialog.value = "Nueva Transferencia"
+    cantTransfer.value = 0
+    idItem.value = null
+    idLote.value = null
     editedItem.value = JSON.parse(JSON.stringify(defaultItem.value))
 }
 
@@ -132,16 +145,16 @@ export interface Lot {
 const itemSend = (item: Transfer) => {
     // if (!item.warehouses) return
     return {
-        warehouse_origin_id: item.warehouse_origin,
-        warehouse_destination: item.warehouse_origin,
+        warehouse_origin_id: item.warehouse_origin.id,
+        warehouse_destination_id: item.warehouse_destination.id,
         description: item.description,
-        lots: item.inventory_transfer_items
+        items: item.inventory_transfer_items
 
     }
 }
 
 const registerItemFetch = async (item: Transfer) => await fetch(
-    `${apiURL.value}/items`,
+    `${apiURL.value}/inventory/transfers`,
     {
         method: "POST",
         headers: {
@@ -152,6 +165,7 @@ const registerItemFetch = async (item: Transfer) => await fetch(
     }
 ).finally(async () => {
     await itemsRefresh()
+    await transferRefresh()
 });
 
 // const updateItemFetch = async (item: Item) => await fetch(
@@ -213,21 +227,34 @@ const deleteItemConfirm = () => {
 
 }
 const tab = ref(null)
-const newLotsOnClick = () => {
-    if (!editedItem.value.item_lots_group) { return }
-    editedItem.value.item_lots_group.push({
-        id: 0,
-        item_id: 0,
-        code: '',
-        quantity: 0,
-        old_quantity: 0,
-        date_of_due: null,
+const addItems = () => {
+    let idLote: any = null
+    let date_of_due: any = null
+    let description: string = ''
+    if (!itemSelected.value) { return }
+    description = itemSelected.value.description
+    if (itemSelected.value.lots_enabled) {
+        if (!lotSelected.value) return
+        if (!lotSelected.value.date_of_due) return
+        idLote = lotSelected.value.id
+        let fechaOriginal = new Date(lotSelected.value.date_of_due);
+        lotSelected.value.date_of_due = fechaOriginal.toISOString().split('T')[0]
+        date_of_due = lotSelected.value.date_of_due
+        description = description + ' | ' + lotSelected.value.code + ' | ' + new Date(date_of_due).toLocaleDateString('es-ES');
+    }
+    editedItem.value.inventory_transfer_items.push({
+        lots_enabled: itemSelected.value.lots_enabled,
+        item_id: itemSelected.value?.id,
+        description: description,
+        date_of_due: date_of_due,
+        item_lots_group_id: idLote,
+        quantity: cantTransfer.value
     })
 
 }
-const deleteLotOnClick = (index: number) => {
-    if (!editedItem.value.item_lots_group) { return }
-    editedItem.value.item_lots_group.splice(index, 1);
+const deleteItemOnClick = (index: number) => {
+    if (!editedItem.value.inventory_transfer_items) { return }
+    editedItem.value.inventory_transfer_items.splice(index, 1);
 }
 </script>
 
@@ -291,13 +318,13 @@ const deleteLotOnClick = (index: number) => {
                         <v-container>
                             <v-row>
                                 <v-col cols="12" sm="6" md="3">
-                                    <v-select v-model="editedItem.warehouse_origin" required
+                                    <v-select v-model="editedItem.warehouse_origin.id" required
                                         :items="warehousesFetch?.response" :item-title="'description'" item-value="id"
                                         label="Oficina Origen">
                                     </v-select>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="3">
-                                    <v-select v-model="editedItem.warehouse_destination" required
+                                    <v-select v-model="editedItem.warehouse_destination.id" required
                                         :items="warehousesFetch?.response" :item-title="'description'" item-value="id"
                                         label="Oficina Destino">
                                     </v-select>
@@ -307,68 +334,64 @@ const deleteLotOnClick = (index: number) => {
                                         label="Descripción (*)"></v-text-field>
                                 </v-col>
                             </v-row>
+
                             <v-row>
-                                <v-col cols="12" sm="12" md="12">
-                                    <v-card-title> Producto </v-card-title>
+                                <v-col cols="12" sm="12" md="12" class="py-0">
+                                    <p class="pb-0"> Producto </p>
                                 </v-col>
-                                <v-col cols="12" sm="6" md="4">
+                                <v-col cols="12" sm="6" md="3">
                                     <v-autocomplete v-model="idItem" required :items="itemsFetch?.response"
                                         :item-title="'description'" item-value="id" label="Producto">
                                     </v-autocomplete>
-
-
                                 </v-col>
-                                <v-col cols="12" sm="6" md="2">
-                                    <v-autocomplete v-model="idLote" v-if="findItem(idItem)?.lots_enabled" required
-                                        :items="findItem(idItem)?.item_lots_group" :item-title="'code'" item-value="id"
-                                        label="Lote">
+                                <v-col cols="12" sm="6" md="3" v-if="itemSelected?.lots_enabled">
+                                    <v-autocomplete v-model="idLote" required :items="itemSelected.item_lots_group"
+                                        :item-title="'code'" item-value="id" label="Lote">
                                     </v-autocomplete>
                                 </v-col>
-                                <v-col cols="12" sm="6" md="2">
-                                    <v-text-field v-model="cant" label="Cantidad actual"></v-text-field>
+                                <v-col cols="12" sm="6" md="2" v-if="itemSelected">
+                                    <v-text-field disabled v-model="stockSelected"
+                                        label="Cantidad actual"></v-text-field>
                                 </v-col>
-                                <v-col cols="12" sm="6" md="2">
-                                    <v-text-field v-model="editedItem.description"
-                                        label="Cantidad a trasladar"></v-text-field>
+                                <v-col cols="12" sm="6" md="2" v-if="itemSelected">
+                                    <v-text-field v-model="cantTransfer" label="Cantidad a trasladar"></v-text-field>
                                 </v-col>
-                                <v-col cols="12" sm="6" md="2">
-                                    <v-btn color="success" @click="newLotsOnClick">
+                                <v-col cols="12" sm="6" md="2" v-if="itemSelected">
+                                    <v-btn color="success" @click="addItems">
                                         <v-icon icon="mdi-plus-circle"></v-icon>
-                                        <div v-if="!mobile"> Nuevo</div>
+                                        <div v-if="!mobile"> Agregar</div>
                                     </v-btn>
                                 </v-col>
+                            </v-row>
+                            <v-row>
 
-                                <div v-for="(lot, index ) in  editedItem.inventory_transfer_items" :key="index"
-                                    :class="mobile ? 'py-4' : ''">
-                                    <v-row class="d-flex" :class="mobile ? 'bg-blue-grey-lighten-5' : ''">
-                                        <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'pb-0' : ''">
-                                            <v-text-field label="Lote" placeholder="LOTE-001" v-model="lot.code">
-                                            </v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'py-0' : ''">
-                                            <v-text-field label="Cantidad" placeholder="10" v-model="lot.quantity">
-                                            </v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="3">
-                                            <v-text-field type="date" label="Fecha de Vencimiento"
-                                                v-model="lot.date_of_due"></v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="3" v-if="lot.id === 0">
-                                            <v-btn icon="mdi-delete" color="error" @click="deleteLotOnClick(index)">
-                                            </v-btn>
-                                        </v-col>
-                                    </v-row>
-                                </div>
-                                {{ idItem }}
-                                {{
-        idLote
-    }}
-                                <div v-if="idItem">
-
-                                    {{ findItem(idItem) }}
-                                </div>
+                                <v-col cols="12" sm="12" md="12" class="py-0">
+                                    <p class="pb-0"> Productos a transferir </p>
+                                </v-col>
                             </v-row>
 
+                            <div v-for="(item, index ) in  editedItem.inventory_transfer_items" :key="index"
+                                :class="mobile ? 'py-4' : ''">
+                                <v-row class="d-flex" :class="mobile ? 'bg-blue-grey-lighten-5' : ''">
+                                    <v-col cols="12" xs="12" md="3" lg="5" :class="mobile ? 'pb-0' : ''">
+                                        <v-text-field label="Lote" disabled placeholder="LOTE-001"
+                                            v-model="item.description">
+                                        </v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'py-0' : ''">
+                                        <v-text-field label="Cantidad" placeholder="10" v-model="item.quantity">
+                                        </v-text-field>
+                                    </v-col>
+                                    <!-- <v-col cols="12" sm="6" md="3">
+                                        <v-text-field type="date" label="Fecha de Vencimiento"
+                                            v-model="item.date_of_due"></v-text-field>
+                                    </v-col> -->
+                                    <v-col cols="12" sm="6" md="1">
+                                        <v-btn icon="mdi-delete" color="error" @click="deleteItemOnClick(index)">
+                                        </v-btn>
+                                    </v-col>
+                                </v-row>
+                            </div>
                         </v-container>
 
                         <v-card-actions class="mb-2">

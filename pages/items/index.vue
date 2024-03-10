@@ -96,7 +96,7 @@ const openDialogEditItem = (item: Item) => {
     if (item.lots_enabled && item.item_lots_group) {
         item.item_lots_group.forEach(lot => {
             if (!lot.date_of_due) return
-            var fechaOriginal = new Date(lot.date_of_due);
+            let fechaOriginal = new Date(lot.date_of_due);
             lot.date_of_due = fechaOriginal.toISOString().split('T')[0]
         })
     }

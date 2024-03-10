@@ -4,7 +4,9 @@ export interface TransferFetch {
 }
 
 export interface Transfer {
-    id: number | 0;
+    id: number;
+    warehouse_origin_id?: number;
+    warehouse_destination_id?: number;
     series: string;
     number: number;
     description: string;
@@ -12,17 +14,22 @@ export interface Transfer {
     details?: string | null;
     create_at?: Date;
     update_at?: Date;
-    warehouse_origin: Warehouse | {};
-    warehouse_destination: Warehouse | {};
+    warehouse_origin: Warehouse;
+    warehouse_destination: Warehouse;
     inventory_transfer_items: InventoryTransferItem[];
 }
 
 export interface InventoryTransferItem {
-    id: number;
-    inventories_transfer_id: number;
-    item_lots_group_id: number;
+    id?: number | null;
+    description?: string;
+    date_of_due?: string;
+    inventories_transfer_id?: number;
+    lots_enabled: boolean;
+    item_id: number;
+    item_lots_group_id: number | null | undefined;
     quantity: number;
-    item_lots_group: ItemLotsGroup;
+    items?: Item;
+    item_lots_group?: ItemLotsGroup | null;
 }
 
 export interface ItemLotsGroup {
@@ -32,12 +39,11 @@ export interface ItemLotsGroup {
     quantity: string;
     old_quantity: string;
     date_of_due: Date;
-    create_at: Date;
-    update_at: Date;
-    items: Items;
+    create_at?: Date;
+    update_at?: Date;
 }
 
-export interface Items {
+export interface Item {
     id: number;
     name: string;
     description: string;
@@ -46,24 +52,20 @@ export interface Items {
     model: string;
     barcode: string;
     internal_id: string;
-    stock: string;
-    stock_min: string;
+    stock: number;
+    stock_min: number;
     active: boolean;
     status: boolean;
     lots_enabled: boolean;
     unit_type_id: string;
     category_id: null;
     warehouse_id: number;
-    sale_unit_price: string;
-    purchase_unit_price: string;
-    createdAt: Date;
-    update_at: Date;
+    sale_unit_price: number;
+    purchase_unit_price: number;
+    createdAt?: Date;
+    update_at?: Date;
     type_commission: string;
-    commission: string;
-}
-
-export enum Series {
-    Nta = "NTA",
+    commission: number;
 }
 
 export interface Warehouse {
@@ -71,6 +73,6 @@ export interface Warehouse {
     establishment_id: number;
     description: string;
     user_id: null;
-    create_at: Date;
-    update_at: null;
+    create_at?: Date;
+    update_at?: Date;
 }
