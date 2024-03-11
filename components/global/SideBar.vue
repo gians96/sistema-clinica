@@ -15,7 +15,7 @@ const menus = ref([
     toSub: [
       { title: "Productos", value: "productos", to: "/items/", view: true },
       { title: "Categoría", value: "category", to: "/items/category", view: false },
-      { title: "Especialidad", value: "specialty", to: "/items/speciality", view: true },
+      { title: "Especialidad", value: "specialty", to: "/items/speciality", view: false },
     ]
   },
   {
@@ -36,7 +36,9 @@ const menus = ref([
     icon: "mdi-cog-outline", title: "Empresa", value: "companies", to: "/companies", view: true,
     toSub: [
       { title: "Configuración", value: "configuracion", to: "/companies", view: true },
-      { title: "Usuarios", value: "users", to: "/companies/users", view: false },
+      { title: "Establecimiento", value: "establishments", to: "/companies/establishments", view: true },
+      { title: "Oficinas/Áreas", value: "office and areas", to: "/companies/offices", view: true },
+      { title: "Usuarios", value: "users", to: "/companies/users", view: true },
       { title: "Lista de diagnósticos", value: "diagnosticList", to: "/companies/diagnostic_list", view: false }
     ]
   },
