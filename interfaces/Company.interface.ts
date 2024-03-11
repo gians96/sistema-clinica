@@ -1,4 +1,4 @@
-import {
+import type {
   Country,
   Department,
   Province,
@@ -21,6 +21,6 @@ export interface Company {
   aditionalInformation: string;
   webAddress: string;
   logo: string;
-  api_facturacion: { url: string ; token: string  } ;
-  api_search_ruc_dni: { url: string ; token: string } ;
+  api_facturacion: { url: string; token: string };
+  api_search_ruc_dni: { url: string; token: string };
 }

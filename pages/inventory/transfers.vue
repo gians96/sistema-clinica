@@ -8,6 +8,7 @@ import type { Items, Item, ItemLotsGroup } from "@/interfaces/Item.interface";
 const snackbarStore = useSnackbarStore()
 const apiURL = useCookie("apiURL");
 import { useDisplay } from 'vuetify'
+import type { Company } from '~/interfaces/Company.interface';
 const { mobile } = useDisplay()
 const { data: transferFetch, refresh: transferRefresh } = await useFetch<TransferFetch>(`${apiURL.value}/inventory/transfers`, { method: 'GET' });
 const { data: warehousesFetch } = await useFetch<Warehouses>(`${apiURL.value}/warehouses`, { method: 'GET' });
@@ -18,11 +19,12 @@ const headers = ref([
     // { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
     { key: 'n', title: 'N°' },
     { key: 'id', title: 'ID' },
-    { key: 'series', title: 'Serie' },
-    { key: 'number', title: 'Numeración' },
+    { key: 'series', title: 'Serie / Numeración' },
+    // { key: 'number', title: 'Numeración' },
     { key: 'warehouse_origin.description', title: 'Oficina Origen' },
     { key: 'warehouse_destination.description', title: 'Oficina Destino' },
     { key: 'quantity', title: 'Cant. Productos' },
+    { key: 'create_at', title: 'Fecha transferida' },
     { key: 'actions', title: 'Acciones' },
 ])
 
@@ -107,7 +109,7 @@ const openDialogEditItem = (item: Item) => {
     if (item.lots_enabled && item.item_lots_group) {
         item.item_lots_group.forEach(lot => {
             if (!lot.date_of_due) return
-            var fechaOriginal = new Date(lot.date_of_due);
+            let fechaOriginal = new Date(lot.date_of_due);
             lot.date_of_due = fechaOriginal.toISOString().split('T')[0]
         })
     }
@@ -168,6 +170,128 @@ const registerItemFetch = async (item: Transfer) => await fetch(
     await transferRefresh()
 });
 
+const header = [
+    { text: "DESCRIPCIÓN", style: { fontSize: 12, bold: true, alignment: "center" } },
+    { text: "UNIDAD", style: { fontSize: 12, bold: true, alignment: "center" } },
+    { text: "CANTIDAD", style: { fontSize: 12, bold: true, alignment: "center" } },
+    { text: "LOTE", style: { fontSize: 12, bold: true, alignment: "center" } }
+];
+
+const variableReactiva = ref("NOTA DE TRASLADO")
+
+// let pdfLink = ref();
+
+const printItems = (transfer: Transfer) => {
+    if (!transfer) return [header]
+    return [header,
+        ...transfer.inventory_transfer_items.map(item => {
+            return [
+                { text: item.items?.description.toString(), style: { fontSize: 11, alignment: "center" } },
+                { text: item.items?.sale_unit_price, style: { fontSize: 11, alignment: "center" } },
+                { text: item.quantity.toString(), style: { fontSize: 11, bold: true, alignment: "center" } },
+                { text: item.lots_enabled ? item.item_lots_group?.code.toString() : "", style: { fontSize: 11, bold: true, alignment: "center" } }
+            ];
+        })
+    ]
+};
+const company = useCookie<Company>("company");
+
+const printTransfer = (transfer: Transfer) => {
+    if (!transfer.create_at) return null
+    let fecha = formatDateDDMMYYYY(transfer.create_at.toString())
+    const pdfMake = usePDFMake();
+    pdfMake.tableLayouts = {
+        custom: {
+            paddingLeft: function () {
+                return 5;
+            },
+            paddingRight: function () {
+                return 5;
+            },
+        },
+    };
+    pdfMake.createPdf({
+        pageSize: 'A4',
+        pageMargins: [35, 50, 35, 50],
+        content: [
+            {
+                columns: [
+
+                    {
+                        text: ''
+                    },
+                    [{
+                        text: 'R.U.C. ' + company.value.number,
+                        style: { fontSize: 14, bold: true, alignment: "center" },
+                        margin: [0, 0, 0, 5],
+                    }, {
+                        text: variableReactiva.value,
+                        style: { fontSize: 14, bold: true, alignment: "center" },
+                        margin: [0, 0, 0, 5],
+                    },
+                    {
+                        text: transfer.series + " - " + transfer.number,
+                        style: { fontSize: 14, bold: true, alignment: "center" },
+                        margin: [0, 0, 0, 35],
+                    },]
+                ],
+            },
+            {
+                columns: [
+                    [
+                        { text: `Ofi. Origen: ${transfer.warehouse_origin.description}`, style: { fontSize: 12, bold: true, alignment: "left" }, margin: [0, 0, 0, 5] },
+                        { text: `Responsable Ofi. Origen: ${transfer.warehouse_origin.users?.name}`, style: { fontSize: 12, bold: true, alignment: "left" }, margin: [0, 0, 0, 5] }
+                    ],
+                    [
+                        { text: `Ofi. Destino: ${transfer.warehouse_destination.description}`, style: { fontSize: 12, bold: true, alignment: "left" }, margin: [0, 0, 0, 5] },
+                        { text: `Responsable Ofi. Destino: ${transfer.warehouse_destination.users?.name}`, style: { fontSize: 12, bold: true, alignment: "left" }, margin: [0, 0, 0, 5] }
+                    ]
+                ],
+            },
+
+            // { text: `Responsable Ofi. Origen: ${transfer.warehouse_origin.description}`, style: { fontSize: 12, bold: true, alignment: "left" }, margin: [0, 0, 0, 5] },
+
+
+            // { text: `Responsable Ofi. Destino: ${transfer.warehouse_destination.description}`, style: { fontSize: 12, bold: true, alignment: "left" }, margin: [0, 0, 0, 5] },
+
+            { text: `Motivo: ${transfer.description}`, style: { fontSize: 12, bold: true, alignment: "left" }, margin: [0, 0, 0, 5] },
+
+            {
+                text: `FECHA: ${fecha}`,
+                margin: [0, 0, 0, 20],
+                style: { fontSize: 12, bold: true, alignment: "left" },
+
+            },
+            {
+                // layout: "custom",
+                table: {
+                    heights: 1,
+                    widths: ['*', 100, '*', '*'],
+                    margin: [50, 0, 0, 50],
+
+                    alignment: "center",
+                    body: printItems(transfer),
+                },
+            },
+            {
+                columns: [
+                    [
+                        { text: `________________________________`, style: { fontSize: 12, bold: true, alignment: "center" }, margin: [0, 80, 0, 5] },
+                        { text: ` ${transfer.warehouse_origin.description}`, style: { fontSize: 10, bold: true, alignment: "center" }, margin: [0, 0, 0, 5] },
+                        { text: ` ${transfer.warehouse_origin.users?.name}`, style: { fontSize: 10, bold: true, alignment: "center" }, margin: [0, 0, 0, 5] }
+                    ],
+                    [
+                        { text: `________________________________`, style: { fontSize: 12, bold: true, alignment: "center" }, margin: [0, 80, 0, 5] },
+                        { text: ` ${transfer.warehouse_destination.description}`, style: { fontSize: 10, bold: true, alignment: "center" }, margin: [0, 0, 0, 5] },
+                        { text: ` ${transfer.warehouse_destination.users?.name}`, style: { fontSize: 10, bold: true, alignment: "center" }, margin: [0, 0, 0, 5] }
+                    ]
+                ],
+            },
+        ],
+    }).print()
+    // modalPrecuenta.value = true
+};
+
 // const updateItemFetch = async (item: Item) => await fetch(
 //     `${apiURL.value}/items`,
 //     {
@@ -182,14 +306,14 @@ const registerItemFetch = async (item: Transfer) => await fetch(
 //     await itemsRefresh()
 // });
 
-const deleteItemFetch = async (id: number) => await fetch(
-    `${apiURL.value}/items/${id}`,
-    {
-        method: "DELETE",
-    }
-).finally(async () => {
-    await itemsRefresh()
-});
+// const deleteItemFetch = async (id: number) => await fetch(
+//     `${apiURL.value}/items/${id}`,
+//     {
+//         method: "DELETE",
+//     }
+// ).finally(async () => {
+//     await itemsRefresh()
+// });
 
 const save = () => {
     try {
@@ -202,30 +326,45 @@ const save = () => {
             // itemsFetch.value.response.push(editedItem.value)
         }
         closeDialogItem()
-    } catch (error) {
+    } catch (error: any) {
         snackbarStore.setStatus("error", "Error", error)
     } finally {
 
         snackbarStore.setStatus("success", "Guardado correctamente")
     }
 }
-const deleteItemConfirm = () => {
-    try {
-        if (!itemsFetch.value) return null
-        deleteItemFetch(editedItem.value.id)
-        // itemsFetch.value.response.splice(editedIndex.value, 1)
-        closeDialogDeleteItem()
-        nextTick(() => {
-            editedItem.value = JSON.parse(JSON.stringify(defaultItem.value))
-            editedIndex.value = -1
-        })
-    } catch (error) {
-        snackbarStore.setStatus("error", "Error", error)
-    } finally {
-        snackbarStore.setStatus("success", "Eliminado correctamente")
-    }
+// const deleteItemConfirm = () => {
+//     try {
+//         if (!itemsFetch.value) return null
+//         deleteItemFetch(editedItem.value.id)
+//         // itemsFetch.value.response.splice(editedIndex.value, 1)
+//         closeDialogDeleteItem()
+//         nextTick(() => {
+//             editedItem.value = JSON.parse(JSON.stringify(defaultItem.value))
+//             editedIndex.value = -1
+//         })
+//     } catch (error) {
+//         snackbarStore.setStatus("error", "Error", error)
+//     } finally {
+//         snackbarStore.setStatus("success", "Eliminado correctamente")
+//     }
 
+// }
+const formatDateDDMMYYYY = (date: string) => {
+    let fechaOriginal = new Date(date);
+    let dateTemp = fechaOriginal.toISOString().split('T')[0];
+    // Formatear la hora en el formato HH:mm:ss
+    let formattedHour = new Date(`${fechaOriginal}`).toLocaleTimeString('es-ES', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+
+    return new Date(dateTemp).toLocaleDateString('es-ES') + " " + formattedHour;
 }
+
+
 const tab = ref(null)
 const addItems = () => {
     let idLote: any = null
@@ -286,16 +425,17 @@ const deleteItemOnClick = (index: number) => {
                         <template v-slot:item.n="{ index }">
                             {{ index + 1 + itemsPerPage * (page - 1) }}
                         </template>
-
-                        <template v-slot:item.active="{ item }">
-                            <v-checkbox-btn v-model="item.raw.active" disabled></v-checkbox-btn>
+                        <template v-slot:item.series="{ item }">
+                            {{ item.raw.series }} - {{ item.raw.number }}
                         </template>
-
+                        <template v-slot:item.create_at="{ item }">
+                            {{ formatDateDDMMYYYY(item.raw.create_at) }}
+                        </template>
                         <template v-slot:item.actions="{ item }">
                             <div class="justify-center ">
 
                                 <v-btn class="me-2" rounded icon="mdi-file" color="blue-grey"
-                                    @click="openDialogEditItem(item.raw)">
+                                    @click="printTransfer(item.raw)">
                                 </v-btn>
 
                             </div>
@@ -304,8 +444,6 @@ const deleteItemOnClick = (index: number) => {
                         <template v-slot:bottom>
                             <div class="text-center pt-2">
                                 <v-pagination v-model="page" :length="pageCount"></v-pagination>
-                                <!-- <v-text-field :model-value="itemsPerPage" class="pa-2" label="Items per page" type="number" min="-1"
-                max="15" hide-details @update:model-value="itemsPerPage = parseInt($event, 10)"></v-text-field> -->
                             </div>
                         </template>
                     </v-data-table>
@@ -407,7 +545,7 @@ const deleteItemOnClick = (index: number) => {
                 </v-dialog>
                 <!-- DIALOG NEW , EDIT -->
                 <!-- DIALGO DELETE -->
-                <v-dialog v-model="dialogDelete" max-width="500px" persistent>
+                <!-- <v-dialog v-model="dialogDelete" max-width="500px" persistent>
                     <v-card>
                         <v-card class="text-h5 px-4 py-4 text-center">¿Está seguro de que desea eliminar este
                             elemento?</v-card>
@@ -418,7 +556,7 @@ const deleteItemOnClick = (index: number) => {
                             <v-spacer></v-spacer>
                         </v-card-actions>
                     </v-card>
-                </v-dialog>
+                </v-dialog> -->
                 <!-- DIALOG -->
             </v-container>
         </v-card>

@@ -1,8 +1,8 @@
 import vuetify from "vite-plugin-vuetify";
 
 // PWA Config
-const title = "Vuetify 3 + Nuxt 3 Starter";
-const shortTitle = "Vuetify 3 + Nuxt 3 Starter";
+const title = "Sistema Clínica";
+const shortTitle = "SISCLI";
 const description =
   "Template to get you up and running with Nuxt 3 & Vuetify 3";
 const image = "https://vuetify3nuxt3starter.behonbaker.com/starter.png";
@@ -18,6 +18,7 @@ export default defineNuxtConfig({
   build: { transpile: ["vuetify"] },
   modules: [
     '@pinia/nuxt',
+    "nuxt-pdfmake",
     "@kevinmarrec/nuxt-pwa",
     async (options, nuxt) => {
       nuxt.hooks.hook("vite:extendConfig", config =>
@@ -41,8 +42,8 @@ export default defineNuxtConfig({
       mode: "out-in" // default
     },
     head: {
-      title: "Vuetify 3 + Nuxt 3 Starter",
-      titleTemplate: "%s | Vuetify 3 + Nuxt 3 Starter",
+      title: "SYSCLI",
+      titleTemplate: "%s | -",
       link: [
         { rel: "stylesheet", href: "https://rsms.me/inter/inter.css" },
         { rel: "preconnect", href: "https://rsms.me/" },

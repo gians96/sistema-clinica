@@ -39,7 +39,7 @@ export interface ItemLotsGroup {
     quantity: string;
     old_quantity: string;
     date_of_due: Date;
-    create_at?: Date;
+    create_at?: Date | string;
     update_at?: Date;
 }
 
@@ -73,6 +73,29 @@ export interface Warehouse {
     establishment_id: number;
     description: string;
     user_id: null;
+    users?: Users;
     create_at?: Date;
     update_at?: Date;
+}
+
+
+export interface Users {
+    id: number;
+    name: string;
+    email: null;
+    password: null;
+    api_token: null;
+    locked: boolean;
+    photo_filename: string;
+    date_of_birth: null;
+    corporate_cell_phone: null;
+    personal_cell_phone: null;
+    identity_document_type_id: null;
+    number: null;
+    address: null;
+    telephone: null;
+    firt_name: null;
+    last_name: null;
+    create_at: Date;
+    update_at: Date;
 }

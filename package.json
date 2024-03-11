@@ -16,6 +16,7 @@
     "@nuxtjs/google-fonts": "^3.0.1",
     "@types/node": "^18",
     "nuxt": "^3.6.2",
+    "nuxt-pdfmake": "^0.0.16",
     "sass": "^1.63.6",
     "vuetify": "^3.3.7"
   },
