@@ -1,3 +1,5 @@
+import type { Users } from "./User";
+
 export interface Warehouses {
     response: Warehouse[];
     database: string;
@@ -8,9 +10,11 @@ export interface Warehouse {
     user_id: number | null;
     establishments?: Establishments;
     // establishment_id: number;
+    text: string,
     description: string;
     create_at?: Date;
     update_at?: null;
+    users: Users | null;
 }
 
 export interface Establishments {

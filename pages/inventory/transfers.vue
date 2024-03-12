@@ -1,19 +1,27 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
 import { useSnackbarStore } from '@/store/index';
-import type { TransferFetch, Transfer, Warehouse } from "@/interfaces/Transfers.interface";
-import type { Warehouses } from "~/interfaces/Warehouse.interface";
-import type { Items, Item, ItemLotsGroup } from "@/interfaces/Item.interface";
+import type { Transfer, WarehouseTransfer, Users } from "@/interfaces/Transfers.interface";
+import type { Warehouse } from "~/interfaces/Warehouse.interface";
+import type { Item, ItemLotsGroup } from "@/interfaces/Item.interface";
 
 const snackbarStore = useSnackbarStore()
 const apiURL = useCookie("apiURL");
 import { useDisplay } from 'vuetify'
 import type { Company } from '~/interfaces/Company.interface';
 const { mobile } = useDisplay()
-const { data: transferFetch, refresh: transferRefresh } = await useFetch<TransferFetch>(`${apiURL.value}/inventory/transfers`, { method: 'GET' });
-const { data: warehousesFetch } = await useFetch<Warehouses>(`${apiURL.value}/warehouses`, { method: 'GET' });
-const { data: itemsFetch, refresh: itemsRefresh } = await useFetch<Items>(`${apiURL.value}/items`, { method: 'GET' });
+const { data: transferFetch, refresh: transferRefresh } = await useFetch<Transfer[]>(`${apiURL.value}/inventory/transfers`, { method: 'GET' });
+const { data: warehousesFetch } = await useFetch<Warehouse[]>(`${apiURL.value}/warehouses`, { method: 'GET' });
+const { data: itemsFetch, refresh: itemsRefresh } = await useFetch<Item[]>(`${apiURL.value}/items`, { method: 'GET' });
 
+const warehouseData = computed<Warehouse[] | null>(() => {
+    if (!warehousesFetch.value) return null
+    return warehousesFetch.value?.map((warehouse: Warehouse) => {
+        return {
+            ...warehouse,
+            text: warehouse.description + " | " + (warehouse.users?.name ? warehouse.users?.name : 'NO ASIGNADO')
+        }
+    })
+})
 
 const headers = ref([
     // { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
@@ -24,6 +32,7 @@ const headers = ref([
     { key: 'warehouse_origin.description', title: 'Oficina Origen' },
     { key: 'warehouse_destination.description', title: 'Oficina Destino' },
     { key: 'quantity', title: 'Cant. Productos' },
+    { key: 'description', title: 'Motivo' },
     { key: 'create_at', title: 'Fecha transferida' },
     { key: 'actions', title: 'Acciones' },
 ])
@@ -42,8 +51,12 @@ const editedItem = ref<Transfer>({
     description: '',
     quantity: 0,
     details: "",
-    warehouse_origin: { id: 1 } as Warehouse,
-    warehouse_destination: { id: 1 } as Warehouse,
+    warehouse_origin: { id: 1 } as WarehouseTransfer,
+    warehouse_destination: { id: 1 } as WarehouseTransfer,
+    user_origin_id: null,
+    user_destination_id: null,
+    user_origin: {} as Users,
+    user_destination: {} as Users,
     inventory_transfer_items: []
 })
 
@@ -54,8 +67,12 @@ const defaultItem = ref<Transfer>({
     description: '',
     quantity: 0,
     details: "",
-    warehouse_origin: { id: 1 } as Warehouse,
-    warehouse_destination: { id: 1 } as Warehouse,
+    warehouse_origin: { id: 1 } as WarehouseTransfer,
+    warehouse_destination: { id: 1 } as WarehouseTransfer,
+    user_origin_id: null,
+    user_destination_id: null,
+    user_origin: {} as Users,
+    user_destination: {} as Users,
     inventory_transfer_items: []
 })
 
@@ -65,13 +82,14 @@ const idLote = ref<number | null>()
 const cantTransfer = ref<number>(0)
 const itemSelected = computed<Item | null>(() => {
     if (!idItem.value) return null
-    return itemsFetch.value?.response.filter(item => item.id === idItem.value)[0] as Item
+    if (!itemsFetch.value) return null
+    return itemsFetch.value.filter((item: Item) => item.id === idItem.value)[0]
 })
 
 const lotSelected = computed<ItemLotsGroup | null>(() => {
     if (!itemSelected.value?.item_lots_group) return null
     if (!idLote.value || !itemSelected.value?.lots_enabled) return null
-    return itemSelected.value?.item_lots_group.filter(item => item.id === idLote.value)[0] as ItemLotsGroup
+    return itemSelected.value?.item_lots_group.filter((item: ItemLotsGroup) => item.id === idLote.value)[0]
 })
 const stockSelected = computed<number | 0>(() => {
     if (!itemSelected.value) return 0
@@ -89,7 +107,7 @@ let editedIndex = ref(-1)
 
 const pageCount = computed(() => {
     if (!transferFetch.value) return 1
-    return Math.ceil(transferFetch.value.response.length / itemsPerPage.value)
+    return Math.ceil(transferFetch.value.length / itemsPerPage.value)
 })
 
 const nameTitleDialog = ref("")
@@ -116,9 +134,8 @@ const openDialogEditItem = (item: Item) => {
         })
     }
     editedItem.value = JSON.parse(JSON.stringify(item))
-    editedIndex.value = itemsFetch.value.response.indexOf(item)
+    editedIndex.value = itemsFetch.value.indexOf(item)
 }
-
 
 const closeDialogItem = () => {
     dialog.value = false
@@ -146,14 +163,22 @@ export interface Lot {
     quantity: number;
 }
 
+const findIdUserWarehouse = (idWarehouse: number) => {
+    if (!warehousesFetch.value) return null
+    let { user_id } = warehousesFetch.value.filter((warehouse: Warehouse) => warehouse.id === idWarehouse)[0]
+    return user_id
+}
+
 const itemSend = (item: Transfer) => {
     // if (!item.warehouses) return
+
     return {
         warehouse_origin_id: item.warehouse_origin.id,
         warehouse_destination_id: item.warehouse_destination.id,
         description: item.description,
-        items: item.inventory_transfer_items
-
+        items: item.inventory_transfer_items,
+        user_origin_id: findIdUserWarehouse(item.warehouse_origin.id),
+        user_destination_id: findIdUserWarehouse(item.warehouse_destination.id)
     }
 }
 
@@ -170,7 +195,7 @@ const registerItemFetch = async (item: Transfer) => await fetch(
 ).finally(async () => {
     await transferRefresh()
     if (!transferFetch.value) return
-    await printTransfer(transferFetch.value?.response[0])
+    await printTransfer(transferFetch.value[0])
 });
 
 const header = [
@@ -190,7 +215,7 @@ const printItems = (transfer: Transfer) => {
         ...transfer.inventory_transfer_items.map(item => {
             return [
                 { text: item.items?.description.toString(), style: { fontSize: 11, alignment: "center" } },
-                { text: item.items?.sale_unit_price, style: { fontSize: 11, alignment: "center" } },
+                { text: item.items?.unit_type_id.toString(), style: { fontSize: 11, alignment: "center" } },
                 { text: item.quantity.toString(), style: { fontSize: 11, bold: true, alignment: "center" } },
                 { text: item.lots_enabled ? item.item_lots_group?.code.toString() : "", style: { fontSize: 11, bold: true, alignment: "center" } }
             ];
@@ -255,14 +280,14 @@ const printTransfer = (transfer: Transfer) => {
                     [
                         { text: `Ofi. Origen: ${transfer.warehouse_origin.description}`, style: { fontSize: 12, bold: true, alignment: "left" }, margin: [0, 0, 0, 5] },
                         {
-                            text: `Responsable Ofi. Origen: ` + transfer.warehouse_origin.users?.name ? transfer.warehouse_origin.users?.name : '',
+                            text: 'Responsable Ofi. Origen: ' + (transfer.user_origin?.name ? transfer.user_origin?.name : ''),
                             style: { fontSize: 12, bold: true, alignment: "left" }, margin: [0, 0, 0, 5]
                         }
                     ],
                     [
                         { text: `Ofi. Destino: ${transfer.warehouse_destination.description}`, style: { fontSize: 12, bold: true, alignment: "left" }, margin: [0, 0, 0, 5] },
                         {
-                            text: `Responsable Ofi. Destino: ` + transfer.warehouse_destination.users?.name ? transfer.warehouse_destination.users?.name : '',
+                            text: `Responsable Ofi. Destino: ` + (transfer.user_destination?.name ? transfer.user_destination?.name : ''),
                             style: { fontSize: 12, bold: true, alignment: "left" }, margin: [0, 0, 0, 5]
                         }
                     ]
@@ -290,12 +315,12 @@ const printTransfer = (transfer: Transfer) => {
                     [
                         { text: `________________________________`, style: { fontSize: 12, bold: true, alignment: "center" }, margin: [0, 80, 0, 5] },
                         { text: ` ${transfer.warehouse_origin.description}`, style: { fontSize: 10, bold: true, alignment: "center" }, margin: [0, 0, 0, 5] },
-                        { text: transfer.warehouse_origin.users?.name ? transfer.warehouse_origin.users?.name : '', style: { fontSize: 10, bold: true, alignment: "center" }, margin: [0, 0, 0, 5] }
+                        { text: (transfer.user_origin?.name ? transfer.user_origin?.name : ''), style: { fontSize: 10, bold: true, alignment: "center" }, margin: [0, 0, 0, 5] }
                     ],
                     [
                         { text: `________________________________`, style: { fontSize: 12, bold: true, alignment: "center" }, margin: [0, 80, 0, 5] },
                         { text: ` ${transfer.warehouse_destination.description}`, style: { fontSize: 10, bold: true, alignment: "center" }, margin: [0, 0, 0, 5] },
-                        { text: transfer.warehouse_destination.users?.name ? transfer.warehouse_destination.users?.name : '', style: { fontSize: 10, bold: true, alignment: "center" }, margin: [0, 0, 0, 5] }
+                        { text: (transfer.user_destination?.name ? transfer.user_destination?.name : ''), style: { fontSize: 10, bold: true, alignment: "center" }, margin: [0, 0, 0, 5] }
                     ]
                 ],
             },
@@ -336,7 +361,7 @@ const save = async () => {
         } else {
             let res = await registerItemFetch(editedItem.value)
 
-            // itemsFetch.value.response.push(editedItem.value)
+            // itemsFetch.value.push(editedItem.value)
         }
         closeDialogItem()
 
@@ -351,7 +376,7 @@ const save = async () => {
 //     try {
 //         if (!itemsFetch.value) return null
 //         deleteItemFetch(editedItem.value.id)
-//         // itemsFetch.value.response.splice(editedIndex.value, 1)
+//         // itemsFetch.value.splice(editedIndex.value, 1)
 //         closeDialogDeleteItem()
 //         nextTick(() => {
 //             editedItem.value = JSON.parse(JSON.stringify(defaultItem.value))
@@ -430,9 +455,8 @@ const deleteItemOnClick = (index: number) => {
                     </v-col>
                 </v-row>
                 <v-row dense>
-                    <v-data-table v-model:page="page" v-model="selected" :headers="headers"
-                        :items="transferFetch?.response" :items-per-page="itemsPerPage" :search="search"
-                        class="elevation-1">
+                    <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="transferFetch"
+                        :items-per-page="itemsPerPage" :search="search" class="elevation-1">
                         <template v-slot:item.n="{ index }">
                             {{ index + 1 + itemsPerPage * (page - 1) }}
                         </template>
@@ -464,20 +488,18 @@ const deleteItemOnClick = (index: number) => {
                         <v-container>
                             <v-row>
                                 <v-col cols="12" sm="6" md="3">
-                                    <v-select v-model="editedItem.warehouse_origin.id" required
-                                        :items="warehousesFetch?.response" :item-title="'description'" item-value="id"
-                                        label="Oficina Origen">
+                                    <v-select v-model="editedItem.warehouse_origin.id" required :items="warehouseData"
+                                        :item-title="'text'" item-value="id" label="Oficina Origen">
                                     </v-select>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="3">
                                     <v-select v-model="editedItem.warehouse_destination.id" required
-                                        :items="warehousesFetch?.response" :item-title="'description'" item-value="id"
+                                        :items="warehouseData" :item-title="'text'" item-value="id"
                                         label="Oficina Destino">
                                     </v-select>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="6">
-                                    <v-text-field v-model="editedItem.description"
-                                        label="Motivo (*)"></v-text-field>
+                                    <v-text-field v-model="editedItem.description" label="Motivo (*)"></v-text-field>
                                 </v-col>
                             </v-row>
                             <v-row>
@@ -485,7 +507,7 @@ const deleteItemOnClick = (index: number) => {
                                     <p class="pb-0"> Producto </p>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="3">
-                                    <v-autocomplete v-model="idItem" required :items="itemsFetch?.response"
+                                    <v-autocomplete v-model="idItem" required :items="itemsFetch"
                                         :item-title="'description'" item-value="id" label="Producto">
                                     </v-autocomplete>
                                 </v-col>

@@ -1,3 +1,4 @@
+import type { Users } from "./User";
 export interface TransferFetch {
     response: Transfer[];
     database: string;
@@ -12,10 +13,14 @@ export interface Transfer {
     description: string;
     quantity: number;
     details?: string | null;
+    user_origin_id?: number | null;
+    user_destination_id?: number | null;
     create_at?: Date;
     update_at?: Date;
-    warehouse_origin: Warehouse;
-    warehouse_destination: Warehouse;
+    user_origin?: Users | null;
+    user_destination?: Users | null;
+    warehouse_origin: WarehouseTransfer;
+    warehouse_destination: WarehouseTransfer;
     inventory_transfer_items: InventoryTransferItem[];
 }
 
@@ -68,7 +73,7 @@ export interface Item {
     commission: number;
 }
 
-export interface Warehouse {
+export interface WarehouseTransfer {
     id: number;
     establishment_id: number;
     description: string;
@@ -78,24 +83,3 @@ export interface Warehouse {
     update_at?: Date;
 }
 
-
-export interface Users {
-    id: number;
-    name: string;
-    email: null;
-    password: null;
-    api_token: null;
-    locked: boolean;
-    photo_filename: string;
-    date_of_birth: null;
-    corporate_cell_phone: null;
-    personal_cell_phone: null;
-    identity_document_type_id: null;
-    number: null;
-    address: null;
-    telephone: null;
-    firt_name: null;
-    last_name: null;
-    create_at: Date;
-    update_at: Date;
-}

@@ -1,14 +1,13 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
 import { useSnackbarStore } from '@/store/index';
 import type { Items, Item, ItemLotsGroup } from "@/interfaces/Item.interface";
-import type { Warehouses } from "~/interfaces/Warehouse.interface";
+import type { Warehouse } from "~/interfaces/Warehouse.interface";
 const snackbarStore = useSnackbarStore()
 const apiURL = useCookie("apiURL");
 import { useDisplay } from 'vuetify'
 const { mobile } = useDisplay()
-const { data: itemsFetch, refresh: itemsRefresh } = await useFetch<Items>(`${apiURL.value}/items`, { method: 'GET' });
-const { data: warehousesFetch } = await useFetch<Warehouses>(`${apiURL.value}/warehouses`, { method: 'GET' });
+const { data: itemsFetch, refresh: itemsRefresh } = await useFetch<Item[]>(`${apiURL.value}/items`, { method: 'GET' });
+const { data: warehousesFetch } = await useFetch<Warehouse[]>(`${apiURL.value}/warehouses`, { method: 'GET' });
 
 const headers = ref([
     // { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
@@ -79,7 +78,7 @@ let editedIndex = ref(-1)
 
 const pageCount = computed(() => {
     if (!itemsFetch.value) return 1
-    return Math.ceil(itemsFetch.value.response.length / itemsPerPage.value)
+    return Math.ceil(itemsFetch.value.length / itemsPerPage.value)
 })
 
 const nameTitleDialog = ref("")
@@ -101,14 +100,14 @@ const openDialogEditItem = (item: Item) => {
         })
     }
     editedItem.value = JSON.parse(JSON.stringify(item))
-    editedIndex.value = itemsFetch.value.response.indexOf(item)
+    editedIndex.value = itemsFetch.value.indexOf(item)
 }
 
 const openDialogDeleteItem = (item: Item) => {
     if (!itemsFetch.value) return null
     dialogDelete.value = true
     nameTitleDialog.value = "Eliminar Especialidad"
-    // editedIndex.value = itemsFetch.value.response.indexOf(item)
+    // editedIndex.value = itemsFetch.value.indexOf(item)
     editedItem.value = item
 }
 
@@ -231,7 +230,7 @@ const save = () => {
             updateItemFetch(editedItem.value)
         } else {
             registerItemFetch(editedItem.value)
-            // itemsFetch.value.response.push(editedItem.value)
+            // itemsFetch.value.push(editedItem.value)
         }
         closeDialogItem()
     } catch (error) {
@@ -245,7 +244,7 @@ const deleteItemConfirm = () => {
     try {
         if (!itemsFetch.value) return null
         deleteItemFetch(editedItem.value.id)
-        // itemsFetch.value.response.splice(editedIndex.value, 1)
+        // itemsFetch.value.splice(editedIndex.value, 1)
         closeDialogDeleteItem()
         nextTick(() => {
             editedItem.value = JSON.parse(JSON.stringify(defaultItem.value))
@@ -299,9 +298,8 @@ const deleteLotOnClick = (index: number) => {
                 </v-row>
                 <!-- {{ editedItem }} -->
                 <v-row dense>
-                    <v-data-table v-model:page="page" v-model="selected" :headers="headers"
-                        :items="itemsFetch?.response" :items-per-page="itemsPerPage" :search="search"
-                        class="elevation-1">
+                    <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="itemsFetch"
+                        :items-per-page="itemsPerPage" :search="search" class="elevation-1">
                         <template v-slot:item.n="{ index }">
                             {{ index + 1 + itemsPerPage * (page - 1) }}
                         </template>
@@ -374,8 +372,8 @@ const deleteLotOnClick = (index: number) => {
                                             </v-col>
                                             <v-col cols="12" sm="6" md="3">
                                                 <v-select v-model="editedItem.warehouses" required
-                                                    :items="warehousesFetch?.response" :item-title="'description'"
-                                                    item-value="id" label="Área">
+                                                    :items="warehousesFetch" :item-title="'description'" item-value="id"
+                                                    label="Área">
                                                 </v-select>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="3">
