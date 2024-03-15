@@ -389,18 +389,29 @@ const save = async () => {
 //     }
 
 // }
+
+
+
 const formatDateDDMMYYYY = (date: string) => {
     let fechaOriginal = new Date(date);
-    let dateTemp = fechaOriginal.toISOString().split('T')[0];
+
+    // Obtener el día, mes y año por separado
+    let day = fechaOriginal.getUTCDate();
+    let month = fechaOriginal.getUTCMonth() + 1; // Los meses empiezan desde 0
+    let year = fechaOriginal.getUTCFullYear();
+
     // Formatear la hora en el formato HH:mm:ss
     let formattedHour = new Date(`${fechaOriginal}`).toLocaleTimeString('es-ES', {
-        hour12: false,
+        hour12: true,
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
     });
 
-    return new Date(dateTemp).toLocaleDateString('es-ES') + " " + formattedHour;
+    // Formatear la fecha en el formato DD/MM/YYYY
+    let formattedDate = `${day}/${month}/${year}`;
+
+    return formattedDate + " " + formattedHour;
 }
 
 
