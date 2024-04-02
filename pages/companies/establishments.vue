@@ -5,8 +5,9 @@ import type { Warehouse } from "~/interfaces/Warehouse.interface";
 const snackbarStore = useSnackbarStore()
 const apiURL = useCookie("apiURL");
 import { useDisplay } from 'vuetify'
+import type { Establishment } from '~/interfaces/Establishments.interface';
 const { mobile } = useDisplay()
-const { data: itemsFetch, refresh: itemsRefresh } = await useFetch<Item[]>(`${apiURL.value}/items`, { method: 'GET' });
+const { data: establishmentsFetch, refresh: establishmentsRefresh } = await useFetch<Establishment[]>(`${apiURL.value}/establishments`, { method: 'GET' });
 const { data: warehousesFetch } = await useFetch<Warehouse[]>(`${apiURL.value}/warehouses`, { method: 'GET' });
 
 const headers = ref([
