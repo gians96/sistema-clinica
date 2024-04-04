@@ -274,6 +274,38 @@ const deleteLotOnClick = (index: number) => {
     if (!editedItem.value.item_lots_group) { return }
     editedItem.value.item_lots_group.splice(index, 1);
 }
+
+const exportItemsXLS = async () => {
+    try {
+        // Realiza la solicitud para descargar el archivo Excel
+        const response = await fetch(`${apiURL.value}/export/items/`);
+        if (!response.ok) {
+            throw new Error('No se pudo descargar el archivo Excel');
+        }
+
+        // Convierte la respuesta en un blob
+        const blob = await response.blob();
+
+        // Crea una URL para el blob
+        const url = window.URL.createObjectURL(blob);
+
+        // Crea un enlace temporal para descargar el archivo
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'items.xlsx');
+        document.body.appendChild(link);
+
+        // Simula un clic en el enlace para iniciar la descarga
+        link.click();
+
+        // Elimina el enlace después de la descarga
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error('Error al descargar el archivo Excel:', error);
+        // Maneja el error apropiadamente, por ejemplo, mostrando un mensaje al usuario
+    }
+}
+
 </script>
 
 <template>
@@ -284,16 +316,30 @@ const deleteLotOnClick = (index: number) => {
                 <span class="subheading">Productos</span>
             </div>
             <v-spacer></v-spacer>
-            <v-btn append-icon="mdi-plus-circle" color="primary" variant="flat"
-                @click="openDialogNewItem()">Nuevo</v-btn>
+
         </v-app-bar>
         <!-- {{ apiURL }}asds -->
         <!-- {{ itemsFetch }} -->
         <v-card class="justify-self-end mx-4" elevation="0">
             <v-container fluid>
                 <v-row>
-                    <v-col cols="12" lg="4" md="4" sm="12" xs="12">
+                    <v-col cols="12" class=" d-flex justify-center align-center">
                         <v-text-field v-model="search" append-inner-icon="mdi-magnify" label="Buscar"></v-text-field>
+                        <v-spacer></v-spacer>
+                        <v-btn append-icon="mdi-export" color="green" variant="flat"
+                            @click="exportItemsXLS()">Exportar</v-btn>
+                        <v-btn append-icon="mdi-plus-circle" color="primary" variant="flat"
+                            @click="openDialogNewItem()">Nuevo</v-btn>
+                    </v-col>
+
+
+
+                    <v-col cols="2">
+
+
+                    </v-col>
+                    <v-col cols="12" lg="2" md="4" sm="12" xs="12">
+
                     </v-col>
                 </v-row>
                 <!-- {{ editedItem }} -->
