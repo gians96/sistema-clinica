@@ -22,6 +22,8 @@ export interface Transfer {
     warehouse_origin: WarehouseTransfer;
     warehouse_destination: WarehouseTransfer;
     inventory_transfer_items: InventoryTransferItem[];
+    state_types_id: number;
+    state_invetories_transfer: StateInvetoriesTransfer;
 }
 
 export interface InventoryTransferItem {
@@ -83,3 +85,7 @@ export interface WarehouseTransfer {
     update_at?: Date;
 }
 
+export interface StateInvetoriesTransfer {
+    id: number;
+    description: string;
+}

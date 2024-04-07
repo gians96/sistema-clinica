@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useSnackbarStore } from '@/store/index';
-import type { Transfer, WarehouseTransfer, Users } from "@/interfaces/Transfers.interface";
+import type { Transfer, WarehouseTransfer, StateInvetoriesTransfer } from "@/interfaces/Transfers.interface";
 import type { Warehouse } from "~/interfaces/Warehouse.interface";
 import type { Item, ItemLotsGroup } from "@/interfaces/Item.interface";
 
@@ -34,6 +34,7 @@ const headers = ref([
     { key: 'quantity', title: 'Cant. Productos' },
     { key: 'description', title: 'Motivo' },
     { key: 'create_at', title: 'Fecha transferida' },
+    { key: 'state_invetories_transfer.description', title: 'Estado' },
     { key: 'actions', title: 'Acciones' },
 ])
 
@@ -197,6 +198,21 @@ const registerItemFetch = async (item: Transfer) => await fetch(
     if (!transferFetch.value) return
     await printTransfer(transferFetch.value[0])
 });
+const voidedTransferFetch = async (id: number) => await fetch(
+    `${apiURL.value}/inventory/transfers/voided`,
+    {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            // Authorization: `Bearer ${userCookie.value.token}`,
+        },
+        body: JSON.stringify({ id })
+    }
+).finally(async () => {
+    await transferRefresh()
+    if (!transferFetch.value) return
+})
+
 
 const header = [
     { text: "DESCRIPCIÓN", style: { fontSize: 12, bold: true, alignment: "center" } },
@@ -238,10 +254,19 @@ const printTransfer = (transfer: Transfer) => {
             },
         },
     };
+    let isVoided = {
+        text: 'ANULADO',
+        absolutePosition: { x: 100, y: 300 },
+        alignment: 'center', // Centrar el texto
+        fontSize: 70, // Tamaño de la fuente
+        color: 'red', // Color del texto
+    }
+
     pdfMake.createPdf({
         pageSize: 'A4',
         pageMargins: [35, 50, 35, 50],
         content: [
+            transfer.state_types_id === 6 ? isVoided : {},
             {
                 columns: [
                     {
@@ -389,8 +414,30 @@ const save = async () => {
 //     }
 
 // }
+const voidedOpenDialog = (transfer: Transfer) => {
+    dialogDelete.value = true
+    editedItem.value = JSON.parse(JSON.stringify(transfer))
+}
+const voidedTransferConfirm = () => {
+    try {
+        if (!itemsFetch.value) return null
 
 
+        voidedTransferFetch(editedItem.value.id)
+
+        // itemsFetch.value.splice(editedIndex.value, 1)
+        closeDialogDeleteItem()
+        nextTick(() => {
+            editedItem.value = JSON.parse(JSON.stringify(defaultItem.value))
+            editedIndex.value = -1
+        })
+    } catch (error) {
+        snackbarStore.setStatus("error", "Error", error)
+    } finally {
+        snackbarStore.setStatus("success", "Eliminado correctamente")
+    }
+
+}
 
 const formatDateDDMMYYYY = (date: string) => {
     let fechaOriginal = new Date(date);
@@ -445,6 +492,18 @@ const deleteItemOnClick = (index: number) => {
     if (!editedItem.value.inventory_transfer_items) { return }
     editedItem.value.inventory_transfer_items.splice(index, 1);
 }
+
+
+const statusColorState: Record<StateInvetoriesTransfer['id'], string> = {
+    1: 'default',
+    2: 'green',
+    3: 'green',
+    4: 'green',
+    5: 'green',
+    6: 'red',
+    7: 'green',
+}
+
 </script>
 
 <template>
@@ -477,12 +536,30 @@ const deleteItemOnClick = (index: number) => {
                         <template v-slot:item.create_at="{ item }">
                             {{ formatDateDDMMYYYY(item.raw.create_at) }}
                         </template>
+                        <template v-slot:item.state_invetories_transfer.description="{ item }">
+                            <v-chip :color="statusColorState[item.raw.state_invetories_transfer.id]">
+                                {{ item.raw.state_invetories_transfer.description }}
+                            </v-chip>
+                            <!-- {{ editedItem }} -->
+                        </template>
                         <template v-slot:item.actions="{ item }">
-                            <div class="justify-center ">
-                                <v-btn class="me-2" rounded icon="mdi-file" color="blue-grey"
-                                    @click="printTransfer(item.raw)">
-                                </v-btn>
-                            </div>
+
+                            <v-tooltip>
+                                <template v-slot:activator="{ props }">
+                                    <v-btn v-bind="props" v-if="item.raw.state_types_id !== 6" class="me-2" rounded
+                                        icon="mdi-minus-circle" color="red" @click="voidedOpenDialog(item.raw)">
+                                    </v-btn>
+                                </template>
+                                <span>Anular</span>
+                            </v-tooltip>
+                            <v-tooltip>
+                                <template v-slot:activator="{ props }">
+                                    <v-btn v-bind="props" class="me-2" rounded icon="mdi-file" color="blue-grey"
+                                        @click="printTransfer(item.raw)">
+                                    </v-btn>
+                                </template>
+                                <span>Imprimir</span>
+                            </v-tooltip>
                         </template>
                         <template v-slot:bottom>
                             <div class="text-center pt-2">
@@ -583,18 +660,18 @@ const deleteItemOnClick = (index: number) => {
                 </v-dialog>
                 <!-- DIALOG NEW , EDIT -->
                 <!-- DIALGO DELETE -->
-                <!-- <v-dialog v-model="dialogDelete" max-width="500px" persistent>
+                <v-dialog v-model="dialogDelete" max-width="500px" persistent>
                     <v-card>
-                        <v-card class="text-h5 px-4 py-4 text-center">¿Está seguro de que desea eliminar este
-                            elemento?</v-card>
+                        <v-card class="text-h5 px-4 py-4 text-center">¿Está seguro de que desea anular esta
+                            transferencia? - {{ editedItem.series }} - {{ editedItem.number }}</v-card>
                         <v-card-actions>
                             <v-spacer></v-spacer>
                             <v-btn color="blue-darken-1" variant="text" @click="closeDialogDeleteItem">Cancelar</v-btn>
-                            <v-btn color="red-darken-1" variant="flat" @click="deleteItemConfirm">Eliminar</v-btn>
+                            <v-btn color="red-darken-1" variant="flat" @click="voidedTransferConfirm">Anular</v-btn>
                             <v-spacer></v-spacer>
                         </v-card-actions>
                     </v-card>
-                </v-dialog> -->
+                </v-dialog>
                 <!-- DIALOG -->
             </v-container>
         </v-card>
