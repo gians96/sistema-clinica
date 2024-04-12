@@ -1,11 +1,6 @@
 import type { Users } from "./User";
 import type { Establishment } from "./Establishments.interface";
 
-export interface Warehouses {
-    response: Warehouse[];
-    database: string;
-}
-
 export interface Warehouse {
     id: number;
     user_id: number | null;

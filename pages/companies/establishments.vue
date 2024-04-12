@@ -14,13 +14,8 @@ const headers = ref([
     // { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
     { key: 'n', title: 'N°' },
     { key: 'id', title: 'ID' },
-    { key: 'internal_id', title: 'Cód. Interno' },
-    { key: 'description', title: 'Nombre' },
-    { key: 'unit_type_id', title: 'Uni. Medi.' },
-    { key: 'stock', title: 'Stock' },
-    { key: 'sale_unit_price', title: 'P.Unitario (Venta)' },
-    { key: 'purchase_unit_price', title: 'P.Unitario (Compra)' },
-    { key: 'active', title: 'Habilitado' },
+    { key: 'description', title: 'Descripción' },
+    { key: 'code', title: 'Código' },
     { key: 'actions', title: 'Acciones' },
 ])
 
@@ -30,56 +25,56 @@ const search = ref('')
 const selected = ref([])
 const dialog = ref(false)
 const dialogDelete = ref(false)
-const editedItem = ref<Item>({
+const editedItem = ref<Establishment>({
     id: 0,
-    name: "",
-    description: "",
-    second_name: "",
-    model: "",
-    barcode: "",
-    internal_id: "",
-    stock: 0,
-    stock_min: 0,
-    active: true,
-    status: true,
-    lots_enabled: false,
-    unit_type_id: "NIU",
-    category_id: null,
-    item_lots_group: [] as ItemLotsGroup[],
-    warehouses: { id: 1, description: "" },
-    sale_unit_price: 1,
-    purchase_unit_price: 1,
-    type_commission: "",
-    commission: 0
+    description: '',
+    country_id: null,
+    department_id: null,
+    province_id: null,
+    district_id: null,
+    country: '',
+    department: '',
+    province: '',
+    district: '',
+    address: '',
+    email: '',
+    telephone: '',
+    code: '',
+    aditional_information: '',
+    web_address: '',
+    trade_address: '',
+    create_at: null,
+    update_at: null,
+    warehouse: null,
 })
 
-const defaultItem = ref<Item>({
+const defaultItem = ref<Establishment>({
     id: 0,
-    name: "",
-    description: "",
-    second_name: "",
-    model: "",
-    barcode: "",
-    internal_id: "",
-    stock: 0,
-    stock_min: 0,
-    active: true,
-    status: true,
-    lots_enabled: false,
-    unit_type_id: "NIU",
-    category_id: null,
-    item_lots_group: [] as ItemLotsGroup[],
-    warehouses: { id: 1, description: "" },
-    sale_unit_price: 1,
-    purchase_unit_price: 1,
-    type_commission: "",
-    commission: 0
+    description: '',
+    country_id: null,
+    department_id: null,
+    province_id: null,
+    district_id: null,
+    country: '',
+    department: '',
+    province: '',
+    district: '',
+    address: '',
+    email: '',
+    telephone: '',
+    code: '',
+    aditional_information: '',
+    web_address: '',
+    trade_address: '',
+    create_at: null,
+    update_at: null,
+    warehouse: null,
 })
 let editedIndex = ref(-1)
 
 const pageCount = computed(() => {
-    if (!itemsFetch.value) return 1
-    return Math.ceil(itemsFetch.value.length / itemsPerPage.value)
+    if (!establishmentsFetch.value) return 1
+    return Math.ceil(establishmentsFetch.value.length / itemsPerPage.value)
 })
 
 const nameTitleDialog = ref("")
@@ -89,23 +84,23 @@ const openDialogNewItem = () => {
     editedItem.value = JSON.parse(JSON.stringify(defaultItem.value))
 }
 
-const openDialogEditItem = (item: Item) => {
-    if (!itemsFetch.value) return null
+const openDialogEditItem = (item: Establishment) => {
+    if (!establishmentsFetch.value) return null
     dialog.value = true
     nameTitleDialog.value = "Editar Producto"
-    if (item.lots_enabled && item.item_lots_group) {
-        item.item_lots_group.forEach(lot => {
-            if (!lot.date_of_due) return
-            let fechaOriginal = new Date(lot.date_of_due);
-            lot.date_of_due = fechaOriginal.toISOString().split('T')[0]
-        })
-    }
+    // if (item.lots_enabled && item.item_lots_group) {
+    //     item.item_lots_group.forEach(lot => {
+    //         if (!lot.date_of_due) return
+    //         let fechaOriginal = new Date(lot.date_of_due);
+    //         lot.date_of_due = fechaOriginal.toISOString().split('T')[0]
+    //     })
+    // }
     editedItem.value = JSON.parse(JSON.stringify(item))
-    editedIndex.value = itemsFetch.value.indexOf(item)
+    editedIndex.value = establishmentsFetch.value.indexOf(item)
 }
 
-const openDialogDeleteItem = (item: Item) => {
-    if (!itemsFetch.value) return null
+const openDialogDeleteItem = (item: Establishment) => {
+    if (!establishmentsFetch.value) return null
     dialogDelete.value = true
     nameTitleDialog.value = "Eliminar Especialidad"
     // editedIndex.value = itemsFetch.value.indexOf(item)
@@ -126,68 +121,35 @@ const closeDialogDeleteItem = () => {
         editedIndex.value = -1
     })
 }
-export interface ItemSend {
-    id?: number;
-    name: string;
-    description: string;
-    second_name: string;
-    model: string;
-    barcode: string;
-    internal_id: string;
-    stock: number;
-    stock_min: number;
-    active: boolean;
-    status: boolean;
-    lots_enabled: boolean;
-    unit_type_id: string;
-    category_id?: number | null;
-    warehouse_id: number;
-    sale_unit_price: number;
-    purchase_unit_price: number;
-    type_commission: string | null;
-    commission: number | null;
-    lots: Lot[];
-}
 
-export interface Lot {
-    id?: number;
-    item_id?: number;
-    code: string;
-    quantity: number;
-    old_quantity?: number;
-    date_of_due: string | null;
-    create_at?: Date;
-    update_at?: Date;
-}
-
-const itemSend = (item: Item) => {
-    if (!item.warehouses) return
+const itemSend = (item: Establishment) => {
+    if (!item.description) return
     return {
         id: item.id,
-        name: item.name,
         description: item.description,
-        second_name: item.second_name,
-        model: item.model,
-        barcode: item.barcode,
-        internal_id: item.internal_id,
-        stock: item.stock,
-        stock_min: item.stock_min,
-        active: item.active,
-        status: item.status,
-        lots_enabled: item.lots_enabled,
-        unit_type_id: item.unit_type_id,
-        category_id: item.category_id,
-        warehouse_id: item.warehouses.id,
-        sale_unit_price: item.sale_unit_price,
-        purchase_unit_price: item.purchase_unit_price,
-        type_commission: item.type_commission,
-        commission: item.commission,
-        lots: item.item_lots_group,
+        country_id: item.country_id,
+        department_id: item.department_id,
+        province_id: item.province_id,
+        district_id: item.district_id,
+        country: item.country,
+        department: item.department,
+        province: item.province,
+        district: item.district,
+        address: item.address,
+        email: item.email,
+        telephone: item.telephone,
+        code: item.code,
+        aditional_information: item.aditional_information,
+        web_address: item.web_address,
+        trade_address: item.trade_address,
+        create_at: item.create_at,
+        update_at: item.update_at,
+        warehouse: item.warehouse
     }
 }
 
-const registerItemFetch = async (item: Item) => await fetch(
-    `${apiURL.value}/items`,
+const registerItemFetch = async (item: Establishment) => await fetch(
+    `${apiURL.value}/establishments`,
     {
         method: "POST",
         headers: {
@@ -197,11 +159,11 @@ const registerItemFetch = async (item: Item) => await fetch(
         body: JSON.stringify(itemSend(item))
     }
 ).finally(async () => {
-    await itemsRefresh()
+    await establishmentsRefresh()
 });
 
-const updateItemFetch = async (item: Item) => await fetch(
-    `${apiURL.value}/items`,
+const updateItemFetch = async (item: Establishment) => await fetch(
+    `${apiURL.value}/establishments`,
     {
         method: "PUT",
         headers: {
@@ -211,7 +173,7 @@ const updateItemFetch = async (item: Item) => await fetch(
         body: JSON.stringify(itemSend(item))
     }
 ).finally(async () => {
-    await itemsRefresh()
+    await establishmentsRefresh()
 });
 
 const deleteItemFetch = async (id: number) => await fetch(
@@ -220,12 +182,14 @@ const deleteItemFetch = async (id: number) => await fetch(
         method: "DELETE",
     }
 ).finally(async () => {
-    await itemsRefresh()
+    await establishmentsRefresh()
 });
 
 const save = () => {
     try {
-        if (!itemsFetch.value) return null
+        if (!establishmentsFetch.value) return null
+        if (!establishmentsFetch.value) return null
+
         if (editedIndex.value > -1) {
             // itemsFetch.value = JSON.parse(JSON.stringify(editedItem.value))
             updateItemFetch(editedItem.value)
@@ -234,7 +198,7 @@ const save = () => {
             // itemsFetch.value.push(editedItem.value)
         }
         closeDialogItem()
-    } catch (error) {
+    } catch (error: any) {
         snackbarStore.setStatus("error", "Error", error)
     } finally {
 
@@ -243,7 +207,7 @@ const save = () => {
 }
 const deleteItemConfirm = () => {
     try {
-        if (!itemsFetch.value) return null
+        if (!establishmentsFetch.value) return null
         deleteItemFetch(editedItem.value.id)
         // itemsFetch.value.splice(editedIndex.value, 1)
         closeDialogDeleteItem()
@@ -251,7 +215,7 @@ const deleteItemConfirm = () => {
             editedItem.value = JSON.parse(JSON.stringify(defaultItem.value))
             editedIndex.value = -1
         })
-    } catch (error) {
+    } catch (error: any) {
         snackbarStore.setStatus("error", "Error", error)
     } finally {
         snackbarStore.setStatus("success", "Eliminado correctamente")
@@ -260,25 +224,25 @@ const deleteItemConfirm = () => {
 }
 const tab = ref(null)
 const newLotsOnClick = () => {
-    if (!editedItem.value.item_lots_group) { return }
-    editedItem.value.item_lots_group.push({
-        id: 0,
-        item_id: 0,
-        code: '',
-        quantity: 0,
-        old_quantity: 0,
-        date_of_due: null,
-    })
+    // if (!editedItem.value.item_lots_group) { return }
+    // editedItem.value.item_lots_group.push({
+    //     id: 0,
+    //     item_id: 0,
+    //     code: '',
+    //     quantity: 0,
+    //     old_quantity: 0,
+    //     date_of_due: null,
+    // })
 
 }
 const deleteLotOnClick = (index: number) => {
-    if (!editedItem.value.item_lots_group) { return }
-    editedItem.value.item_lots_group.splice(index, 1);
+    // if (!editedItem.value.item_lots_group) { return }
+    // editedItem.value.item_lots_group.splice(index, 1);
 }
 </script>
 
 <template>
-    <v-container fluid v-if="itemsFetch">
+    <v-container fluid v-if="establishmentsFetch">
         <v-app-bar class="justify-center" flat append>
             <div class="justify-center mx-4">
                 <v-icon class="me-1" icon="mdi-pill-multiple"></v-icon>
@@ -299,7 +263,7 @@ const deleteLotOnClick = (index: number) => {
                 </v-row>
                 <!-- {{ editedItem }} -->
                 <v-row dense>
-                    <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="itemsFetch"
+                    <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="establishmentsFetch"
                         :items-per-page="itemsPerPage" :search="search" class="elevation-1">
                         <template v-slot:item.n="{ index }">
                             {{ index + 1 + itemsPerPage * (page - 1) }}
@@ -336,7 +300,7 @@ const deleteLotOnClick = (index: number) => {
                         <v-card-title class="px-0 py-0">
                             <v-tabs v-model="tab" bg-color="primary">
                                 <v-tab value="general">General</v-tab>
-                                <v-tab value="lots" v-if="editedItem.lots_enabled">Lotes</v-tab>
+                                <!-- <v-tab value="lots" v-if="editedItem.lots_enabled">Lotes</v-tab> -->
                             </v-tabs>
                         </v-card-title>
                         <v-card-text>
@@ -352,7 +316,7 @@ const deleteLotOnClick = (index: number) => {
                                                 <v-text-field v-model="editedItem.name"
                                                     label="Nombre des"></v-text-field>
                                             </v-col> -->
-                                            <v-col cols="12" sm="6" md="6">
+                                            <!-- <v-col cols="12" sm="6" md="6">
                                                 <v-text-field v-model="editedItem.second_name"
                                                     label="Nombre secundario"></v-text-field>
                                             </v-col>
@@ -399,73 +363,11 @@ const deleteLotOnClick = (index: number) => {
                                             </v-col>
                                             <v-col cols="12" sm="6" md="3">
                                                 <v-checkbox v-model="editedItem.active" label="Habilitado"></v-checkbox>
-                                            </v-col>
-
-                                            <!-- <v-col cols="12" sm="6" md="3">
-                                                <v-text-field type="date" label="Date"></v-text-field>
-                                            </v-col> -->
-                                            <!-- <v-col cols="12" sm="6" md="4">
-                                                <v-select v-model="editedItem.type_commission"
-                                                    :items="['Dinero', 'Porcentaje']"
-                                                    label="Tipo de comisión"></v-select>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="4">
-                                                <v-text-field v-model="editedItem.commission"
-                                                    label="Comisión"></v-text-field>
-                                            </v-col> -->
-                                            <!-- <v-col cols="12" sm="6" md="4">
-                                                <v-switch v-model="editedItem.active" color="success"
-                                                    label="Habilitado"></v-switch>
                                             </v-col> -->
                                         </v-row>
                                     </v-container>
                                 </v-window-item>
-                                <v-window-item value="lots">
-                                    <v-card-title class="d-flex">
-                                        Lotes
-                                        <v-spacer></v-spacer>
-                                        <v-btn color="success" @click="newLotsOnClick">
-                                            <v-icon icon="mdi-plus-circle"></v-icon>
-                                            <div v-if="!mobile"> Nuevo</div>
-                                        </v-btn>
-                                    </v-card-title>
-                                    <div v-for="(lot, index ) in  editedItem.item_lots_group" :key="index"
-                                        :class="mobile ? 'py-4' : ''">
-                                        <v-row class="d-flex" :class="mobile ? 'bg-blue-grey-lighten-5' : ''">
-                                            <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'pb-0' : ''">
-                                                <v-text-field label="Lote" placeholder="LOTE-001" v-model="lot.code">
-                                                </v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'py-0' : ''">
-                                                <v-text-field label="Cantidad" placeholder="10" v-model="lot.quantity">
-                                                </v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3">
-                                                <v-text-field type="date" label="Fecha de Vencimiento"
-                                                    v-model="lot.date_of_due"></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3" v-if="lot.id === 0">
-                                                <v-btn icon="mdi-delete" color="error" @click="deleteLotOnClick(index)">
-                                                </v-btn>
-                                            </v-col>
-                                            <!-- {{ lot.id }},{{ lot.item_id }},{{ lot.code }} -->
-                                            <!-- <v-col cols="12" xs="12" md="2" lg="2"
-                                                class="d-flex aling-center justify-center"
-                                                :class="mobile ? 'py-0' : ''">
-                                                <v-spacer></v-spacer>
-                                                <v-spacer></v-spacer>
-                                                
-                                                <v-spacer></v-spacer>
-                                            </v-col> -->
 
-                                        </v-row>
-
-                                    </div>
-                                    <!-- <p>{{ editedItem }}</p> -->
-                                    <!-- <p>-----------------</p> -->
-                                    <!-- <p>{{ editedItemLotsGroup }}</p> -->
-
-                                </v-window-item>
                             </v-window>
                         </v-card-text>
 

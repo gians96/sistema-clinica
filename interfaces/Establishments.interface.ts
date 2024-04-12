@@ -11,13 +11,13 @@ export interface Establishment {
     province: null | string;
     district: null | string;
     address: null | string;
-    email: null;
-    telephone: null;
-    code: null;
-    aditional_information: null;
-    web_address: null;
-    trade_address: null;
-    create_at: Date;
-    update_at: Date;
+    email: null | string;
+    telephone: null | string;
+    code: null | string;
+    aditional_information: null | string;
+    web_address: null | string;
+    trade_address: null | string;
+    create_at: Date | null;
+    update_at: Date | null;
     warehouse: Warehouse[] | [] | null
 }
