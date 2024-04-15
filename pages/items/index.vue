@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useSnackbarStore } from '@/store/index';
-import type { Items, Item, ItemLotsGroup } from "@/interfaces/Item.interface";
+import type { Item, ItemLotsGroup } from "@/interfaces/Item.interface";
 import type { Warehouse } from "~/interfaces/Warehouse.interface";
 const snackbarStore = useSnackbarStore()
 const apiURL = useCookie("apiURL");

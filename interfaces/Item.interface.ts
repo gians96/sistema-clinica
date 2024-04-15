@@ -1,8 +1,3 @@
-export interface Items {
-    response: Item[];
-    database: string;
-}
-
 export interface Item {
     id: number | 0;
     name: string;
@@ -46,4 +41,22 @@ export interface Warehouses {
     user_id?: number;
     create_at?: string;
     update_at?: string;
+}
+
+
+export interface Product {
+    id: number
+    name: string
+    note: string
+    price: number
+    // imageUrl: string
+    // itemCode?: string | null
+    quantity: number
+    status: number
+    // tag: Tag[] | []
+    categoryId: number | null
+    internalId: string
+    unitTypeId: string
+    // currencyTypeSymbol: string
+    // sale_affectation_igv_type_id: string
 }

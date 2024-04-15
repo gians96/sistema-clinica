@@ -11,6 +11,14 @@ const menus = ref([
   { icon: "mdi-thermometer", title: "Triaje", value: "triage", to: "/triage", toSub: null, view: false },
   { icon: "mdi-medical-bag", title: "Atención Médica", value: "medicalAttention", to: "/medical_attention", toSub: null, view: false },
   {
+    icon: "mdi-network-pos", title: "POS", value: "POS", to: "#", view: true,
+    toSub: [
+      { title: "Punto de venta", value: "productos", to: "/pos/", view: true },
+      // { title: "Categoría", value: "category", to: "/items/category", view: false },
+      // { title: "Especialidad", value: "specialty", to: "/items/speciality", view: false },
+    ]
+  },
+  {
     icon: "mdi-pill-multiple", title: "Productos/Servicios", value: "items", to: "#", view: true,
     toSub: [
       { title: "Productos", value: "productos", to: "/items/", view: true },
