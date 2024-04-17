@@ -39,6 +39,9 @@ const addItemsPOS = (item: Item) => {
             name: item.description,
             note: "",
             price: item.sale_unit_price,
+            type_item_id: item.type_item_id,
+            type_item: item.type_item,
+            net_weight: 0,
             // imageUrl: item.image_url,
             // itemCode: item.item_code,
             quantity: 1,
@@ -78,7 +81,7 @@ const deleteItemPOS = (id: number) => {
 const itemSelected = ref<Item>()
 const totalListPOS = () => {
     if (listItemsPOS.value.length === 0) return 0
-    return listItemsPOS.value.reduce((acumulador, data) => { return acumulador + data.price * data.quantity }, 0)
+    return listItemsPOS.value.reduce((acumulador, data) => { return acumulador + data.price * data.net_weight }, 0)
 }
 const isShowModalComprobante = ref(false)
 const mountPay = ref<number | null>(null)
@@ -160,8 +163,11 @@ const seriesFilterToDocumentType = computed<Series[]>(() => {
                     </v-col>
                     <v-col cols="12" sm="12" v-if="listItemsPOS.length !== 0">
                         <v-row no-gutters v-for="(item, index) in listItemsPOS" :key="index" class="py-0">
-                            <v-col cols="10">
+                            <v-col cols="8">
                                 <div class="text-left">{{ item.name }}</div>
+                            </v-col>
+                            <v-col cols="2">
+                                <div class="text-left">PRECIO. {{ item.price * item.net_weight }}</div>
                             </v-col>
                             <v-col cols="2">
                                 <div class="text-left">CANT. {{ item.quantity }}</div>
@@ -169,23 +175,35 @@ const seriesFilterToDocumentType = computed<Series[]>(() => {
                             <v-spacer></v-spacer>
                             <v-col cols="2">
                                 <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="searchItems" label="# Pollos"></v-text-field>
+                                    variant="solo" v-model="item.quantity_chicken" label="# Pollos"></v-text-field>
+                            </v-col>
+                            <v-col cols="2" v-if="item.type_item?.id === 2">
+                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
+                                    variant="solo" v-model="item.quantity_box" label="#Jaba"></v-text-field>
+                            </v-col>
+                            <v-col cols="2" v-if="item.type_item?.id === 2">
+                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
+                                    variant="solo" v-model="item.tare" label="Tara"></v-text-field>
+                            </v-col>
+                            <v-col cols="2" v-if="item.type_item?.id === 2">
+                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
+                                    variant="solo" v-model="item.gross_weight" label="Peso Bruto"></v-text-field>
+                            </v-col>
+                            <v-col cols="2" v-if="item.type_item?.id === 1">
+                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
+                                    variant="solo" v-model="item.average" label="Promedio"></v-text-field>
                             </v-col>
                             <v-col cols="2">
                                 <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="searchItems" label="Peso neto"></v-text-field>
+                                    variant="solo" v-model="item.net_weight" label="Peso neto"></v-text-field>
                             </v-col>
                             <v-col cols="2">
                                 <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="searchItems" label="Precio"></v-text-field>
+                                    variant="solo" v-model="item.price" label="Precio"></v-text-field>
                             </v-col>
-                            <v-col cols="2">
+                            <v-col cols="2" v-if="item.type_item?.id === 1">
                                 <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="searchItems" label="Promedio"></v-text-field>
-                            </v-col>
-                            <v-col cols="2">
-                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="searchItems" label="Descuento"></v-text-field>
+                                    variant="solo" v-model="item.discount" label="Descuento"></v-text-field>
                             </v-col>
                             <v-col cols="1" class="d-flex align-center justify-center">
                                 <!-- <v-spacer></v-spacer> -->
