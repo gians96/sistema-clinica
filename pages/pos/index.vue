@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import { useSnackbarStore } from '@/store/index';
-import type { Item, Product } from "@/interfaces/Item.interface";
+import type { Item, Product, paymentMethodTypes } from "@/interfaces/Item.interface";
 const apiURL = useCookie("apiURL");
 import { useDisplay } from "vuetify";
 const { mobile } = useDisplay();
 const snackbarStore = useSnackbarStore()
-const typeMountPayments = [10, 20, 50, 100, 200]
-import { series, customers, items } from "./data.ts"
+const typeMountPayments = [10, 20, 50, 100]
+// const typeMountPayments = [10, 20, 50, 100, 200]
+import { series, customers, items, payment_method_types } from "./data.ts"
 const itemsFetch = ref<Item[]>(items)
 // const { data: itemsFetch, refresh: itemsRefresh } = await useFetch<Item[]>(`${apiURL.value}/items`, { method: 'GET' });
 const searchItems = ref<string>("");
@@ -143,6 +144,16 @@ const seriesFilterToDocumentType = computed<Series[]>(() => {
     serieDocumentSelected.value = serieSelected[0]
     return serieSelected
 })
+
+const paymentMethodTypesSelected = ref<paymentMethodTypes>({
+    "id": "01",
+    "description": "Efectivo",
+    "has_card": false,
+    "charge": 0,
+    "number_days": 0,
+    "is_credit": false,
+    "is_cash": true
+})
 </script>
 
 <template>
@@ -161,101 +172,69 @@ const seriesFilterToDocumentType = computed<Series[]>(() => {
                             alt="waterbucket" />
                         <p>No se han agregado productos</p>
                     </v-col>
-                    <v-col cols="12" sm="12" v-if="listItemsPOS.length !== 0">
+                    <v-col cols="12" v-if="listItemsPOS.length !== 0">
                         <v-row no-gutters v-for="(item, index) in listItemsPOS" :key="index" class="py-0">
-                            <v-col cols="8">
-                                <div class="text-left">{{ item.name }}</div>
+                            <v-col cols="12" md="12" lg="10" sm="12" xs="12">
+                                <v-row no-gutters>
+                                    <v-col cols="12">
+                                        <div class="text-left">{{ item.name }} - {{ item.unitTypeId }}</div>
+                                    </v-col>
+                                    <v-col cols="2">
+                                        <v-text-field density="compact" variant="solo" v-model="item.quantity_chicken"
+                                            label="# Pollos"></v-text-field>
+                                    </v-col>
+                                    <div v-if="item.type_item?.id === 2" class="px-1"></div>
+                                    <v-col cols="2" v-if="item.type_item?.id === 2">
+                                        <v-text-field density="compact" variant="solo" v-model="item.quantity_box"
+                                            label="#Jaba"></v-text-field>
+                                    </v-col>
+                                    <div class="px-1"></div>
+                                    <v-col cols="2" v-if="item.type_item?.id === 2">
+                                        <v-text-field density="compact" variant="solo" v-model="item.tare"
+                                            label="Tara"></v-text-field>
+                                    </v-col>
+                                    <div class="px-1" cols="2" v-if="item.type_item?.id === 2"></div>
+                                    <v-col cols="2" v-if="item.type_item?.id === 2">
+                                        <v-text-field density="compact" variant="solo" v-model="item.gross_weight"
+                                            label="Peso Bruto"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="2" v-if="item.type_item?.id === 1">
+                                        <v-text-field density="compact" variant="solo" v-model="item.average"
+                                            label="Promedio"></v-text-field>
+                                    </v-col>
+                                    <div class="px-1" cols="2"></div>
+                                    <v-col cols="2">
+                                        <v-text-field density="compact" variant="solo" v-model="item.net_weight"
+                                            label="Peso neto"></v-text-field>
+                                    </v-col>
+                                    <div class="px-1"></div>
+                                    <v-col cols="2">
+                                        <v-text-field density="compact" variant="solo" v-model="item.price"
+                                            label="Precio"></v-text-field>
+                                    </v-col>
+                                    <div class="px-1" cols="2" v-if="item.type_item?.id === 1"></div>
+                                    <v-col cols="2" v-if="item.type_item?.id === 1">
+                                        <v-text-field density="compact" variant="solo" v-model="item.discount"
+                                            label="Descuento"></v-text-field>
+                                    </v-col>
+                                </v-row>
                             </v-col>
-                            <v-col cols="2">
-                                <div class="text-left">PRECIO. {{ item.price * item.net_weight }}</div>
-                            </v-col>
-                            <v-col cols="2">
-                                <div class="text-left">CANT. {{ item.quantity }}</div>
+                            <v-col cols="12" md="12" lg="2" sm="12" xs="12" class="d-flex align-center justify-center">
+                                <v-row no-gutters class="d-flex align-center justify-center">
+                                    <v-col cols="6" class="d-flex align-center justify-center">
+                                        <div class="text-left">S/. {{ item.price * item.net_weight }}</div>
+                                    </v-col>
+                                    <v-col cols="6" class="d-flex align-center justify-center">
+                                        <v-btn @click="deleteItemPOS(index)" icon="mdi-delete-forever"
+                                            color="red"></v-btn>
+                                    </v-col>
+                                </v-row>
                             </v-col>
                             <v-spacer></v-spacer>
-                            <v-col cols="2">
-                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="item.quantity_chicken" label="# Pollos"></v-text-field>
-                            </v-col>
-                            <v-col cols="2" v-if="item.type_item?.id === 2">
-                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="item.quantity_box" label="#Jaba"></v-text-field>
-                            </v-col>
-                            <v-col cols="2" v-if="item.type_item?.id === 2">
-                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="item.tare" label="Tara"></v-text-field>
-                            </v-col>
-                            <v-col cols="2" v-if="item.type_item?.id === 2">
-                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="item.gross_weight" label="Peso Bruto"></v-text-field>
-                            </v-col>
-                            <v-col cols="2" v-if="item.type_item?.id === 1">
-                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="item.average" label="Promedio"></v-text-field>
-                            </v-col>
-                            <v-col cols="2">
-                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="item.net_weight" label="Peso neto"></v-text-field>
-                            </v-col>
-                            <v-col cols="2">
-                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="item.price" label="Precio"></v-text-field>
-                            </v-col>
-                            <v-col cols="2" v-if="item.type_item?.id === 1">
-                                <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                                    variant="solo" v-model="item.discount" label="Descuento"></v-text-field>
-                            </v-col>
-                            <v-col cols="1" class="d-flex align-center justify-center">
-                                <!-- <v-spacer></v-spacer> -->
-                                <!-- <v-btn color="green" @click="mostrarModalNota(index)" icon="mdi-note-outline"> -->
-                                <!-- </v-btn> -->
-                                <!-- <v-spacer></v-spacer>
-                                <v-btn @click="decrementQuantityItemPOS(index)" icon="mdi-minus"></v-btn>
-                                <v-btn @click="incrementQuantityItemPOS(index)" icon="mdi-plus"></v-btn>
-                                <v-spacer></v-spacer> -->
-                                <v-btn @click="deleteItemPOS(index)" icon="mdi-delete-forever" color="red"></v-btn>
-                                <!-- <v-spacer></v-spacer> -->
-                            </v-col>
+
                             <v-divider :class="listItemsPOS.length == index + 1 ? 'pb-7' : ''"></v-divider>
                         </v-row>
                     </v-col>
-                    <!-- <v-col cols="12">
-                        <v-sheet elevation="0">
-                            <v-tabs bg-color="grey-lighten-3" next-icon="mdi-arrow-right-bold-box-outline"
-                                prev-icon="mdi-arrow-left-bold-box-outline" show-arrows>
-                                <v-chip-group mandatory selected-class="text-primary">
-                                    <v-chip @click="filtroCategoria(null)" color="success">Todos</v-chip>
-                                    <v-chip v-for="(row, index) in dCategoria.data" :key="index"
-                                        @click="filtroCategoria(row.id)" color="success">{{ row.name }}</v-chip>
-                                </v-chip-group>
-                            </v-tabs>
-                        </v-sheet>
-                        <div class="py-2"></div>
-
-                        <v-text-field clearable @click:clear="clearSearch()" persistent-clear density="compact"
-                            variant="solo" append-inner-icon="mdi-magnify" single-line v-model="searchItems"
-                            label="Buscar menu"></v-text-field>
-                    </v-col> -->
-                    <!-- <v-col v-for="item in itemsFilter" :key="item.id" :cols="mobile ? '6' : '2'"
-                        class="d-flex px-2 py-2">
-                        <v-card @click="addItemsPOS(item)" class="rounded-b-xl rounded-t-xl bg-white" width="100%"
-                            variant="text">
-                            <v-img :src="item.image_url" :height="100" aspect-ratio="1/1" cover class="">
-                                <div class="text-center pt-4">
-                                    <v-chip variant="elevated">
-                                        <div class="font-weight-bold">
-                                            S/. {{ item.sale_unit_price }}
-                                        </div>
-                                    </v-chip>
-                                </div>
-                            </v-img>
-                            <div class="px-2 py-2">
-                                <div class="font-weight-light font-italic text-body-2">
-                                    {{ item.description }}
-                                </div>
-                            </div>
-                        </v-card>
-                    </v-col> -->
                 </v-row>
             </v-container>
         </v-col>
@@ -264,8 +243,6 @@ const seriesFilterToDocumentType = computed<Series[]>(() => {
             width="100%">
             <v-container fluid>
                 <v-row no-gutters>
-
-
                     <v-card>
                         <v-card-title>
                             <v-btn-toggle borderless color="success" class="d-flex justify-center"
@@ -284,11 +261,12 @@ const seriesFilterToDocumentType = computed<Series[]>(() => {
                         <v-card-text>
                             <v-row class="mb-2">
                                 <v-col cols="12" :lg="false ? '6' : '12'" sm="6" class="pb-0">
-                                    <v-row no-gutters>
+                                    <v-row no-gutters class="pb-4">
                                         <v-col cols="3">
                                             <v-combobox class="inline select-box" v-model="serieDocumentSelected"
                                                 :items="seriesFilterToDocumentType" item-title="number" item-value="id">
-                                            </v-combobox></v-col>
+                                            </v-combobox>
+                                        </v-col>
                                         <v-col cols="8">
                                             <v-combobox class="inline select-box" v-model="customersSelected"
                                                 :items="customers" variant="solo-filled" item-title="description"
@@ -299,6 +277,7 @@ const seriesFilterToDocumentType = computed<Series[]>(() => {
                                             <v-btn variant="flat" block icon="mdi-add" color="success">
                                             </v-btn>
                                         </v-col>
+                                        <v-divider></v-divider>
                                         <v-col cols="12" class="d-flex justify-center py-6">
                                             <v-sheet class="d-flex align-center flex-column">
                                                 <v-sheet>Monto a Cobrar</v-sheet>
@@ -307,31 +286,51 @@ const seriesFilterToDocumentType = computed<Series[]>(() => {
                                                 <v-sheet>Vuelto: {{ moneyDecimal(String(vuelto())) }}</v-sheet>
                                             </v-sheet>
                                         </v-col>
-                                        <v-col cols="12">
-                                            <v-text-field prepend-icon="mdi-cash" label="Ingrese monto"
-                                                placeholder="0.00" v-model="mountPay">
-                                            </v-text-field>
-                                        </v-col>
+                                        <v-divider class="pb-5"></v-divider>
                                         <v-row no-gutters justify="center">
+                                            <v-col cols="10" class="d-flex justify-start">
+                                                <div>Pagos Agregados:</div>
+                                            </v-col>
+                                            <v-col cols="2" class="d-flex justify-center pb-4">
+                                                <v-btn variant="flat" block icon="mdi-add" color="success">
+                                                </v-btn>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row no-gutters justify="center">
+                                            <v-col cols="5" class="d-flex justify-center">
+                                                <v-combobox class="inline select-box" :items="payment_method_types"
+                                                    v-model="paymentMethodTypesSelected" variant="solo-filled"
+                                                    item-title="description" item-value="id">
+                                                </v-combobox>
+                                            </v-col>
+                                            <v-col cols="6" class="d-flex justify-center">
+                                                <v-text-field label="Ingrese monto" placeholder="0.00"
+                                                    v-model="mountPay">
+                                                </v-text-field>
+                                            </v-col>
+                                            <v-col cols="1" class="py-2">
+                                                <v-btn variant="flat" block icon="mdi-delete" color="red">
+                                                </v-btn>
+                                            </v-col>
                                             <v-col :cols="mobile ? '3' : '2'" class="d-flex justify-center py-1 px-1"
                                                 v-for="(row, index) in typeMountPayments" :key="index">
                                                 <v-chip color="success" size="large" @click="modifiedAmountPay(row)">
-                                                    S/.{{
-        row
-    }}</v-chip>
+                                                    S/.{{ row }}</v-chip>
                                             </v-col>
-                                            <v-col :cols="mobile ? '4' : '3'" class=" py-1 px-1">
+                                            <!-- <v-col :cols="mobile ? '4' : '3'" class=" py-1 px-1">
                                                 <v-chip color="success" size="large"
                                                     @click="modifiedAmountPay(totalListPOS())">
                                                     Exacto</v-chip>
-                                            </v-col>
-                                            <v-col :cols="mobile ? '4' : '3'" class=" py-1">
+                                            </v-col> -->
+                                            <!-- <v-col :cols="mobile ? '4' : '3'" class=" py-1">
                                                 <v-chip color="default" size="large"> +Pagos</v-chip>
-                                            </v-col>
+                                            </v-col> -->
                                         </v-row>
                                     </v-row>
-                                    <v-col cols="12" class="d-flex justify-center pt-6 pb-0">
-                                        <v-btn color="success" size="large" @click="onClickPagar()"
+                                    <v-divider class="pt-3"></v-divider>
+
+                                    <v-col cols="12" class="d-flex justify-center  pb-0">
+                                        <v-btn color="success" block="" size="large" @click="onClickPagar()"
                                             :disabled="false ? true : false"> PAGAR </v-btn>
                                     </v-col>
                                 </v-col>

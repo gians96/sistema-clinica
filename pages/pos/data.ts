@@ -509,3 +509,87 @@ export const series = [
     }
 ]
 
+
+export const payment_method_types = [
+    {
+        "id": "01",
+        "description": "Efectivo",
+        "has_card": false,
+        "charge": 0,
+        "number_days": 0,
+        "is_credit": false,
+        "is_cash": true
+    },
+    {
+        "id": "02",
+        "description": "Tarjeta de crédito",
+        "has_card": true,
+        "charge": 0,
+        "number_days": 0,
+        "is_credit": false,
+        "is_cash": false
+    },
+    {
+        "id": "03",
+        "description": "Tarjeta de débito",
+        "has_card": true,
+        "charge": 0,
+        "number_days": 0,
+        "is_credit": false,
+        "is_cash": false
+    },
+    {
+        "id": "04",
+        "description": "Transferencia",
+        "has_card": false,
+        "charge": 0,
+        "number_days": 0,
+        "is_credit": false,
+        "is_cash": false
+    },
+    {
+        "id": "05",
+        "description": "Factura a 30 días",
+        "has_card": false,
+        "charge": 0,
+        "number_days": 30,
+        "is_credit": true,
+        "is_cash": false
+    },
+    {
+        "id": "06",
+        "description": "Tarjeta crédito visa",
+        "has_card": true,
+        "charge": 3.68,
+        "number_days": 0,
+        "is_credit": false,
+        "is_cash": false
+    },
+    {
+        "id": "07",
+        "description": "Contado contraentrega",
+        "has_card": false,
+        "charge": 0,
+        "number_days": 0,
+        "is_credit": false,
+        "is_cash": false
+    },
+    {
+        "id": "10",
+        "description": "Contado",
+        "has_card": false,
+        "charge": 0,
+        "number_days": 0,
+        "is_credit": false,
+        "is_cash": true
+    },
+    {
+        "id": "11",
+        "description": "Yape",
+        "has_card": false,
+        "charge": 0,
+        "number_days": 0,
+        "is_credit": false,
+        "is_cash": false
+    }
+]

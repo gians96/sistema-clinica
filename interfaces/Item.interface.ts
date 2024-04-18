@@ -75,3 +75,13 @@ export interface Product {
     // currencyTypeSymbol: string
     // sale_affectation_igv_type_id: string
 }
+
+export interface paymentMethodTypes {
+    id: string;
+    description: string;
+    has_card: boolean;
+    charge: number;
+    number_days: number;
+    is_credit: boolean;
+    is_cash: boolean;
+}
