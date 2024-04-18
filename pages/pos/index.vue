@@ -24,7 +24,7 @@ const itemsFilter = computed<Item[]>(() => {
     //     );
     // }
     if (searchItems.value.length > 0) {
-        dataFilter = dataFilter.filter((data) =>
+        dataFilter = dataFilter.filter((data: any) =>
             data.description
                 .toLocaleLowerCase()
                 .includes(searchItems.value.toLocaleLowerCase())
@@ -43,10 +43,13 @@ const addItemsPOS = (item: Item) => {
             type_item_id: item.type_item_id,
             type_item: item.type_item,
             net_weight: 0,
+            quantity_chicken: 0,
             // imageUrl: item.image_url,
             // itemCode: item.item_code,
             quantity: 1,
             status: 0,
+            isDiscount: false,
+            discount: item.type_item_id === 1 ? 0.5 : 0,
             categoryId: item.category_id,
             internalId: item.internal_id,
             unitTypeId: item.unit_type_id,
@@ -82,7 +85,12 @@ const deleteItemPOS = (id: number) => {
 const itemSelected = ref<Item>()
 const totalListPOS = () => {
     if (listItemsPOS.value.length === 0) return 0
-    return listItemsPOS.value.reduce((acumulador, data) => { return acumulador + data.price * data.net_weight }, 0)
+    return listItemsPOS.value.reduce((acumulador, data) => {
+        return acumulador +
+            (data.price * data.quantity -
+                (data.isDiscount ? (data.type_item_id === 1 ? data.discount * data.quantity_chicken : 0) : 0)
+            )
+    }, 0)
 }
 const isShowModalComprobante = ref(false)
 const mountPay = ref<number | null>(null)
@@ -175,56 +183,75 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                     <v-col cols="12" v-if="listItemsPOS.length !== 0">
                         <v-row no-gutters v-for="(item, index) in listItemsPOS" :key="index" class="py-0">
                             <v-col cols="12" md="12" lg="10" sm="12" xs="12">
-                                <v-row no-gutters>
-                                    <v-col cols="12">
-                                        <div class="text-left">{{ item.name }} - {{ item.unitTypeId }}</div>
+                                <v-row no-gutters class="pt-4">
+                                    <v-col cols="12" class="pb-4"
+                                        :class="mobile ? 'd-flex justify-center' : 'd-flex justify-left'">
+                                        <div class="text-left font-weight-bold">{{ item.name }} - {{ item.unitTypeId }}
+                                        </div>
                                     </v-col>
-                                    <v-col cols="2">
-                                        <v-text-field density="compact" variant="solo" v-model="item.quantity_chicken"
-                                            label="# Pollos"></v-text-field>
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1" v-if="item.type_item_id">
+                                        <v-text-field type="number" density="compact" variant="solo"
+                                            v-model="item.quantity_chicken" label="# Pollos"></v-text-field>
                                     </v-col>
-                                    <div v-if="item.type_item?.id === 2" class="px-1"></div>
-                                    <v-col cols="2" v-if="item.type_item?.id === 2">
-                                        <v-text-field density="compact" variant="solo" v-model="item.quantity_box"
-                                            label="#Jaba"></v-text-field>
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
+                                        class="pr-1">
+                                        <v-text-field type="number" density="compact" variant="solo"
+                                            v-model="item.quantity_box" label="#Jaba"></v-text-field>
                                     </v-col>
-                                    <div class="px-1"></div>
-                                    <v-col cols="2" v-if="item.type_item?.id === 2">
-                                        <v-text-field density="compact" variant="solo" v-model="item.tare"
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
+                                        class="pr-1">
+                                        <v-text-field type="number" density="compact" variant="solo" v-model="item.tare"
                                             label="Tara"></v-text-field>
                                     </v-col>
-                                    <div class="px-1" cols="2" v-if="item.type_item?.id === 2"></div>
-                                    <v-col cols="2" v-if="item.type_item?.id === 2">
-                                        <v-text-field density="compact" variant="solo" v-model="item.gross_weight"
-                                            label="Peso Bruto"></v-text-field>
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
+                                        class="pr-1">
+                                        <v-text-field type="number" density="compact" variant="solo"
+                                            v-model="item.gross_weight" label="Peso Bruto"></v-text-field>
                                     </v-col>
-                                    <v-col cols="2" v-if="item.type_item?.id === 1">
-                                        <v-text-field density="compact" variant="solo" v-model="item.average"
-                                            label="Promedio"></v-text-field>
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 1"
+                                        class="pr-1">
+                                        <v-text-field type="number" density="compact" variant="solo"
+                                            v-model="item.average" label="Promedio"></v-text-field>
                                     </v-col>
-                                    <div class="px-1" cols="2"></div>
-                                    <v-col cols="2">
-                                        <v-text-field density="compact" variant="solo" v-model="item.net_weight"
-                                            label="Peso neto"></v-text-field>
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1">
+                                        <v-text-field type="number" density="compact" variant="solo"
+                                            v-model="item.quantity"
+                                            :label="item.type_item_id ? 'Peso neto' : 'Cantidad'" color="white"
+                                            bg-color="success"></v-text-field>
                                     </v-col>
-                                    <div class="px-1"></div>
-                                    <v-col cols="2">
-                                        <v-text-field density="compact" variant="solo" v-model="item.price"
-                                            label="Precio"></v-text-field>
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1">
+                                        <v-text-field type="number" density="compact" variant="solo"
+                                            v-model="item.price" label="Precio" color="white"
+                                            bg-color="success"></v-text-field>
                                     </v-col>
-                                    <div class="px-1" cols="2" v-if="item.type_item?.id === 1"></div>
-                                    <v-col cols="2" v-if="item.type_item?.id === 1">
-                                        <v-text-field density="compact" variant="solo" v-model="item.discount"
-                                            label="Descuento"></v-text-field>
+                                    <v-col cols="6" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 1"
+                                        class="pr-1 d-flex">
+                                        <v-checkbox v-model="item.isDiscount"
+                                            :label="!item.isDiscount ? 'Descuento' : ''" class="pr-6"></v-checkbox>
+                                        <v-text-field v-if="item.isDiscount" type="number" density="compact"
+                                            variant="solo" v-model="item.discount" label="Descuento"></v-text-field>
                                     </v-col>
                                 </v-row>
                             </v-col>
-                            <v-col cols="12" md="12" lg="2" sm="12" xs="12" class="d-flex align-center justify-center">
+                            <v-col cols="12" md="12" lg="2" sm="12" xs="12"
+                                class="d-flex align-center justify-center pb-4">
                                 <v-row no-gutters class="d-flex align-center justify-center">
-                                    <v-col cols="6" class="d-flex align-center justify-center">
-                                        <div class="text-left">S/. {{ item.price * item.net_weight }}</div>
+                                    <v-col :cols='mobile ? "10" : "8"' class="d-flex align-center flex-column">
+                                        <div class="text-h4 py-2">
+                                            S/.{{ moneyDecimal(String(item.price * item.quantity - (item.isDiscount ?
+        item.discount * item.quantity_chicken : 0))) }}
+                                        </div>
+                                        <div v-if="item.isDiscount">
+                                            <div class="text-decoration-line-through" v-if="item.type_item_id === 1">
+                                                Sub T: {{ moneyDecimal(String(item.quantity * item.price)) }}
+                                            </div>
+                                            <div v-if="item.type_item_id === 1">
+                                                Desc: {{ moneyDecimal(String(item.discount * item.quantity_chicken)) }}
+                                            </div>
+                                        </div>
                                     </v-col>
-                                    <v-col cols="6" class="d-flex align-center justify-center">
+                                    <v-col :cols='mobile ? "2" : "4"' class="d-flex align-center "
+                                        :class='mobile ? "justify-center" : "justify-end"'>
                                         <v-btn @click="deleteItemPOS(index)" icon="mdi-delete-forever"
                                             color="red"></v-btn>
                                     </v-col>
@@ -260,7 +287,7 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                         </v-card-title>
                         <v-card-text>
                             <v-row class="mb-2">
-                                <v-col cols="12" :lg="false ? '6' : '12'" sm="6" class="pb-0">
+                                <v-col cols="12" :lg="false ? '6' : '12'" sm="12" class="pb-0">
                                     <v-row no-gutters class="pb-4">
                                         <v-col cols="3">
                                             <v-combobox class="inline select-box" v-model="serieDocumentSelected"
@@ -281,29 +308,28 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                                         <v-col cols="12" class="d-flex justify-center py-6">
                                             <v-sheet class="d-flex align-center flex-column">
                                                 <v-sheet>Monto a Cobrar</v-sheet>
-                                                <v-sheet class="text-h4 py-2">S/.{{ moneyDecimal(String(totalListPOS()))
-                                                    }}</v-sheet>
+                                                <v-sheet class="text-h4 py-2">
+                                                    S/.{{ moneyDecimal(String(totalListPOS())) }}
+                                                </v-sheet>
                                                 <v-sheet>Vuelto: {{ moneyDecimal(String(vuelto())) }}</v-sheet>
                                             </v-sheet>
                                         </v-col>
                                         <v-divider class="pb-5"></v-divider>
                                         <v-row no-gutters justify="center">
-                                            <v-col cols="10" class="d-flex justify-start">
-                                                <div>Pagos Agregados:</div>
-                                            </v-col>
-                                            <v-col cols="2" class="d-flex justify-center pb-4">
-                                                <v-btn variant="flat" block icon="mdi-add" color="success">
+                                            <v-col cols="12" class="d-flex align-center pb-4">
+                                                <div class="pr-6">Pagos Agregados:</div>
+                                                <v-btn variant="flat" icon="mdi-add" color="success" >
                                                 </v-btn>
                                             </v-col>
                                         </v-row>
                                         <v-row no-gutters justify="center">
-                                            <v-col cols="5" class="d-flex justify-center">
+                                            <v-col cols="4" class="d-flex justify-center">
                                                 <v-combobox class="inline select-box" :items="payment_method_types"
-                                                    v-model="paymentMethodTypesSelected" variant="solo-filled"
+                                                    v-model="paymentMethodTypesSelected" variant="outlined"
                                                     item-title="description" item-value="id">
                                                 </v-combobox>
                                             </v-col>
-                                            <v-col cols="6" class="d-flex justify-center">
+                                            <v-col cols="7" class="d-flex justify-center">
                                                 <v-text-field label="Ingrese monto" placeholder="0.00"
                                                     v-model="mountPay">
                                                 </v-text-field>
@@ -330,7 +356,7 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                                     <v-divider class="pt-3"></v-divider>
 
                                     <v-col cols="12" class="d-flex justify-center  pb-0">
-                                        <v-btn color="success" block="" size="large" @click="onClickPagar()"
+                                        <v-btn color="success" block size="large" @click="onClickPagar()"
                                             :disabled="false ? true : false"> PAGAR </v-btn>
                                     </v-col>
                                 </v-col>

@@ -3,6 +3,7 @@ export interface Item {
     name: string;
     description: string;
     second_name: string;
+    text_filter: string;
     model: string;
     barcode: string;
     internal_id: string;
@@ -13,6 +14,7 @@ export interface Item {
     lots_enabled: boolean;
     unit_type_id: 'NIU';
     category_id: number | null;
+    warehouse_id: number | null;
     warehouses: Warehouses | null;
     item_lots_group?: ItemLotsGroup[] | [];
     sale_unit_price: number;
@@ -21,8 +23,8 @@ export interface Item {
     type_item: TypeItem | null;
     type_commission?: string | null;
     commission?: number | null;
-    createdAt?: Date;
-    update_at?: Date;
+    createdAt?: string;
+    update_at?: string;
 }
 export interface TypeItem {
     id: number;
@@ -43,11 +45,10 @@ export interface Warehouses {
     id: number;
     establishment_id?: number;
     description: string;
-    user_id?: number;
+    user_id?: number | null;
     create_at?: string;
-    update_at?: string;
+    update_at?: string | null;
 }
-
 
 export interface Product {
     id: number
@@ -55,13 +56,14 @@ export interface Product {
     note: string
     price: number
     type_item_id?: number | null;
-    quantity_chicken?: number | null;
+    quantity_chicken: number ;
     average?: number | null;
     quantity_box?: number | null;
     tare?: number | null;
     gross_weight?: number | null;
     net_weight?: number | null;
-    discount?: number | null;
+    discount: number ;
+    isDiscount: boolean;
     type_item?: TypeItem | null;
 
     // imageUrl: string
