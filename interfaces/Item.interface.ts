@@ -56,16 +56,16 @@ export interface Product {
     note: string
     price: number
     type_item_id?: number | null;
-    quantity_chicken: number ;
+    quantity_chicken: number;
     average?: number | null;
     quantity_box?: number | null;
     tare?: number | null;
     gross_weight?: number | null;
     net_weight?: number | null;
-    discount: number ;
+    discount: number;
     isDiscount: boolean;
     type_item?: TypeItem | null;
-
+    total: number;
     // imageUrl: string
     // itemCode?: string | null
     quantity: number
@@ -74,6 +74,7 @@ export interface Product {
     categoryId: number | null
     internalId: string
     unitTypeId: string
+
     // currencyTypeSymbol: string
     // sale_affectation_igv_type_id: string
 }

@@ -33,6 +33,7 @@ const itemsFilter = computed<Item[]>(() => {
     return dataFilter;
 });
 const listItemsPOS = ref<Product[]>([]);
+
 const addItemsPOS = (item: Item) => {
     if (listItemsPOS.value?.filter((data) => data.id === item.id).length === 0) {
         let ProductTemp: Product = {
@@ -53,6 +54,7 @@ const addItemsPOS = (item: Item) => {
             categoryId: item.category_id,
             internalId: item.internal_id,
             unitTypeId: item.unit_type_id,
+            total: 0
             // currencyTypeSymbol: item.currency_type_symbol,
             // sale_affectation_igv_type_id: item.sale_affectation_igv_type_id,
         };
@@ -224,7 +226,7 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                                             v-model="item.price" label="Precio" color="white"
                                             bg-color="success"></v-text-field>
                                     </v-col>
-                                    <v-col cols="6" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 1"
+                                    <v-col cols="6" xs="4" sm="4" md="3" lg="3" v-if="item.type_item?.id === 1"
                                         class="pr-1 d-flex">
                                         <v-checkbox v-model="item.isDiscount"
                                             :label="!item.isDiscount ? 'Descuento' : ''" class="pr-6"></v-checkbox>
@@ -236,21 +238,22 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                             <v-col cols="12" md="12" lg="2" sm="12" xs="12"
                                 class="d-flex align-center justify-center pb-4">
                                 <v-row no-gutters class="d-flex align-center justify-center">
-                                    <v-col :cols='mobile ? "10" : "8"' class="d-flex align-center flex-column">
-                                        <div class="text-h4 py-2">
+                                    <v-col :cols='mobile ? "10" : "9"' class="d-flex align-center flex-column">
+                                        <div class="text-h5 py-2 ">
                                             S/.{{ moneyDecimal(String(item.price * item.quantity - (item.isDiscount ?
         item.discount * item.quantity_chicken : 0))) }}
                                         </div>
                                         <div v-if="item.isDiscount">
-                                            <div class="text-decoration-line-through" v-if="item.type_item_id === 1">
+                                            <div class="text-decoration-line-through text-center"
+                                                v-if="item.type_item_id === 1">
                                                 Sub T: {{ moneyDecimal(String(item.quantity * item.price)) }}
                                             </div>
-                                            <div v-if="item.type_item_id === 1">
+                                            <div v-if="item.type_item_id === 1" class="text-center">
                                                 Desc: {{ moneyDecimal(String(item.discount * item.quantity_chicken)) }}
                                             </div>
                                         </div>
                                     </v-col>
-                                    <v-col :cols='mobile ? "2" : "4"' class="d-flex align-center "
+                                    <v-col :cols='mobile ? "2" : "3"' class="d-flex align-center "
                                         :class='mobile ? "justify-center" : "justify-end"'>
                                         <v-btn @click="deleteItemPOS(index)" icon="mdi-delete-forever"
                                             color="red"></v-btn>
@@ -318,7 +321,7 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                                         <v-row no-gutters justify="center">
                                             <v-col cols="12" class="d-flex align-center pb-4">
                                                 <div class="pr-6">Pagos Agregados:</div>
-                                                <v-btn variant="flat" icon="mdi-add" color="success" >
+                                                <v-btn variant="flat" icon="mdi-add" color="success">
                                                 </v-btn>
                                             </v-col>
                                         </v-row>
@@ -338,10 +341,10 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                                                 <v-btn variant="flat" block icon="mdi-delete" color="red">
                                                 </v-btn>
                                             </v-col>
-                                            <v-col :cols="mobile ? '3' : '2'" class="d-flex justify-center py-1 px-1"
+                                            <v-col :cols="mobile ? '4' : '3'" class="d-flex justify-center py-1 px-1"
                                                 v-for="(row, index) in typeMountPayments" :key="index">
-                                                <v-chip color="success" size="large" @click="modifiedAmountPay(row)">
-                                                    S/.{{ row }}</v-chip>
+                                                <v-btn color="success" size="large" @click="modifiedAmountPay(row)">
+                                                    S/.{{ row }}</v-btn>
                                             </v-col>
                                             <!-- <v-col :cols="mobile ? '4' : '3'" class=" py-1 px-1">
                                                 <v-chip color="success" size="large"
