@@ -12,6 +12,7 @@ export interface Item {
     active: boolean;
     status: boolean;
     lots_enabled: boolean;
+    currency_type_id?: string | null;
     unit_type_id: 'NIU';
     category_id: number | null;
     warehouse_id: number | null;
@@ -25,6 +26,8 @@ export interface Item {
     commission?: number | null;
     createdAt?: string;
     update_at?: string;
+    net_weight?: number;
+    quantity_chicken?: number;
 }
 export interface TypeItem {
     id: number;
@@ -57,7 +60,7 @@ export interface Product {
     price: number
     type_item_id?: number | null;
     quantity_chicken: number;
-    average?: number | null;
+    average_weight?: number | null;
     quantity_box?: number | null;
     tare?: number | null;
     gross_weight?: number | null;

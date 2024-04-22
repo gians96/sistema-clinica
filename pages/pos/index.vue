@@ -34,8 +34,11 @@ const itemsFilter = computed<Item[]>(() => {
 });
 const listItemsPOS = ref<Product[]>([]);
 
+
 const addItemsPOS = (item: Item) => {
     if (listItemsPOS.value?.filter((data) => data.id === item.id).length === 0) {
+        // const quantity = (item.net_weight ?? 0) * (item.quantity_chicken ?? 0) * item.sale_unit_price;
+
         let ProductTemp: Product = {
             id: item.id,
             name: item.description,
@@ -43,11 +46,11 @@ const addItemsPOS = (item: Item) => {
             price: item.sale_unit_price,
             type_item_id: item.type_item_id,
             type_item: item.type_item,
-            net_weight: 0,
+            net_weight: 0, //peso neto
             quantity_chicken: 0,
             // imageUrl: item.image_url,
             // itemCode: item.item_code,
-            quantity: 1,
+            quantity: 0,
             status: 0,
             isDiscount: false,
             discount: item.type_item_id === 1 ? 0.5 : 0,
@@ -64,7 +67,20 @@ const addItemsPOS = (item: Item) => {
         incrementQuantityItemPOS(index);
     }
 };
+watch(listItemsPOS.value, async (newQuestion, oldQuestion) => {
 
+    try {
+        for (let index = 0; index < listItemsPOS.value.length; index++) {
+            listItemsPOS.value[index].quantity = listItemsPOS.value[index].quantity_chicken * (listItemsPOS.value[index].average_weight ?? 0)
+        }
+    } catch (error) {
+        console.log(error);
+
+    } finally {
+        // loading.value = false
+    }
+
+})
 //Funcionalidades
 const incrementQuantityItemPOS = (i: number) => {
     if (i !== -1) {
@@ -164,6 +180,12 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
     "is_credit": false,
     "is_cash": true
 })
+
+const dialogConfirmSale = ref(false)
+const dialogCustomer = ref(false)
+const tabDialogCustomer = ref(null)
+const onClickClosDialogCustomer = ref()
+
 </script>
 
 <template>
@@ -202,18 +224,18 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
                                         class="pr-1">
-                                        <v-text-field type="number" density="compact" variant="solo" v-model="item.tare"
-                                            label="Tara"></v-text-field>
+                                        <v-text-field type="number" density="compact" variant="solo"
+                                            v-model="item.gross_weight" label="Peso Bruto"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
                                         class="pr-1">
-                                        <v-text-field type="number" density="compact" variant="solo"
-                                            v-model="item.gross_weight" label="Peso Bruto"></v-text-field>
+                                        <v-text-field type="number" density="compact" variant="solo" v-model="item.tare"
+                                            label="Tara"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 1"
                                         class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
-                                            v-model="item.average" label="Promedio"></v-text-field>
+                                            v-model="item.average_weight" label="Peso Promedio"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
@@ -234,6 +256,7 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                                             variant="solo" v-model="item.discount" label="Descuento"></v-text-field>
                                     </v-col>
                                 </v-row>
+                                {{ listItemsPOS }}
                             </v-col>
                             <v-col cols="12" md="12" lg="2" sm="12" xs="12"
                                 class="d-flex align-center justify-center pb-4">
@@ -304,7 +327,8 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                                             </v-combobox>
                                         </v-col>
                                         <v-col cols="1" class="py-2">
-                                            <v-btn variant="flat" block icon="mdi-add" color="success">
+                                            <v-btn variant="flat" block icon="mdi-add" color="success"
+                                                @click="dialogCustomer = true">
                                             </v-btn>
                                         </v-col>
                                         <v-divider></v-divider>
@@ -359,7 +383,7 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                                     <v-divider class="pt-3"></v-divider>
 
                                     <v-col cols="12" class="d-flex justify-center  pb-0">
-                                        <v-btn color="success" block size="large" @click="onClickPagar()"
+                                        <v-btn color="success" block size="large" @click="dialogConfirmSale = true"
                                             :disabled="false ? true : false"> PAGAR </v-btn>
                                     </v-col>
                                 </v-col>
@@ -376,6 +400,215 @@ const paymentMethodTypesSelected = ref<paymentMethodTypes>({
                 </v-row>
             </v-container>
         </v-col>
+        <!--  -->
+        <!-- DIALOGS -->
+        <!-- DIALGO CONFIRMAR VENTA -->
+        <v-dialog v-model="dialogConfirmSale" max-width="500px" persistent>
+            <v-card>
+                <v-card class="text-h5  py-4 text-center">¿Estas seguro de realizar la venta?</v-card>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue-darken-1" variant="text" @click="dialogConfirmSale = false">Cancelar</v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn color="success" size="large" variant="flat" @click="onClickPagar()">Pagar</v-btn>
+                    <v-spacer></v-spacer>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <!-- DIALOG -->
+
+
+        <!-- CUADRO DIALOGO -->
+        <v-dialog v-model="dialogCustomer" :max-width="mobile ? '100%' : '70%'" transition="dialog-bottom-transition"
+            persistent>
+            <v-card>
+                <v-toolbar color="primary" title="Nuevo Cliente"> </v-toolbar>
+                <v-card-title class="px-0 py-0">
+                    <v-tabs v-model="tabDialogCustomer" bg-color="primary">
+                        <v-tab value="data">Datos de cliente</v-tab>
+                        <v-tab value="direction">Dirección</v-tab>
+                        <v-tab value="others">Otros datos</v-tab>
+                    </v-tabs>
+                </v-card-title>
+                <v-card-text>
+                    <v-window v-model="tabDialogCustomer">
+                        <v-window-item value="data">
+                            <v-container>
+                                <v-row>
+                                    <v-col cols="12" sm="6" md="6">
+                                        <v-text-field v-model="editedItem.description"
+                                            label="Descripción (*)"></v-text-field>
+                                    </v-col>
+                                    <!-- <v-col cols="12" sm="6" md="8">
+                                                <v-text-field v-model="editedItem.name"
+                                                    label="Nombre des"></v-text-field>
+                                            </v-col> -->
+                                    <v-col cols="12" sm="6" md="6">
+                                        <v-text-field v-model="editedItem.second_name"
+                                            label="Nombre secundario"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-text-field v-model="editedItem.model" label="Modelo"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-select :items="['NIU']" label="Unidad*" v-model="editedItem.unit_type_id"
+                                            required></v-select>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-text-field v-model="editedItem.sale_unit_price"
+                                            label="Precio de venta x unidad"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-text-field v-model="editedItem.purchase_unit_price"
+                                            label="Precio de compra x unidad"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-select v-model="editedItem.warehouses" required :items="warehousesFetch"
+                                            :item-title="'description'" item-value="id" label="Área">
+                                        </v-select>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-text-field v-model="editedItem.stock" label="Stock Inicial"
+                                            :disabled="editedItem.lots_enabled"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-text-field v-model="editedItem.stock_min"
+                                            label="Stock Mínimo"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-text-field v-model="editedItem.barcode"
+                                            label="Código de barra"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-text-field v-model="editedItem.internal_id"
+                                            label="Código Interno"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-checkbox v-model="editedItem.lots_enabled"
+                                            label="¿Maneja lote?"></v-checkbox>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-checkbox v-model="editedItem.active" label="Habilitado"></v-checkbox>
+                                    </v-col>
+
+                                    <!-- <v-col cols="12" sm="6" md="3">
+                                                <v-text-field type="date" label="Date"></v-text-field>
+                                            </v-col> -->
+                                    <!-- <v-col cols="12" sm="6" md="4">
+                                                <v-select v-model="editedItem.type_commission"
+                                                    :items="['Dinero', 'Porcentaje']"
+                                                    label="Tipo de comisión"></v-select>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field v-model="editedItem.commission"
+                                                    label="Comisión"></v-text-field>
+                                            </v-col> -->
+                                    <!-- <v-col cols="12" sm="6" md="4">
+                                                <v-switch v-model="editedItem.active" color="success"
+                                                    label="Habilitado"></v-switch>
+                                            </v-col> -->
+                                </v-row>
+                            </v-container>
+                        </v-window-item>
+                        <v-window-item value="direction">
+                            <v-card-title class="d-flex">
+                                Lotes
+                                <v-spacer></v-spacer>
+                                <v-btn color="success" @click="newLotsOnClick">
+                                    <v-icon icon="mdi-plus-circle"></v-icon>
+                                    <div v-if="!mobile"> Nuevo</div>
+                                </v-btn>
+                            </v-card-title>
+                            <div v-for="(lot, index ) in  editedItem.item_lots_group" :key="index"
+                                :class="mobile ? 'py-4' : ''">
+                                <v-row class="d-flex" :class="mobile ? 'bg-blue-grey-lighten-5' : ''">
+                                    <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'pb-0' : ''">
+                                        <v-text-field label="Lote" placeholder="LOTE-001" v-model="lot.code">
+                                        </v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'py-0' : ''">
+                                        <v-text-field label="Cantidad" placeholder="10" v-model="lot.quantity">
+                                        </v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-text-field type="date" label="Fecha de Vencimiento"
+                                            v-model="lot.date_of_due"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3" v-if="lot.id === 0">
+                                        <v-btn icon="mdi-delete" color="error" @click="deleteLotOnClick(index)">
+                                        </v-btn>
+                                    </v-col>
+                                    <!-- {{ lot.id }},{{ lot.item_id }},{{ lot.code }} -->
+                                    <!-- <v-col cols="12" xs="12" md="2" lg="2"
+                                                class="d-flex aling-center justify-center"
+                                                :class="mobile ? 'py-0' : ''">
+                                                <v-spacer></v-spacer>
+                                                <v-spacer></v-spacer>
+                                                
+                                                <v-spacer></v-spacer>
+                                            </v-col> -->
+
+                                </v-row>
+                            </div>
+                        </v-window-item>
+                        <v-window-item value="others">
+                            <v-card-title class="d-flex">
+                                Lotes
+                                <v-spacer></v-spacer>
+                                <v-btn color="success" @click="newLotsOnClick">
+                                    <v-icon icon="mdi-plus-circle"></v-icon>
+                                    <div v-if="!mobile"> Nuevo</div>
+                                </v-btn>
+                            </v-card-title>
+                            <div v-for="(lot, index ) in  editedItem.item_lots_group" :key="index"
+                                :class="mobile ? 'py-4' : ''">
+                                <v-row class="d-flex" :class="mobile ? 'bg-blue-grey-lighten-5' : ''">
+                                    <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'pb-0' : ''">
+                                        <v-text-field label="Lote" placeholder="LOTE-001" v-model="lot.code">
+                                        </v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'py-0' : ''">
+                                        <v-text-field label="Cantidad" placeholder="10" v-model="lot.quantity">
+                                        </v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3">
+                                        <v-text-field type="date" label="Fecha de Vencimiento"
+                                            v-model="lot.date_of_due"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6" md="3" v-if="lot.id === 0">
+                                        <v-btn icon="mdi-delete" color="error" @click="deleteLotOnClick(index)">
+                                        </v-btn>
+                                    </v-col>
+                                    <!-- {{ lot.id }},{{ lot.item_id }},{{ lot.code }} -->
+                                    <!-- <v-col cols="12" xs="12" md="2" lg="2"
+                                                class="d-flex aling-center justify-center"
+                                                :class="mobile ? 'py-0' : ''">
+                                                <v-spacer></v-spacer>
+                                                <v-spacer></v-spacer>
+                                                
+                                                <v-spacer></v-spacer>
+                                            </v-col> -->
+
+                                </v-row>
+                            </div>
+                        </v-window-item>
+                    </v-window>
+                </v-card-text>
+
+                <v-card-actions class="mb-2">
+                    <v-spacer></v-spacer>
+                    <v-btn class="mx-2" color="blue-darken-1" variant="text" @click="dialogCustomer=false">
+                        Cancelar
+                    </v-btn>
+                    <v-btn color="blue-darken-1" variant="elevated" @click="save()">
+                        Guardar
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <!-- DIALOG NEW , EDIT -->
+
+
     </v-row>
 
 </template>
