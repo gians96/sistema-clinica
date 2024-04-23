@@ -93,3 +93,8 @@ export interface paymentMethodTypes {
     is_credit: boolean;
     is_cash: boolean;
 }
+
+export interface paymentPOS {
+    payment_method_type: paymentMethodTypes;
+    mount: number;
+}

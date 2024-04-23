@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useSnackbarStore } from '@/store/index';
-import type { Item, Product, paymentMethodTypes } from "@/interfaces/Item.interface";
+import type { Item, Product, paymentMethodTypes, paymentPOS } from "@/interfaces/Item.interface";
 const apiURL = useCookie("apiURL");
 import { useDisplay } from "vuetify";
 const { mobile } = useDisplay();
@@ -33,7 +33,6 @@ const itemsFilter = computed<Item[]>(() => {
     return dataFilter;
 });
 const listItemsPOS = ref<Product[]>([]);
-
 
 const addItemsPOS = (item: Item) => {
     if (listItemsPOS.value?.filter((data) => data.id === item.id).length === 0) {
@@ -71,7 +70,6 @@ const addItemsPOS = (item: Item) => {
     }
 };
 watch(listItemsPOS.value, async (newQuestion, oldQuestion) => {
-
     try {
         for (let index = 0; index < listItemsPOS.value.length; index++) {
             if (listItemsPOS.value[index].type_item_id === 1) {
@@ -85,8 +83,6 @@ watch(listItemsPOS.value, async (newQuestion, oldQuestion) => {
                 listItemsPOS.value[index].tare_weight = (listItemsPOS.value[index].tare ?? 0) * (listItemsPOS.value[index].quantity_box ?? 0)
                 listItemsPOS.value[index].tare_weight = String(listItemsPOS.value[index].tare_weight) + " kg"
             }
-
-
             listItemsPOS.value[index].quantity = Number(moneyDecimal(String(listItemsPOS.value[index].quantity)))
             listItemsPOS.value[index].total = listItemsPOS.value[index].quantity * listItemsPOS.value[index].price -
                 (listItemsPOS.value[index].isDiscount ?
@@ -96,12 +92,13 @@ watch(listItemsPOS.value, async (newQuestion, oldQuestion) => {
         }
     } catch (error) {
         console.log(error);
-
     } finally {
         // loading.value = false
     }
-
 })
+
+
+
 //Funcionalidades
 const incrementQuantityItemPOS = (i: number) => {
     if (i !== -1) {
@@ -125,14 +122,19 @@ const itemSelected = ref<Item>()
 const totalListPOS = () => {
     if (listItemsPOS.value.length === 0) return 0
     return listItemsPOS.value.reduce((acumulador, data) => {
-        return acumulador +
-            (data.price * data.quantity -
-                (data.isDiscount ? (data.type_item_id === 1 ? data.discount * data.quantity_chicken : 0) : 0)
-            )
+        return acumulador + data.total
+        // return acumulador +
+        //     (data.price * data.quantity -
+        //         (data.isDiscount ? (data.type_item_id === 1 ? data.discount * data.quantity_chicken : 0) : 0)
+        //     )
     }, 0)
 }
 const isShowModalComprobante = ref(false)
-const mountPay = ref<number | null>(null)
+const mountPay = ref<number>(0)
+const accountsReceivable = () => {
+    if (totalListPOS() <= mountPay.value) return 0
+    return totalListPOS() - mountPay.value
+}
 const moneyDecimal = (x: string) => {
     return Number.parseFloat(x).toFixed(2);
 }
@@ -140,7 +142,7 @@ const cleanDataForm = () => {
     listItemsPOS.value = []
     isShowModalComprobante.value = false
     // saleNoteResponse.value = null
-    mountPay.value = null
+    mountPay.value = 0
 }
 
 const vuelto = () => {
@@ -192,23 +194,51 @@ const seriesFilterToDocumentType = computed<Series[]>(() => {
     return serieSelected
 })
 
-const paymentMethodTypesSelected = ref<paymentMethodTypes>({
-    "id": "01",
-    "description": "Efectivo",
-    "has_card": false,
-    "charge": 0,
-    "number_days": 0,
-    "is_credit": false,
-    "is_cash": true
-})
-
 const dialogConfirmSale = ref(false)
 const dialogCustomer = ref(false)
 const tabDialogCustomer = ref(null)
-const onClickClosDialogCustomer = ref()
+const onClickCloseDialogCustomer = ref()
 const concatString = (s1: String, s2: String | number | null) => {
     return (s1 + "|  " + moneyDecimal(String(s2)))
 }
+
+const paymentsMethodTypes = ref<paymentPOS[]>([])
+const onClickAddPaymentMethods = () => {
+    paymentsMethodTypes.value.push(
+        {
+            payment_method_type: {
+                "id": "01",
+                "description": "Efectivo",
+                "has_card": false,
+                "charge": 0,
+                "number_days": 0,
+                "is_credit": false,
+                "is_cash": true
+            },
+            mount: 0
+        }
+    )
+}
+
+const onClickDeletePaymentMethods = (id: number) => {
+    paymentsMethodTypes.value.splice(id, 1);
+}
+
+onMounted(async () => {
+    await onClickAddPaymentMethods()
+})
+watch(paymentsMethodTypes.value, async (newQuestion, oldQuestion) => {
+    try {
+        mountPay.value = paymentsMethodTypes.value.reduce((acumulador, data) => {
+            return acumulador + Number(data.mount)
+        }, 0)
+
+    } catch (error) {
+        console.log(error);
+    } finally {
+        // loading.value = false
+    }
+})
 </script>
 
 <template>
@@ -307,14 +337,12 @@ const concatString = (s1: String, s2: String | number | null) => {
                                 </v-row>
                             </v-col>
                             <v-spacer></v-spacer>
-
                             <v-divider :class="listItemsPOS.length == index + 1 ? 'pb-7' : ''"></v-divider>
                         </v-row>
                     </v-col>
                 </v-row>
             </v-container>
         </v-col>
-
         <v-col cols="12" md="5" lg="4" sm="5" xs="11" class="d-flex align-center justify-center  " height="100%"
             width="100%">
             <v-container fluid>
@@ -355,53 +383,52 @@ const concatString = (s1: String, s2: String | number | null) => {
                                             </v-btn>
                                         </v-col>
                                         <v-divider></v-divider>
-                                        <v-col cols="12" class="d-flex justify-center py-6">
+                                        <v-col cols="12" class="d-flex justify-center py-3">
                                             <v-sheet class="d-flex align-center flex-column">
                                                 <v-sheet>Monto a Cobrar</v-sheet>
                                                 <v-sheet class="text-h4 py-2">
                                                     S/.{{ moneyDecimal(String(totalListPOS())) }}
                                                 </v-sheet>
                                                 <v-sheet>Vuelto: {{ moneyDecimal(String(vuelto())) }}</v-sheet>
+                                                <v-sheet class="text-red">Por cobrar: {{
+        moneyDecimal(String(accountsReceivable())) }}</v-sheet>
                                             </v-sheet>
                                         </v-col>
-                                        <v-divider class="pb-5"></v-divider>
-                                        <v-row no-gutters justify="center">
-                                            <v-col cols="12" class="d-flex align-center pb-4">
-                                                <div class="pr-6">Pagos Agregados:</div>
-                                                <v-btn variant="flat" icon="mdi-add" color="success">
-                                                </v-btn>
-                                            </v-col>
-                                        </v-row>
-                                        <v-row no-gutters justify="center">
-                                            <v-col cols="4" class="d-flex justify-center">
-                                                <v-combobox class="inline select-box" :items="payment_method_types"
-                                                    v-model="paymentMethodTypesSelected" variant="outlined"
-                                                    item-title="description" item-value="id">
-                                                </v-combobox>
-                                            </v-col>
-                                            <v-col cols="7" class="d-flex justify-center">
-                                                <v-text-field label="Ingrese monto" placeholder="0.00"
-                                                    v-model="mountPay">
-                                                </v-text-field>
-                                            </v-col>
-                                            <v-col cols="1" class="py-2">
-                                                <v-btn variant="flat" block icon="mdi-delete" color="red">
-                                                </v-btn>
-                                            </v-col>
-                                            <v-col :cols="mobile ? '4' : '3'" class="d-flex justify-center py-1 px-1"
-                                                v-for="( row, index ) in  typeMountPayments " :key="index">
-                                                <v-btn color="success" size="large" @click="modifiedAmountPay(row)">
-                                                    S/.{{ row }}</v-btn>
-                                            </v-col>
-                                            <!-- <v-col :cols="mobile ? '4' : '3'" class=" py-1 px-1">
-                                                <v-chip color="success" size="large"
-                                                    @click="modifiedAmountPay(totalListPOS())">
-                                                    Exacto</v-chip>
-                                            </v-col> -->
-                                            <!-- <v-col :cols="mobile ? '4' : '3'" class=" py-1">
-                                                <v-chip color="default" size="large"> +Pagos</v-chip>
-                                            </v-col> -->
-                                        </v-row>
+                                        <v-divider class=""></v-divider>
+
+
+                                    </v-row>
+                                    <v-row no-gutters justify="center" class="py-3">
+                                        <v-col cols="12" xs="12" md="12" lg="12" class="d-flex align-center">
+                                            <div class="pr-6">Pagos Agregados:</div>
+                                            <v-btn variant="flat" icon="mdi-add" color="success"
+                                                @click="onClickAddPaymentMethods()">
+                                            </v-btn>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row no-gutters justify="center" v-if="paymentsMethodTypes.length !== 0"
+                                        v-for="(payment, index) in paymentsMethodTypes" :key="index">
+                                        <v-col cols="7" class="pr-1">
+                                            <v-combobox class="inline select-box" :items="payment_method_types"
+                                                v-model="payment.payment_method_type" variant="outlined"
+                                                item-title="description" item-value="id">
+                                            </v-combobox>
+                                        </v-col>
+                                        <v-col cols="4" class="d-flex justify-center pr-1">
+                                            <v-text-field label="Ingrese monto" placeholder="0.00"
+                                                v-model="payment.mount">
+                                            </v-text-field>
+                                        </v-col>
+                                        <v-col cols="1" class="py-2">
+                                            <v-btn @click="onClickDeletePaymentMethods(index)" variant="flat" block
+                                                icon="mdi-delete" color="red">
+                                            </v-btn>
+                                        </v-col>
+                                        <!-- <v-col :cols="mobile ? '4' : '3'" class="d-flex justify-center py-1 px-1"
+                                            v-for="( row, index ) in  typeMountPayments " :key="index">
+                                            <v-btn color="success" size="large" @click="modifiedAmountPay(row)">
+                                                S/.{{ row }}</v-btn>
+                                        </v-col> -->
                                     </v-row>
                                     <v-divider class="pt-3"></v-divider>
 
@@ -410,11 +437,7 @@ const concatString = (s1: String, s2: String | number | null) => {
                                             :disabled="false ? true : false"> PAGAR </v-btn>
                                     </v-col>
                                 </v-col>
-                                <!-- <v-col cols=" 12" lg="6" sm="6" class="d-flex justify-center"
-                                    v-if="saleNoteResponse?.success">
-                                    <iframe :src="saleNoteResponse.data.print_ticket" type="application/pdf" width="90%"
-                                        height="400px"></iframe>
-                                </v-col> -->
+
                             </v-row>
                         </v-card-text>
 
