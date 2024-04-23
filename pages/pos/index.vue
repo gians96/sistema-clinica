@@ -48,7 +48,10 @@ const addItemsPOS = (item: Item) => {
             type_item: item.type_item,
             net_weight: 0, //peso neto
             quantity_chicken: 0,
+            tare: 6.8,
+            quantity_box: 1,
             // imageUrl: item.image_url,
+            tare_weight: 0,
             // itemCode: item.item_code,
             quantity: 0,
             status: 0,
@@ -71,7 +74,25 @@ watch(listItemsPOS.value, async (newQuestion, oldQuestion) => {
 
     try {
         for (let index = 0; index < listItemsPOS.value.length; index++) {
-            listItemsPOS.value[index].quantity = listItemsPOS.value[index].quantity_chicken * (listItemsPOS.value[index].average_weight ?? 0)
+            if (listItemsPOS.value[index].type_item_id === 1) {
+                listItemsPOS.value[index].quantity = listItemsPOS.value[index].quantity_chicken * (listItemsPOS.value[index].average_weight ?? 0)
+            }
+            if (listItemsPOS.value[index].type_item_id === 2) {
+                listItemsPOS.value[index].quantity = listItemsPOS.value[index].gross_weight ?
+                    (listItemsPOS.value[index].gross_weight ?? 0) - ((listItemsPOS.value[index].tare ?? 0) * (listItemsPOS.value[index].quantity_box ?? 0)) :
+                    0
+
+                listItemsPOS.value[index].tare_weight = (listItemsPOS.value[index].tare ?? 0) * (listItemsPOS.value[index].quantity_box ?? 0)
+                listItemsPOS.value[index].tare_weight = String(listItemsPOS.value[index].tare_weight) + " kg"
+            }
+
+
+            listItemsPOS.value[index].quantity = Number(moneyDecimal(String(listItemsPOS.value[index].quantity)))
+            listItemsPOS.value[index].total = listItemsPOS.value[index].quantity * listItemsPOS.value[index].price -
+                (listItemsPOS.value[index].isDiscount ?
+                    (listItemsPOS.value[index].type_item_id === 1 ?
+                        listItemsPOS.value[index].discount * listItemsPOS.value[index].quantity_chicken : 0)
+                    : 0)
         }
     } catch (error) {
         console.log(error);
@@ -185,7 +206,9 @@ const dialogConfirmSale = ref(false)
 const dialogCustomer = ref(false)
 const tabDialogCustomer = ref(null)
 const onClickClosDialogCustomer = ref()
-
+const concatString = (s1: String, s2: String | number | null) => {
+    return (s1 + "|  " + moneyDecimal(String(s2)))
+}
 </script>
 
 <template>
@@ -205,7 +228,7 @@ const onClickClosDialogCustomer = ref()
                         <p>No se han agregado productos</p>
                     </v-col>
                     <v-col cols="12" v-if="listItemsPOS.length !== 0">
-                        <v-row no-gutters v-for="(item, index) in listItemsPOS" :key="index" class="py-0">
+                        <v-row no-gutters v-for="(item, index) in  listItemsPOS " :key="index" class="py-0">
                             <v-col cols="12" md="12" lg="10" sm="12" xs="12">
                                 <v-row no-gutters class="pt-4">
                                     <v-col cols="12" class="pb-4"
@@ -225,22 +248,23 @@ const onClickClosDialogCustomer = ref()
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
                                         class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
-                                            v-model="item.gross_weight" label="Peso Bruto"></v-text-field>
+                                            v-model="item.gross_weight" label="Peso Bruto (kg)"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
                                         class="pr-1">
-                                        <v-text-field type="number" density="compact" variant="solo" v-model="item.tare"
-                                            label="Tara"></v-text-field>
+                                        <v-text-field density="compact" variant="solo" v-model="item.tare"
+                                            :label="concatString('Tara(kg)', item.tare_weight ?? '')"
+                                            suffix=""></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 1"
                                         class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
-                                            v-model="item.average_weight" label="Peso Promedio"></v-text-field>
+                                            v-model="item.average_weight" label="Peso Promedio (kg)"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
                                             v-model="item.quantity"
-                                            :label="item.type_item_id ? 'Peso neto' : 'Cantidad'" color="white"
+                                            :label="item.type_item_id ? 'Peso neto (kg)' : 'Cantidad'" color="white"
                                             bg-color="success"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1">
@@ -256,7 +280,6 @@ const onClickClosDialogCustomer = ref()
                                             variant="solo" v-model="item.discount" label="Descuento"></v-text-field>
                                     </v-col>
                                 </v-row>
-                                {{ listItemsPOS }}
                             </v-col>
                             <v-col cols="12" md="12" lg="2" sm="12" xs="12"
                                 class="d-flex align-center justify-center pb-4">
@@ -366,7 +389,7 @@ const onClickClosDialogCustomer = ref()
                                                 </v-btn>
                                             </v-col>
                                             <v-col :cols="mobile ? '4' : '3'" class="d-flex justify-center py-1 px-1"
-                                                v-for="(row, index) in typeMountPayments" :key="index">
+                                                v-for="( row, index ) in  typeMountPayments " :key="index">
                                                 <v-btn color="success" size="large" @click="modifiedAmountPay(row)">
                                                     S/.{{ row }}</v-btn>
                                             </v-col>
@@ -519,7 +542,7 @@ const onClickClosDialogCustomer = ref()
                                     <div v-if="!mobile"> Nuevo</div>
                                 </v-btn>
                             </v-card-title>
-                            <div v-for="(lot, index ) in  editedItem.item_lots_group" :key="index"
+                            <div v-for="( lot, index  ) in   editedItem.item_lots_group " :key="index"
                                 :class="mobile ? 'py-4' : ''">
                                 <v-row class="d-flex" :class="mobile ? 'bg-blue-grey-lighten-5' : ''">
                                     <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'pb-0' : ''">
@@ -560,7 +583,7 @@ const onClickClosDialogCustomer = ref()
                                     <div v-if="!mobile"> Nuevo</div>
                                 </v-btn>
                             </v-card-title>
-                            <div v-for="(lot, index ) in  editedItem.item_lots_group" :key="index"
+                            <div v-for="( lot, index  ) in   editedItem.item_lots_group " :key="index"
                                 :class="mobile ? 'py-4' : ''">
                                 <v-row class="d-flex" :class="mobile ? 'bg-blue-grey-lighten-5' : ''">
                                     <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'pb-0' : ''">
@@ -597,7 +620,7 @@ const onClickClosDialogCustomer = ref()
 
                 <v-card-actions class="mb-2">
                     <v-spacer></v-spacer>
-                    <v-btn class="mx-2" color="blue-darken-1" variant="text" @click="dialogCustomer=false">
+                    <v-btn class="mx-2" color="blue-darken-1" variant="text" @click="dialogCustomer = false">
                         Cancelar
                     </v-btn>
                     <v-btn color="blue-darken-1" variant="elevated" @click="save()">

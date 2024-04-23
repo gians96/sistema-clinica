@@ -63,7 +63,9 @@ export interface Product {
     average_weight?: number | null;
     quantity_box?: number | null;
     tare?: number | null;
+    tare_weight?: number | null | string;
     gross_weight?: number | null;
+
     net_weight?: number | null;
     discount: number;
     isDiscount: boolean;
