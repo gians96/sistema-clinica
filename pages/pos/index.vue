@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import { useSnackbarStore } from '@/store/index';
+// import { useSnackbarStore } from '@/store/index';
 import type { Item, Product, paymentMethodTypes, paymentPOS } from "@/interfaces/Item.interface";
 const apiURL = useCookie("apiURL");
 const token_apiperu = useCookie("token_apiperu");
 import { useDisplay } from "vuetify";
 const { mobile } = useDisplay();
-const snackbarStore = useSnackbarStore()
-const typeMountPayments = [10, 20, 50, 100]
+// const snackbarStore = useSnackbarStore()
+// const typeMountPayments = [10, 20, 50, 100]
 // const typeMountPayments = [10, 20, 50, 100, 200]
 import { series, customers, items, payment_method_types, cat_identity_document_types } from "./data.ts"
 const { data: customersFetch, refresh: customersRefresh } = await useFetch<CustomerIPOS[]>(`${apiURL.value}/customers/pos`, { method: 'GET' });
@@ -18,27 +18,28 @@ const clearSearch = () => {
     searchItems.value = ""
 }
 
-const itemsFilter = computed<Item[]>(() => {
-    if (!itemsFetch.value)
-        throw new Error("Ah ocurrido un problema con el valor");
-    let dataFilter = itemsFetch.value;
-    // if (category_id.value != null) {
-    //     dataFilter = dPlatos.value.filter(
-    //         (data) => data.category_id === category_id.value
-    //     );
-    // }
-    if (searchItems.value.length > 0) {
-        dataFilter = dataFilter.filter((data: any) =>
-            data.description
-                .toLocaleLowerCase()
-                .includes(searchItems.value.toLocaleLowerCase())
-        );
-    }
-    return dataFilter;
-});
+// const itemsFilter = computed<Item[]>(() => {
+//     if (!itemsFetch.value)
+//         throw new Error("Ah ocurrido un problema con el valor");
+//     let dataFilter = itemsFetch.value;
+//     // if (category_id.value != null) {
+//     //     dataFilter = dPlatos.value.filter(
+//     //         (data) => data.category_id === category_id.value
+//     //     );
+//     // }
+//     if (searchItems.value.length > 0) {
+//         dataFilter = dataFilter.filter((data: any) =>
+//             data.description
+//                 .toLocaleLowerCase()
+//                 .includes(searchItems.value.toLocaleLowerCase())
+//         );
+//     }
+//     return dataFilter;
+// });
 const listItemsPOS = ref<Product[]>([]);
-
-const addItemsPOS = (item: Item) => {
+const itemSelected = ref<Item | undefined>()
+const addItemsPOS = (item: Item | undefined) => {
+    if (!item) return null
     if (listItemsPOS.value?.filter((data) => data.id === item.id).length === 0) {
         // const quantity = (item.net_weight ?? 0) * (item.quantity_chicken ?? 0) * item.sale_unit_price;
 
@@ -73,35 +74,27 @@ const addItemsPOS = (item: Item) => {
         incrementQuantityItemPOS(index);
     }
 };
-watch(listItemsPOS.value, async (newQuestion, oldQuestion) => {
-    try {
-        for (let index = 0; index < listItemsPOS.value.length; index++) {
-            if (listItemsPOS.value[index].type_item_id === 1) {
-                listItemsPOS.value[index].quantity = listItemsPOS.value[index].quantity_chicken * (listItemsPOS.value[index].average_weight ?? 0)
-            }
-            if (listItemsPOS.value[index].type_item_id === 2) {
-                listItemsPOS.value[index].quantity = listItemsPOS.value[index].gross_weight ?
-                    (listItemsPOS.value[index].gross_weight ?? 0) - ((listItemsPOS.value[index].tare ?? 0) * (listItemsPOS.value[index].quantity_box ?? 0)) :
-                    0
 
-                listItemsPOS.value[index].tare_weight = (listItemsPOS.value[index].tare ?? 0) * (listItemsPOS.value[index].quantity_box ?? 0)
-                listItemsPOS.value[index].tare_weight = String(listItemsPOS.value[index].tare_weight) + " kg"
-            }
-            listItemsPOS.value[index].quantity = Number(moneyDecimal(String(listItemsPOS.value[index].quantity)))
-            listItemsPOS.value[index].total = listItemsPOS.value[index].quantity * listItemsPOS.value[index].price -
-                (listItemsPOS.value[index].isDiscount ?
-                    (listItemsPOS.value[index].type_item_id === 1 ?
-                        listItemsPOS.value[index].discount * listItemsPOS.value[index].quantity_chicken : 0)
-                    : 0)
+const changeValuesListItemPOS = (product: Product, index: number) => {
+    try {
+        if (product.type_item_id === 1) {
+            listItemsPOS.value[index].quantity = product.quantity_chicken * (product.average_weight ?? 0)
         }
+        if (listItemsPOS.value[index].type_item_id === 2) {
+            listItemsPOS.value[index].quantity = product.gross_weight ?
+                (product.gross_weight ?? 0) - ((product.tare ?? 0) * (product.quantity_box ?? 0)) :
+                0
+
+            listItemsPOS.value[index].tare_weight = (product.tare ?? 0) * (product.quantity_box ?? 0)
+            listItemsPOS.value[index].tare_weight = String(product.tare_weight) + " kg"
+        }
+        listItemsPOS.value[index].quantity = Number(moneyDecimal(String(product.quantity)))
+        listItemsPOS.value[index].total = product.quantity * product.price -
+            (product.isDiscount ? (product.type_item_id === 1 ? product.discount * product.quantity_chicken : 0) : 0)
     } catch (error) {
         console.log(error);
-    } finally {
-        // loading.value = false
     }
-})
-
-
+}
 
 //Funcionalidades
 const incrementQuantityItemPOS = (i: number) => {
@@ -111,18 +104,18 @@ const incrementQuantityItemPOS = (i: number) => {
         console.error(`Producto con id ${i} no encontrado.`);
     }
 };
-const decrementQuantityItemPOS = (i: number) => {
-    if (i !== -1) {
-        if (listItemsPOS.value[i].quantity <= 1) return;
-        listItemsPOS.value[i].quantity -= 1;
-    } else {
-        console.error(`Producto con id ${i} no encontrado.`);
-    }
-};
+// const decrementQuantityItemPOS = (i: number) => {
+//     if (i !== -1) {
+//         if (listItemsPOS.value[i].quantity <= 1) return;
+//         listItemsPOS.value[i].quantity -= 1;
+//     } else {
+//         console.error(`Producto con id ${i} no encontrado.`);
+//     }
+// };
 const deleteItemPOS = (id: number) => {
     listItemsPOS.value.splice(id, 1);
 };
-const itemSelected = ref<Item>()
+
 const totalListPOS = () => {
     if (listItemsPOS.value.length === 0) return 0
     return listItemsPOS.value.reduce((acumulador, data) => {
@@ -286,7 +279,7 @@ const seriesFilterToDocumentType = computed<Series[]>(() => {
 const dialogConfirmSale = ref(false)
 const dialogCustomer = ref(false)
 const tabDialogCustomer = ref(null)
-const onClickCloseDialogCustomer = ref()
+// const onClickCloseDialogCustomer = ref()
 const concatString = (s1: String, s2: String | number | null) => {
     return (s1 + "|  " + moneyDecimal(String(s2)))
 }
@@ -330,7 +323,6 @@ watch(paymentsMethodTypes.value, async (newQuestion, oldQuestion) => {
 })
 
 const onClickPay = () => {
-
 }
 const searchDataCustomers = async () => {
     let customer: Customer;
@@ -382,10 +374,8 @@ const searchDataCustomers = async () => {
                 active: true
             } : null
             customerEdited.value.address = data.data.direccion_completa
-
         } else {
             console.error('Error al obtener los datos:', data.message);
-
         }
     }
     if (customerEdited.value.identity_document_type.id === "1") {//DNI
@@ -396,7 +386,6 @@ const searchDataCustomers = async () => {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token_apiperu.value}`,
-
                 },
                 // body: JSON.stringify(customerEdited.value.number)
             }
@@ -436,16 +425,10 @@ const searchDataCustomers = async () => {
                 active: true
             } : null
             customerEdited.value.address = data.data.direccion
-
         } else {
             console.error('Error al obtener los datos:', data.message);
-
         }
-
     }
-
-
-
 }
 
 import { countries, departments, districts, provinces } from "@/api/locationData"
@@ -526,12 +509,16 @@ const saveCustomer = async () => {
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1" v-if="item.type_item_id">
                                         <v-text-field type="number" density="compact" variant="solo"
-                                            v-model="item.quantity_chicken" label="# Pollos"></v-text-field>
+                                            v-model="item.quantity_chicken"
+                                            @update:model-value="changeValuesListItemPOS(item, index)"
+                                            label="# Pollos"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
                                         class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
-                                            v-model="item.quantity_box" label="#Jaba"></v-text-field>
+                                            v-model="item.quantity_box"
+                                            @update:model-value="changeValuesListItemPOS(item, index)"
+                                            label="#Jaba"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
                                         class="pr-1">
@@ -541,17 +528,21 @@ const saveCustomer = async () => {
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
                                         class="pr-1">
                                         <v-text-field density="compact" variant="solo" v-model="item.tare"
+                                            @update:model-value="changeValuesListItemPOS(item, index)"
                                             :label="concatString('Tara(kg)', item.tare_weight ?? '')"
                                             suffix=""></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 1"
                                         class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
+                                            @update:model-value="changeValuesListItemPOS(item, index)"
+                                            @keyup.enter="changeValuesListItemPOS(item, index)"
                                             v-model="item.average_weight" label="Peso Promedio (kg)"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
                                             v-model="item.quantity"
+                                            @update:model-value="changeValuesListItemPOS(item, index)"
                                             :label="item.type_item_id ? 'Peso neto (kg)' : 'Cantidad'" color="white"
                                             bg-color="success"></v-text-field>
                                     </v-col>
@@ -599,6 +590,7 @@ const saveCustomer = async () => {
                         </v-row>
                     </v-col>
                 </v-row>
+                <!-- {{ listItemsPOS }} -->
             </v-container>
         </v-col>
         <v-col cols="12" md="5" lg="4" sm="5" xs="11" class="d-flex align-center justify-center  " height="100%"
@@ -789,11 +781,9 @@ const saveCustomer = async () => {
                                         label="Correo de contacto"></v-text-field>
                                 </v-col>
                             </v-row>
-                            {{ customerEdited }}
-                            <!-- </v-container> -->
                         </v-window-item>
                         <v-window-item value="direction">
-                            <v-card-title class="d-flex">
+                            <!-- <v-card-title class="d-flex">
                                 Lotes
                                 <v-spacer></v-spacer>
                                 <v-btn color="success" @click="newLotsOnClick">
@@ -820,21 +810,11 @@ const saveCustomer = async () => {
                                         <v-btn icon="mdi-delete" color="error" @click="deleteLotOnClick(index)">
                                         </v-btn>
                                     </v-col>
-                                    <!-- {{ lot.id }},{{ lot.item_id }},{{ lot.code }} -->
-                                    <!-- <v-col cols="12" xs="12" md="2" lg="2"
-                                                class="d-flex aling-center justify-center"
-                                                :class="mobile ? 'py-0' : ''">
-                                                <v-spacer></v-spacer>
-                                                <v-spacer></v-spacer>
-                                                
-                                                <v-spacer></v-spacer>
-                                            </v-col> -->
-
                                 </v-row>
-                            </div>
+                            </div> -->
                         </v-window-item>
                         <v-window-item value="others">
-                            <v-card-title class="d-flex">
+                            <!-- <v-card-title class="d-flex">
                                 Lotes
                                 <v-spacer></v-spacer>
                                 <v-btn color="success" @click="newLotsOnClick">
@@ -861,18 +841,8 @@ const saveCustomer = async () => {
                                         <v-btn icon="mdi-delete" color="error" @click="deleteLotOnClick(index)">
                                         </v-btn>
                                     </v-col>
-                                    <!-- {{ lot.id }},{{ lot.item_id }},{{ lot.code }} -->
-                                    <!-- <v-col cols="12" xs="12" md="2" lg="2"
-                                                class="d-flex aling-center justify-center"
-                                                :class="mobile ? 'py-0' : ''">
-                                                <v-spacer></v-spacer>
-                                                <v-spacer></v-spacer>
-                                                
-                                                <v-spacer></v-spacer>
-                                            </v-col> -->
-
                                 </v-row>
-                            </div>
+                            </div> -->
                         </v-window-item>
                     </v-window>
                 </v-card-text>
