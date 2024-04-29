@@ -2,18 +2,22 @@
 import { useSnackbarStore } from '@/store/index';
 import type { Item, Product, paymentMethodTypes, paymentPOS } from "@/interfaces/Item.interface";
 const apiURL = useCookie("apiURL");
+const token_apiperu = useCookie("token_apiperu");
 import { useDisplay } from "vuetify";
 const { mobile } = useDisplay();
 const snackbarStore = useSnackbarStore()
 const typeMountPayments = [10, 20, 50, 100]
 // const typeMountPayments = [10, 20, 50, 100, 200]
-import { series, customers, items, payment_method_types } from "./data.ts"
+import { series, customers, items, payment_method_types, cat_identity_document_types } from "./data.ts"
+const { data: customersFetch, refresh: customersRefresh } = await useFetch<CustomerIPOS[]>(`${apiURL.value}/customers/pos`, { method: 'GET' });
+import type { CustomerIPOS, Customer, DocumentType } from '~/interfaces/Customer.interface';
 const itemsFetch = ref<Item[]>(items)
 // const { data: itemsFetch, refresh: itemsRefresh } = await useFetch<Item[]>(`${apiURL.value}/items`, { method: 'GET' });
 const searchItems = ref<string>("");
 const clearSearch = () => {
     searchItems.value = ""
 }
+
 const itemsFilter = computed<Item[]>(() => {
     if (!itemsFetch.value)
         throw new Error("Ah ocurrido un problema con el valor");
@@ -163,30 +167,115 @@ export interface Series {
     number: string;
     disabled: boolean;
 }
-export interface Customer {
-    id: number;
-    description: string;
-    name: string;
-    number: string;
-    identity_document_type_id: string;
-    identity_document_type_code: null;
-    has_discount: boolean;
-    discount_type: string;
-    discount_amount: number;
-}
 
 const serieDocumentSelected = ref({})
-const customersSelected = ref<Customer>({
+const customersSelected = ref<CustomerIPOS>({
     "id": 1,
     "description": "99999999 - Clientes - Varios",
     "name": "Clientes - Varios",
     "number": "99999999",
     "identity_document_type_id": "0",
-    "identity_document_type_code": null,
     "has_discount": false,
     "discount_type": "01",
     "discount_amount": 0
 })
+
+const customerEdited = ref<Customer>({
+    id: 0,
+    name: "",
+    number: "",
+    identity_document_type_id: null,
+    identity_document_type: { id: "6", active: true, description: "RUC" },
+    address: "",
+    internal_code: "",
+    barcode: "",
+    observation: "",
+    seller: "",
+    zone: null,
+    zone_id: null,
+    seller_id: null,
+    website: "",
+    enabled: true,
+    type: 'customers',
+    trade_name: "",
+    country_id: "PE",
+    nationality_id: "PE",
+    department_id: null,
+    department: null,
+    province_id: null,
+    province: null,
+    district_id: null,
+    district: null,
+    telephone: "",
+    email: "",
+    perception_agent: true,
+    percentage_perception: null,
+    state: null,
+    condition: null,
+    person_type_id: null,
+    person_type: null,
+    contact: null,
+    comment: null,
+    addresses: null,
+    parent_id: 0,
+    credit_days: 0,
+    optional_email: null,
+    optional_email_send: null,
+    // childrens:
+    accumulated_points: 0,
+    has_discount: false,
+    discount_type: "01",
+    discount_amount: 0
+})
+const customerDefault = ref<Customer>({
+    id: 0,
+    name: "",
+    number: "",
+    identity_document_type_id: null,
+    identity_document_type: { id: "6", active: true, description: "RUC" },
+    address: "",
+    internal_code: "",
+    barcode: "",
+    observation: "",
+    seller: "",
+    zone: null,
+    zone_id: null,
+    seller_id: null,
+    website: "",
+    enabled: true,
+    type: 'customers',
+    trade_name: "",
+    country_id: "PE",
+    nationality_id: "PE",
+    department_id: null,
+    department: null,
+    province_id: null,
+    province: null,
+    district_id: null,
+    district: null,
+    telephone: "",
+    email: "",
+    perception_agent: true,
+    percentage_perception: null,
+    state: null,
+    condition: null,
+    person_type_id: null,
+    person_type: null,
+    contact: null,
+    comment: null,
+    addresses: null,
+    parent_id: 0,
+    credit_days: 0,
+    optional_email: null,
+    optional_email_send: null,
+    // childrens:
+    accumulated_points: 0,
+    has_discount: false,
+    discount_type: "01",
+    discount_amount: 0
+})
+
+
 const seriesFilterToDocumentType = computed<Series[]>(() => {
     if (!series.length) throw new Error("Algo salio mal en la serie")
     let serieSelected = series?.filter((data) => data.document_type_id === documentSelectedOnClick.value)
@@ -239,6 +328,175 @@ watch(paymentsMethodTypes.value, async (newQuestion, oldQuestion) => {
         // loading.value = false
     }
 })
+
+const onClickPay = () => {
+
+}
+const searchDataCustomers = async () => {
+    let customer: Customer;
+    if (customerEdited.value.identity_document_type.id === "6") {//RUC
+        const response = await fetch(
+            `https://apiperu.dev/api/ruc/${customerEdited.value.number}`,
+
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token_apiperu.value}`,
+                },
+                // body: JSON.stringify(customerEdited.value.number)
+            }
+        ).finally(async () => {
+            // await customersRefresh()
+            // dialogCustomer.value = false
+        });
+        let data
+        if (response.ok) {
+            // La solicitud se completó correctamente
+            data = await response.json(); // Parsea la respuesta como JSON
+            // console.log(data); // Aquí tendrás los datos obtenidos
+        } else {
+            // La solicitud falló, maneja el error
+            console.error('Error al obtener los datos:', response.statusText);
+        }
+        if (data.success) {
+            customerEdited.value.name = data.data.nombre_o_razon_social
+            customerEdited.value.department_id = data.data.ubigeo[0]
+            customerEdited.value.department = data.data.ubigeo[2] ? {
+                id: data.data.ubigeo[0],
+                description: data.data.departamento,
+                active: true
+            } : null
+            customerEdited.value.province_id = data.data.ubigeo[1]
+            customerEdited.value.province = data.data.ubigeo[2] ? {
+                id: data.data.ubigeo[1],
+                department_id: data.data.ubigeo[0],
+                description: data.data.provincia,
+                active: true,
+            } : null
+            customerEdited.value.district_id = data.data.ubigeo[2]
+            customerEdited.value.district = data.data.ubigeo[2] ? {
+                id: data.data.ubigeo[2],
+                province_id: data.data.ubigeo[1],
+                description: data.data.distrito,
+                active: true
+            } : null
+            customerEdited.value.address = data.data.direccion_completa
+
+        } else {
+            console.error('Error al obtener los datos:', data.message);
+
+        }
+    }
+    if (customerEdited.value.identity_document_type.id === "1") {//DNI
+        const response = await fetch(
+            `https://apiperu.dev/api/dni/${customerEdited.value.number}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token_apiperu.value}`,
+
+                },
+                // body: JSON.stringify(customerEdited.value.number)
+            }
+        ).finally(async () => {
+            // await customersRefresh()
+            // dialogCustomer.value = false
+        });
+        let data
+        if (response.ok) {
+            // La solicitud se completó correctamente
+            data = await response.json(); // Parsea la respuesta como JSON
+            // console.log(data); // Aquí tendrás los datos obtenidos
+        } else {
+            // La solicitud falló, maneja el error
+            console.error('Error al obtener los datos:', response.statusText);
+        }
+        if (data.success) {
+            customerEdited.value.name = data.data.nombre_completo
+            customerEdited.value.department_id = data.data.ubigeo[0]
+            customerEdited.value.department = data.data.ubigeo[2] ? {
+                id: data.data.ubigeo[0],
+                description: data.data.departamento,
+                active: true
+            } : null
+            customerEdited.value.province_id = data.data.ubigeo[1]
+            customerEdited.value.province = data.data.ubigeo[2] ? {
+                id: data.data.ubigeo[1],
+                department_id: data.data.ubigeo[0],
+                description: data.data.provincia,
+                active: true,
+            } : null
+            customerEdited.value.district_id = data.data.ubigeo[2]
+            customerEdited.value.district = data.data.ubigeo[2] ? {
+                id: data.data.ubigeo[2],
+                province_id: data.data.ubigeo[1],
+                description: data.data.distrito,
+                active: true
+            } : null
+            customerEdited.value.address = data.data.direccion
+
+        } else {
+            console.error('Error al obtener los datos:', data.message);
+
+        }
+
+    }
+
+
+
+}
+
+import { countries, departments, districts, provinces } from "@/api/locationData"
+import type { Country, Department, Province, District } from "@/interfaces/Location.interface";
+const countriesData = ref<Country[]>([...countries])
+const departmentsData = ref<Department[]>([...departments])
+const provincesData = ref<Province[]>([...provinces])
+const districtsData = ref<District[]>([...districts])
+
+const provincesFilter = ref(provincesData.value.filter(data => customerEdited.value.department ? data.department_id === customerEdited.value.department?.id : null))
+const districtsFilter = ref(districtsData.value.filter(data => customerEdited.value.province ? data.province_id === customerEdited.value.province?.id : null))
+const filterProvinces = () => {
+    customerEdited.value.province = null
+    customerEdited.value.district = null
+    provincesFilter.value = provincesData.value.filter(data => customerEdited.value.department ? data.department_id === customerEdited.value.department?.id : null)
+}
+const filterDistrits = () => {
+    customerEdited.value.district = null
+    districtsFilter.value = districtsData.value.filter(data => customerEdited.value.province ? data.province_id === customerEdited.value.province?.id : null)
+}
+
+const saveCustomer = async () => {
+    let customer = {
+        name: customerEdited.value.name,
+        number: customerEdited.value.number,
+        identity_document_type_id: customerEdited.value.identity_document_type.id,
+        address: customerEdited.value.address,
+        trade_name: customerEdited.value.trade_name,
+        department_id: customerEdited.value.department?.id,
+        province_id: customerEdited.value.province?.id,
+        district_id: customerEdited.value.district?.id,
+        telephone: customerEdited.value.telephone,
+        email: customerEdited.value.email
+    }
+
+    const response = await fetch(
+        `${apiURL.value}/customers`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                // Authorization: `Bearer ${userCookie.value.token}`,
+            },
+            body: JSON.stringify(customer)
+        }
+    ).finally(async () => {
+        await customersRefresh()
+        dialogCustomer.value = false
+    });
+    // console.log(response);
+}
 </script>
 
 <template>
@@ -371,9 +629,9 @@ watch(paymentsMethodTypes.value, async (newQuestion, oldQuestion) => {
                                                 :items="seriesFilterToDocumentType" item-title="number" item-value="id">
                                             </v-combobox>
                                         </v-col>
-                                        <v-col cols="8">
+                                        <v-col cols="8" v-if="customersFetch">
                                             <v-combobox class="inline select-box" v-model="customersSelected"
-                                                :items="customers" variant="solo-filled" item-title="description"
+                                                :items="customersFetch" variant="solo-filled" item-title="description"
                                                 item-value="id">
                                             </v-combobox>
                                         </v-col>
@@ -437,12 +695,9 @@ watch(paymentsMethodTypes.value, async (newQuestion, oldQuestion) => {
                                             :disabled="false ? true : false"> PAGAR </v-btn>
                                     </v-col>
                                 </v-col>
-
                             </v-row>
                         </v-card-text>
-
                     </v-card>
-
                 </v-row>
             </v-container>
         </v-col>
@@ -456,7 +711,7 @@ watch(paymentsMethodTypes.value, async (newQuestion, oldQuestion) => {
                     <v-spacer></v-spacer>
                     <v-btn color="blue-darken-1" variant="text" @click="dialogConfirmSale = false">Cancelar</v-btn>
                     <v-spacer></v-spacer>
-                    <v-btn color="success" size="large" variant="flat" @click="onClickPagar()">Pagar</v-btn>
+                    <v-btn color="success" size="large" variant="flat" @click="onClickPay()">Pagar</v-btn>
                     <v-spacer></v-spacer>
                 </v-card-actions>
             </v-card>
@@ -464,97 +719,78 @@ watch(paymentsMethodTypes.value, async (newQuestion, oldQuestion) => {
         <!-- DIALOG -->
 
 
-        <!-- CUADRO DIALOGO -->
-        <v-dialog v-model="dialogCustomer" :max-width="mobile ? '100%' : '70%'" transition="dialog-bottom-transition"
+        <!-- CUADRO DIALOGO CLIENTE -->
+        <v-dialog v-model="dialogCustomer" :max-width="mobile ? '100%' : '60%'" transition="dialog-bottom-transition"
             persistent>
             <v-card>
                 <v-toolbar color="primary" title="Nuevo Cliente"> </v-toolbar>
                 <v-card-title class="px-0 py-0">
                     <v-tabs v-model="tabDialogCustomer" bg-color="primary">
                         <v-tab value="data">Datos de cliente</v-tab>
-                        <v-tab value="direction">Dirección</v-tab>
-                        <v-tab value="others">Otros datos</v-tab>
+                        <!-- <v-tab value="direction">Dirección</v-tab>
+                        <v-tab value="others">Otros datos</v-tab> -->
                     </v-tabs>
                 </v-card-title>
                 <v-card-text>
                     <v-window v-model="tabDialogCustomer">
                         <v-window-item value="data">
-                            <v-container>
-                                <v-row>
-                                    <v-col cols="12" sm="6" md="6">
-                                        <v-text-field v-model="editedItem.description"
-                                            label="Descripción (*)"></v-text-field>
-                                    </v-col>
-                                    <!-- <v-col cols="12" sm="6" md="8">
-                                                <v-text-field v-model="editedItem.name"
-                                                    label="Nombre des"></v-text-field>
-                                            </v-col> -->
-                                    <v-col cols="12" sm="6" md="6">
-                                        <v-text-field v-model="editedItem.second_name"
-                                            label="Nombre secundario"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3">
-                                        <v-text-field v-model="editedItem.model" label="Modelo"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3">
-                                        <v-select :items="['NIU']" label="Unidad*" v-model="editedItem.unit_type_id"
-                                            required></v-select>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3">
-                                        <v-text-field v-model="editedItem.sale_unit_price"
-                                            label="Precio de venta x unidad"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3">
-                                        <v-text-field v-model="editedItem.purchase_unit_price"
-                                            label="Precio de compra x unidad"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3">
-                                        <v-select v-model="editedItem.warehouses" required :items="warehousesFetch"
-                                            :item-title="'description'" item-value="id" label="Área">
-                                        </v-select>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3">
-                                        <v-text-field v-model="editedItem.stock" label="Stock Inicial"
-                                            :disabled="editedItem.lots_enabled"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3">
-                                        <v-text-field v-model="editedItem.stock_min"
-                                            label="Stock Mínimo"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3">
-                                        <v-text-field v-model="editedItem.barcode"
-                                            label="Código de barra"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3">
-                                        <v-text-field v-model="editedItem.internal_id"
-                                            label="Código Interno"></v-text-field>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3">
-                                        <v-checkbox v-model="editedItem.lots_enabled"
-                                            label="¿Maneja lote?"></v-checkbox>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3">
-                                        <v-checkbox v-model="editedItem.active" label="Habilitado"></v-checkbox>
-                                    </v-col>
-
-                                    <!-- <v-col cols="12" sm="6" md="3">
-                                                <v-text-field type="date" label="Date"></v-text-field>
-                                            </v-col> -->
-                                    <!-- <v-col cols="12" sm="6" md="4">
-                                                <v-select v-model="editedItem.type_commission"
-                                                    :items="['Dinero', 'Porcentaje']"
-                                                    label="Tipo de comisión"></v-select>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="4">
-                                                <v-text-field v-model="editedItem.commission"
-                                                    label="Comisión"></v-text-field>
-                                            </v-col> -->
-                                    <!-- <v-col cols="12" sm="6" md="4">
-                                                <v-switch v-model="editedItem.active" color="success"
-                                                    label="Habilitado"></v-switch>
-                                            </v-col> -->
-                                </v-row>
-                            </v-container>
+                            <!-- <v-container> -->
+                            <v-row class="pt-6">
+                                <v-col cols="12" sm="6" md="6" class="py-0">
+                                    <v-combobox class="inline select-box"
+                                        v-model="customerEdited.identity_document_type"
+                                        :items="cat_identity_document_types" item-title="description"
+                                        label="Tipo Doc. Identidad" item-value="id">
+                                    </v-combobox>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="6" class="py-0">
+                                    <v-text-field label="Número" v-model="customerEdited.number">
+                                        <template v-slot:append
+                                            v-if="customerEdited.identity_document_type.id === '1' || customerEdited.identity_document_type.id === '6'">
+                                            <v-btn icon variant="elevated" color="success"
+                                                @click="searchDataCustomers()">
+                                                <v-icon> mdi-magnify </v-icon>
+                                            </v-btn>
+                                        </template>
+                                    </v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="6" class="py-0">
+                                    <v-text-field v-model="customerEdited.name" label="Nombre"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="6" class="py-0">
+                                    <v-text-field v-model="customerEdited.trade_name"
+                                        label="Nombre comercial"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="4" md="4">
+                                    <v-combobox v-model="customerEdited.department" :items="departmentsData"
+                                        @update:modelValue="filterProvinces" item-title="description" item-value="id"
+                                        label="Departamento">
+                                    </v-combobox>
+                                </v-col>
+                                <v-col cols="12" sm="4" md="4">
+                                    <v-combobox v-model="customerEdited.province" :items="provincesFilter"
+                                        @update:modelValue="filterDistrits" item-title="description" item-value="id"
+                                        label="Provincia">
+                                    </v-combobox>
+                                </v-col>
+                                <v-col cols="12" sm="4" md="4">
+                                    <v-combobox v-model="customerEdited.district" :items="districtsFilter"
+                                        item-title="description" item-value="id" label="Distrito">
+                                    </v-combobox>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="6">
+                                    <v-text-field v-model="customerEdited.address" label="Dirección"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="3">
+                                    <v-text-field v-model="customerEdited.telephone" label="Teléfono"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="3">
+                                    <v-text-field v-model="customerEdited.email"
+                                        label="Correo de contacto"></v-text-field>
+                                </v-col>
+                            </v-row>
+                            {{ customerEdited }}
+                            <!-- </v-container> -->
                         </v-window-item>
                         <v-window-item value="direction">
                             <v-card-title class="d-flex">
@@ -646,7 +882,7 @@ watch(paymentsMethodTypes.value, async (newQuestion, oldQuestion) => {
                     <v-btn class="mx-2" color="blue-darken-1" variant="text" @click="dialogCustomer = false">
                         Cancelar
                     </v-btn>
-                    <v-btn color="blue-darken-1" variant="elevated" @click="save()">
+                    <v-btn color="blue-darken-1" variant="elevated" @click="saveCustomer">
                         Guardar
                     </v-btn>
                 </v-card-actions>

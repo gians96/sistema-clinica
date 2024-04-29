@@ -1,11 +1,10 @@
+import type { Country, District, Department, Province } from "./Location.interface";
 export interface Customer {
     id: number;
-    description: string;
     name: string;
     number: string;
     identity_document_type_id: String | null;//#Identity Document type
     identity_document_type: DocumentType;
-    identity_document_type_code: String | null;//NO HAY VALOR
     address: null | string;
     internal_code: String | null;
     barcode: String | null;
@@ -16,18 +15,18 @@ export interface Customer {
     seller_id: number | null;
     website: String | null;
     enabled: boolean;
-    created_at: Date;
-    updated_at: Date;
+    created_at?: Date;
+    updated_at?: Date;
     type: 'customers';
     trade_name: String | null;
-    country_id: YID;
-    nationality_id: YID | null;
+    country_id: "PE";
+    nationality_id: "PE" | null;
     department_id: null | string;
-    department: City | null;
+    department: Department | null;
     province_id: null | string;
-    province: City | null;
+    province: Province | null;
     district_id: null | string;
-    district: City | null;
+    district: District | null;
     telephone: String | null;
     email: String | null;
     perception_agent: boolean;
@@ -43,35 +42,17 @@ export interface Customer {
     credit_days: number;
     optional_email: any[] | null;
     optional_email_send: String | null;
-    childrens: any[];
+    // childrens: any[];
     accumulated_points: number;
     has_discount: boolean;
     discount_type: string | '01';//debe ser un string, SUNAT
     discount_amount: number;
-    location_id: string[];
+    // location_id: string[];
 }
 
 export interface Contact {
     phone: null;
     full_name: null;
-}
-
-export enum YID {
-    PE = "PE",
-}
-
-export interface City {
-    id: string;
-    description: string;
-    active: number;
-}
-
-export enum DocumentType {
-    DNI = "DNI",
-    DocTribNoDOMSinRuc = "Doc.trib.no.dom.sin.ruc",
-    RUC = "RUC",
-    CE = "CE",
-    PASSPORT = "Pasaporte"
 }
 
 export interface CustomerIPOS {
@@ -80,8 +61,13 @@ export interface CustomerIPOS {
     name: string;
     number: string;
     identity_document_type_id: string;
-    identity_document_type_code: null;
     has_discount: boolean;
     discount_type: string;
     discount_amount: number;
+}
+
+export interface DocumentType {
+    id: string;
+    active: Boolean;
+    description: string;
 }

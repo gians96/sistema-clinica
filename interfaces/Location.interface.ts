@@ -1,23 +1,23 @@
 
 export interface Department {
-    id:          string;
+    id: string;
     description: string;
-    active:      number;
+    active: boolean;
 }
 export interface Province {
-    id:            string;
+    id: string;
     department_id: string;
-    description:   string;
-    active:        number;
+    description: string;
+    active: boolean;
 }
 export interface District {
-    id:          string;
+    id: string;
     province_id: string;
     description: string;
-    active:      number;
+    active: boolean;
 }
 export interface Country {
-    id:          string;
+    id: string;
     description: string;
-    active:      number;
+    active: boolean;
 }

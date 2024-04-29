@@ -49,7 +49,11 @@ const editedItem = ref<Item>({
     sale_unit_price: 1,
     purchase_unit_price: 1,
     type_commission: "",
-    commission: 0
+    commission: 0,
+    text_filter: "",
+    type_item: null,
+    type_item_id: null,
+    warehouse_id: null
 })
 
 const defaultItem = ref<Item>({
@@ -72,7 +76,11 @@ const defaultItem = ref<Item>({
     sale_unit_price: 1,
     purchase_unit_price: 1,
     type_commission: "",
-    commission: 0
+    commission: 0,
+    text_filter: "",
+    type_item: null,
+    type_item_id: null,
+    warehouse_id: null
 })
 let editedIndex = ref(-1)
 

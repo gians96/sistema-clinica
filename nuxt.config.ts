@@ -30,6 +30,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiURL: process.env.apiURL,
+      token_apiperu: process.env.token_apiperu
     }
   },
   app: {
