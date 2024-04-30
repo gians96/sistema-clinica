@@ -8,7 +8,7 @@ const { mobile } = useDisplay();
 // const snackbarStore = useSnackbarStore()
 // const typeMountPayments = [10, 20, 50, 100]
 // const typeMountPayments = [10, 20, 50, 100, 200]
-import { series, customers, items, payment_method_types, cat_identity_document_types } from "./data.ts"
+import { series, items, payment_method_types, cat_identity_document_types } from "./data.ts"
 const { data: customersFetch, refresh: customersRefresh } = await useFetch<CustomerIPOS[]>(`${apiURL.value}/customers/pos`, { method: 'GET' });
 import type { CustomerIPOS, Customer, DocumentType } from '~/interfaces/Customer.interface';
 const itemsFetch = ref<Item[]>(items)
@@ -161,7 +161,7 @@ export interface Series {
     disabled: boolean;
 }
 
-const serieDocumentSelected = ref({})
+const serieDocumentSelected = ref<Series>()
 const customersSelected = ref<CustomerIPOS>({
     "id": 1,
     "description": "99999999 - Clientes - Varios",
@@ -523,7 +523,9 @@ const saveCustomer = async () => {
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
                                         class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
-                                            v-model="item.gross_weight" label="Peso Bruto (kg)"></v-text-field>
+                                            v-model="item.gross_weight"
+                                            @update:model-value="changeValuesListItemPOS(item, index)"
+                                            label="Peso Bruto (kg)"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
                                         class="pr-1">
@@ -535,9 +537,9 @@ const saveCustomer = async () => {
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 1"
                                         class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
+                                            v-model="item.average_weight"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
-                                            @keyup.enter="changeValuesListItemPOS(item, index)"
-                                            v-model="item.average_weight" label="Peso Promedio (kg)"></v-text-field>
+                                            label="Peso Promedio (kg)"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
@@ -554,6 +556,7 @@ const saveCustomer = async () => {
                                     <v-col cols="6" xs="4" sm="4" md="3" lg="3" v-if="item.type_item?.id === 1"
                                         class="pr-1 d-flex">
                                         <v-checkbox v-model="item.isDiscount"
+                                            @update:model-value="changeValuesListItemPOS(item, index)"
                                             :label="!item.isDiscount ? 'Descuento' : ''" class="pr-6"></v-checkbox>
                                         <v-text-field v-if="item.isDiscount" type="number" density="compact"
                                             variant="solo" v-model="item.discount" label="Descuento"></v-text-field>
