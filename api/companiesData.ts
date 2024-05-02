@@ -1,6 +1,8 @@
 //import { Category } from "interfaces/Category.interface";
 
-const data = {
+import type { CompanyConfig } from "~/interfaces/Company.interface";
+
+const data: CompanyConfig = {
   id: 1,
   idIdentityDocumentType: 6,
   number: "20541751832",
@@ -10,12 +12,12 @@ const data = {
   country: {
     id: "PE",
     description: "PERÚ",
-    active: 1
+    active: true
   },
   department: {
     id: "15",
     description: "LIMA",
-    active: 1
+    active: true
   },
   province: null,
   district: null,

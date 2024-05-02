@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import CompaniesFetch from "@/api/companiesData"
-import type { Company } from "@/interfaces/Company.interface";
+import type { CompanyConfig } from "@/interfaces/Company.interface";
 import { useSnackbarStore } from '@/store/index'
 import { countries, departments, districts, provinces } from "@/api/locationData"
 import type { Country, Department, Province, District } from "@/interfaces/Location.interface";
 
 const snackbarStore = useSnackbarStore()
-const item = ref<Company>(CompaniesFetch.data)
-const editedItem = ref<Company>(Object.assign({}, item.value))
+const item = ref<CompanyConfig>(CompaniesFetch.data)
+const editedItem = ref<CompanyConfig>(Object.assign({}, item.value))
 
 const countriesData = ref<Country[]>([...countries])
 const departmentsData = ref<Department[]>([...departments])
