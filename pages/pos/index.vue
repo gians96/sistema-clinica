@@ -8,7 +8,7 @@ const { mobile } = useDisplay();
 // const snackbarStore = useSnackbarStore()
 // const typeMountPayments = [10, 20, 50, 100]
 // const typeMountPayments = [10, 20, 50, 100, 200]
-import { series, items, payment_method_types, cat_identity_document_types } from "./data.ts"
+import { items } from "./data.ts"
 const { data: customersFetch, refresh: customersRefresh } = await useFetch<CustomerIPOS[]>(`${apiURL.value}/customers/pos`, { method: 'GET' });
 import type { CustomerIPOS, Customer, DocumentType } from '~/interfaces/Customer.interface';
 const itemsFetch = ref<Item[]>(items)
@@ -16,6 +16,17 @@ const itemsFetch = ref<Item[]>(items)
 const searchItems = ref<string>("");
 const clearSearch = () => {
     searchItems.value = ""
+}
+import { companyStore } from '@/store/company'
+const companyFetch = ref<Companies>()
+const companyStoreObj = companyStore()
+onMounted(async () => {
+    companyFetch.value = companyStore().$state
+    refreshData()
+})
+const refreshData = async () => {
+    await companyStoreObj.requestItems()
+
 }
 
 // const itemsFilter = computed<Item[]>(() => {
@@ -270,8 +281,8 @@ const customerDefault = ref<Customer>({
 
 
 const seriesFilterToDocumentType = computed<Series[]>(() => {
-    if (!series.length) throw new Error("Algo salio mal en la serie")
-    let serieSelected = series?.filter((data) => data.document_type_id === documentSelectedOnClick.value)
+    if (!companyFetch.value || !companyFetch.value.series.length) throw new Error("Algo salio mal en la serie")
+    let serieSelected = companyFetch.value.series?.filter((data) => data.document_type_id === documentSelectedOnClick.value)
     serieDocumentSelected.value = serieSelected[0]
     return serieSelected
 })
@@ -433,6 +444,7 @@ const searchDataCustomers = async () => {
 
 import { countries, departments, districts, provinces } from "@/api/locationData"
 import type { Country, Department, Province, District } from "@/interfaces/Location.interface";
+import type { Companies } from "~/interfaces/Company.interface.js";
 const countriesData = ref<Country[]>([...countries])
 const departmentsData = ref<Department[]>([...departments])
 const provincesData = ref<Province[]>([...provinces])
@@ -499,7 +511,7 @@ const saveCustomer = async () => {
                         <p>No se han agregado productos</p>
                     </v-col>
                     <v-col cols="12" v-if="listItemsPOS.length !== 0">
-                        <v-row no-gutters v-for="(item, index) in  listItemsPOS " :key="index" class="py-0">
+                        <v-row no-gutters v-for="(item, index) in listItemsPOS " :key="index" class="py-0">
                             <v-col cols="12" md="12" lg="10" sm="12" xs="12">
                                 <v-row no-gutters class="pt-4">
                                     <v-col cols="12" class="pb-4"
@@ -569,7 +581,7 @@ const saveCustomer = async () => {
                                     <v-col :cols='mobile ? "10" : "9"' class="d-flex align-center flex-column">
                                         <div class="text-h5 py-2 ">
                                             S/.{{ moneyDecimal(String(item.price * item.quantity - (item.isDiscount ?
-        item.discount * item.quantity_chicken : 0))) }}
+                                                item.discount * item.quantity_chicken : 0))) }}
                                         </div>
                                         <div v-if="item.isDiscount">
                                             <div class="text-decoration-line-through text-center"
@@ -596,8 +608,9 @@ const saveCustomer = async () => {
                 <!-- {{ listItemsPOS }} -->
             </v-container>
         </v-col>
+        <!-- {{ companyFetch }} -->
         <v-col cols="12" md="5" lg="4" sm="5" xs="11" class="d-flex align-center justify-center  " height="100%"
-            width="100%">
+            width="100%" v-if="companyFetch">
             <v-container fluid>
                 <v-row no-gutters>
                     <v-card>
@@ -644,7 +657,7 @@ const saveCustomer = async () => {
                                                 </v-sheet>
                                                 <v-sheet>Vuelto: {{ moneyDecimal(String(vuelto())) }}</v-sheet>
                                                 <v-sheet class="text-red">Por cobrar: {{
-        moneyDecimal(String(accountsReceivable())) }}</v-sheet>
+                                                    moneyDecimal(String(accountsReceivable())) }}</v-sheet>
                                             </v-sheet>
                                         </v-col>
                                         <v-divider class=""></v-divider>
@@ -662,7 +675,8 @@ const saveCustomer = async () => {
                                     <v-row no-gutters justify="center" v-if="paymentsMethodTypes.length !== 0"
                                         v-for="(payment, index) in paymentsMethodTypes" :key="index">
                                         <v-col cols="7" class="pr-1">
-                                            <v-combobox class="inline select-box" :items="payment_method_types"
+                                            <v-combobox class="inline select-box"
+                                                :items="companyFetch.payment_method_types"
                                                 v-model="payment.payment_method_type" variant="outlined"
                                                 item-title="description" item-value="id">
                                             </v-combobox>
@@ -734,7 +748,7 @@ const saveCustomer = async () => {
                                 <v-col cols="12" sm="6" md="6" class="py-0">
                                     <v-combobox class="inline select-box"
                                         v-model="customerEdited.identity_document_type"
-                                        :items="cat_identity_document_types" item-title="description"
+                                        :items="companyFetch.cat_identity_document_types" item-title="description"
                                         label="Tipo Doc. Identidad" item-value="id">
                                     </v-combobox>
                                 </v-col>
