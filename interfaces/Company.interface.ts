@@ -5,7 +5,7 @@ import type {
   District
 } from "@/interfaces/Location.interface";
 export interface Companies {
-  companies: Companies;
+  companies: Company;
   series: Series[];
   cat_document_types: CatDocumentType[];
   cat_identity_document_types: CatDocumentType[];

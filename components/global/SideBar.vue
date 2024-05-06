@@ -10,6 +10,15 @@ const menus = ref([
   { icon: "mdi-account-plus", title: "Reg. Atención", value: "careRecord", to: "/care_record", toSub: null, view: false },
   { icon: "mdi-thermometer", title: "Triaje", value: "triage", to: "/triage", toSub: null, view: false },
   { icon: "mdi-medical-bag", title: "Atención Médica", value: "medicalAttention", to: "/medical_attention", toSub: null, view: false },
+  
+  {
+    icon: "mdi-sale", title: "Ventas", value: "sale", to: "#", view: true,
+    toSub: [
+      { title: "Notas de ventas", value: "sale_notes", to: "/sale-notes/", view: true },
+      // { title: "Categoría", value: "category", to: "/items/category", view: false },
+      // { title: "Especialidad", value: "specialty", to: "/items/speciality", view: false },
+    ]
+  },
   {
     icon: "mdi-network-pos", title: "POS", value: "POS", to: "#", view: true,
     toSub: [

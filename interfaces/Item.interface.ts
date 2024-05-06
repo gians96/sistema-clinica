@@ -20,7 +20,7 @@ export interface Item {
     category_id: number | null;
     warehouse_id: number | null;
     warehouses: Warehouses | null;
-    item_lots_group?: ItemLotsGroup[] | [];
+    item_lots_group?: ItemLotsGroup[];
     sale_unit_price: number;
     purchase_unit_price: number;
     item_type_id: number | null;

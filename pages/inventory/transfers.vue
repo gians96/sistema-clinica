@@ -8,6 +8,10 @@ const snackbarStore = useSnackbarStore()
 const apiURL = useCookie("apiURL");
 import { useDisplay } from 'vuetify'
 import type { Company } from '~/interfaces/Company.interface';
+import { companyStore } from '@/store/company'
+// const companyStoreObj = companyStore()
+// await companyStoreObj.requestItems()
+const company = ref<Company>(companyStore().$state.companies);
 const { mobile } = useDisplay()
 const { data: transferFetch, refresh: transferRefresh } = await useFetch<Transfer[]>(`${apiURL.value}/inventory/transfers`, { method: 'GET' });
 const { data: warehousesFetch } = await useFetch<Warehouse[]>(`${apiURL.value}/warehouses`, { method: 'GET' });
@@ -52,13 +56,14 @@ const editedItem = ref<Transfer>({
     description: '',
     quantity: 0,
     details: "",
-    warehouse_origin: { id: 1 } as WarehouseTransfer,
-    warehouse_destination: { id: 1 } as WarehouseTransfer,
+    warehouse_origin: { id: 1, establishment_id: 1, description: "" } as WarehouseTransfer,
+    warehouse_destination: { id: 1, establishment_id: 1, description: "" } as WarehouseTransfer,
     user_origin_id: null,
     user_destination_id: null,
-    user_origin: {} as Users,
-    user_destination: {} as Users,
-    inventory_transfer_items: []
+    // user_origin: ,
+    // user_destination: {},
+    inventory_transfer_items: [],
+
 })
 
 const defaultItem = ref<Transfer>({
@@ -68,12 +73,12 @@ const defaultItem = ref<Transfer>({
     description: '',
     quantity: 0,
     details: "",
-    warehouse_origin: { id: 1 } as WarehouseTransfer,
-    warehouse_destination: { id: 1 } as WarehouseTransfer,
+    warehouse_origin: { id: 1, establishment_id: 1, description: "" } as WarehouseTransfer,
+    warehouse_destination: { id: 1, establishment_id: 1, description: "" } as WarehouseTransfer,
     user_origin_id: null,
     user_destination_id: null,
-    user_origin: {} as Users,
-    user_destination: {} as Users,
+    // user_origin: {},
+    // user_destination: {},
     inventory_transfer_items: []
 })
 
@@ -238,7 +243,6 @@ const printItems = (transfer: Transfer) => {
         })
     ]
 };
-const company = useCookie<Company>("company");
 import { logo } from '~/public/img';
 const printTransfer = (transfer: Transfer) => {
     if (!transfer.create_at) { transfer.create_at = new Date() }
@@ -432,7 +436,7 @@ const voidedTransferConfirm = () => {
             editedIndex.value = -1
         })
     } catch (error) {
-        snackbarStore.setStatus("error", "Error", error)
+        snackbarStore.setStatus("error", "Error", String(error))
     } finally {
         snackbarStore.setStatus("success", "Eliminado correctamente")
     }
@@ -484,7 +488,8 @@ const addItems = () => {
         description: description,
         date_of_due: date_of_due,
         item_lots_group_id: idLote,
-        quantity: cantTransfer.value
+        quantity: cantTransfer.value,
+        
     })
 
 }
@@ -513,6 +518,7 @@ const statusColorState: Record<StateInvetoriesTransfer['id'], string> = {
                 <v-icon class="me-1" icon="mdi-pill-multiple"></v-icon>
                 <span class="subheading">Transferencia</span>
             </div>
+            <!-- {{}} -->
             <v-spacer></v-spacer>
             <v-btn append-icon="mdi-plus-circle" color="primary" variant="flat"
                 @click="openDialogNewItem()">Nuevo</v-btn>
@@ -524,7 +530,7 @@ const statusColorState: Record<StateInvetoriesTransfer['id'], string> = {
                         <v-text-field v-model="search" append-inner-icon="mdi-magnify" label="Buscar"></v-text-field>
                     </v-col>
                 </v-row>
-                <v-row dense>
+                <v-row dense v-if="transferFetch">
                     <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="transferFetch"
                         :items-per-page="itemsPerPage" :search="search" class="elevation-1">
                         <template v-slot:item.n="{ index }">
@@ -569,7 +575,7 @@ const statusColorState: Record<StateInvetoriesTransfer['id'], string> = {
                     </v-data-table>
                 </v-row>
                 <!-- CUADRO DIALOGO -->
-                <v-dialog v-model="dialog" :max-width="mobile ? '100%' : '70%'" transition="dialog-bottom-transition"
+                <v-dialog v-if="warehouseData" v-model="dialog" :max-width="mobile ? '100%' : '70%'" transition="dialog-bottom-transition"
                     persistent>
                     <v-card>
                         <v-toolbar color="primary" :title="nameTitleDialog"> </v-toolbar>

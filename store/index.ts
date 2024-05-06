@@ -15,10 +15,10 @@ interface SnackBar {
 }
 const useStore = defineStore("store", {
   state: () =>
-    ({
-      drawer: true,
-      rail: true
-    } as navbarState),
+  ({
+    drawer: true,
+    rail: true
+  } as navbarState),
   getters: {},
   actions: {
     setChangeRail() {
@@ -32,15 +32,15 @@ const useStore = defineStore("store", {
 });
 const useSnackbarStore = defineStore("snackbarStore", {
   state: () =>
-    ({
-      show: false,
-      title: "",
-      text: "",
-      color: "",
-      variant: ""
-    } as SnackBar),
+  ({
+    show: false,
+    title: "",
+    text: "",
+    color: "",
+    variant: ""
+  } as SnackBar),
   actions: {
-    setStatus(status: string, title: string, text = undefined) {
+    setStatus(status: string, title: string, text?: string) {
       this.show = true;
       this.title = title;
       this.text = text;

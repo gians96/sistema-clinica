@@ -16,6 +16,8 @@ const searchItems = ref<string>("");
 const clearSearch = () => {
     searchItems.value = ""
 }
+import type { Companies,Series } from "~/interfaces/Company.interface.js";
+
 import { companyStore } from '@/store/company'
 const companyFetch = ref<Companies>()
 const companyStoreObj = companyStore()
@@ -164,14 +166,6 @@ const modifiedAmountPay = (x: number) => {
     mountPay.value = x
 }
 const documentSelectedOnClick = ref("80")
-export interface Series {
-    id: number;
-    contingency: boolean;
-    document_type_id: string;
-    establishment_id: number;
-    number: string;
-    disabled: boolean;
-}
 
 const serieDocumentSelected = ref<Series>()
 const customersSelected = ref<CustomerIPOS>({
@@ -284,6 +278,7 @@ const customerDefault = ref<Customer>({
 const seriesFilterToDocumentType = computed<Series[]>(() => {
     if (!companyFetch.value || !companyFetch.value.series.length) throw new Error("Algo salio mal en la serie")
     let serieSelected = companyFetch.value.series?.filter((data) => data.document_type_id === documentSelectedOnClick.value)
+
     serieDocumentSelected.value = serieSelected[0]
     return serieSelected
 })
@@ -326,7 +321,6 @@ watch(paymentsMethodTypes.value, async (newQuestion, oldQuestion) => {
         mountPay.value = paymentsMethodTypes.value.reduce((acumulador, data) => {
             return acumulador + Number(data.mount)
         }, 0)
-
     } catch (error) {
         console.log(error);
     } finally {
@@ -523,9 +517,6 @@ const searchDataCustomers = async () => {
 
 import { countries, departments, districts, provinces } from "@/api/locationData"
 import type { Country, Department, Province, District } from "@/interfaces/Location.interface";
-import type { Companies } from "~/interfaces/Company.interface.js";
-import type { SaleNotesFetch } from "~/interfaces/SaleNotesFetch.interace.js";
-import { cat_identity_document_types } from "./data";
 const countriesData = ref<Country[]>([...countries])
 const departmentsData = ref<Department[]>([...departments])
 const provincesData = ref<Province[]>([...provinces])
@@ -654,8 +645,9 @@ const saveCustomer = async () => {
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             :label="!item.isDiscount ? 'Descuento' : ''" class="pr-6"></v-checkbox>
                                         <v-text-field v-if="item.isDiscount" type="number" density="compact"
-                                            variant="solo" v-model="item.discount" label="Descuento"></v-text-field>
+                                            variant="solo" v-model="item.discount" label="Descuento"></v-text-field>      
                                     </v-col>
+                                    <!-- {{sendSaleNotes()}} -->
                                 </v-row>
                             </v-col>
                             <v-col cols="12" md="12" lg="2" sm="12" xs="12"
@@ -744,8 +736,6 @@ const saveCustomer = async () => {
                                             </v-sheet>
                                         </v-col>
                                         <v-divider class=""></v-divider>
-
-
                                     </v-row>
                                     <v-row no-gutters justify="center" class="py-3">
                                         <v-col cols="12" xs="12" md="12" lg="12" class="d-flex align-center">
@@ -758,11 +748,11 @@ const saveCustomer = async () => {
                                     <v-row no-gutters justify="center" v-if="paymentsMethodTypes.length !== 0"
                                         v-for="(payment, index) in paymentsMethodTypes" :key="index">
                                         <v-col cols="7" class="pr-1">
-                                            <v-combobox class="inline select-box"
+                                            <v-select class="inline select-box"
                                                 :items="companyFetch.payment_method_types"
                                                 v-model="payment.payment_method_type" variant="outlined"
                                                 item-title="description" item-value="id">
-                                            </v-combobox>
+                                            </v-select>
                                         </v-col>
                                         <v-col cols="4" class="d-flex justify-center pr-1">
                                             <v-text-field label="Ingrese monto" placeholder="0.00"
@@ -774,12 +764,14 @@ const saveCustomer = async () => {
                                                 icon="mdi-delete" color="red">
                                             </v-btn>
                                         </v-col>
+                                        
                                         <!-- <v-col :cols="mobile ? '4' : '3'" class="d-flex justify-center py-1 px-1"
                                             v-for="( row, index ) in  typeMountPayments " :key="index">
                                             <v-btn color="success" size="large" @click="modifiedAmountPay(row)">
                                                 S/.{{ row }}</v-btn>
                                         </v-col> -->
                                     </v-row>
+                                    {{paymentsMethodTypes}}
                                     <v-divider class="pt-3"></v-divider>
 
                                     <v-col cols="12" class="d-flex justify-center  pb-0">
@@ -828,12 +820,12 @@ const saveCustomer = async () => {
                         <v-window-item value="data">
                             <!-- <v-container> -->
                             <v-row class="pt-6">
-                                <v-col cols="12" sm="6" md="6" class="py-0">
-                                    <v-combobox class="inline select-box"
+                                <v-col cols="12" sm="6" md="6" class="py-0" v-if="companyFetch">
+                                    <v-select class="inline select-box"
                                         v-model="customerEdited.identity_document_type"
                                         :items="companyFetch.cat_identity_document_types" item-title="description"
                                         label="Tipo Doc. Identidad" item-value="id">
-                                    </v-combobox>
+                                    </v-select>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="6" class="py-0">
                                     <v-text-field label="Número" v-model="customerEdited.number">

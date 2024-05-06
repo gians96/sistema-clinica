@@ -17,13 +17,13 @@ export interface Transfer {
     user_destination_id?: number | null;
     create_at?: Date;
     update_at?: Date;
-    user_origin?: Users | null;
-    user_destination?: Users | null;
+    user_origin?: Users ;
+    user_destination?: Users ;
     warehouse_origin: WarehouseTransfer;
     warehouse_destination: WarehouseTransfer;
     inventory_transfer_items: InventoryTransferItem[];
-    state_types_id: number;
-    state_invetories_transfer: StateInvetoriesTransfer;
+    state_types_id?: number;
+    state_invetories_transfer?: StateInvetoriesTransfer;
 }
 
 export interface InventoryTransferItem {
@@ -79,7 +79,7 @@ export interface WarehouseTransfer {
     id: number;
     establishment_id: number;
     description: string;
-    user_id: null;
+    user_id?: null;
     users?: Users;
     create_at?: Date;
     update_at?: Date;
