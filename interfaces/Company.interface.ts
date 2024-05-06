@@ -12,6 +12,7 @@ export interface Companies {
   cat_item_types: CatItemType[];
   payment_method_types: PaymentMethodType[];
   business_turns: BusinessTurn[];
+  cat_unit_types: CatUnitTypes[];
 }
 
 export interface BusinessTurn {
@@ -88,4 +89,11 @@ export interface CompanyConfig {
   logo: string;
   api_facturacion?: { url: string; token: string };
   api_search_ruc_dni?: { url: string; token: string };
+}
+
+export interface CatUnitTypes {
+  id: string;
+  active: boolean;
+  description: string;
+  symbol: null | string;
 }

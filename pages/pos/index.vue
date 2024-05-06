@@ -8,11 +8,10 @@ const { mobile } = useDisplay();
 // const snackbarStore = useSnackbarStore()
 // const typeMountPayments = [10, 20, 50, 100]
 // const typeMountPayments = [10, 20, 50, 100, 200]
-import { items } from "./data.ts"
 const { data: customersFetch, refresh: customersRefresh } = await useFetch<CustomerIPOS[]>(`${apiURL.value}/customers/pos`, { method: 'GET' });
 import type { CustomerIPOS, Customer, DocumentType } from '~/interfaces/Customer.interface';
-const itemsFetch = ref<Item[]>(items)
-// const { data: itemsFetch, refresh: itemsRefresh } = await useFetch<Item[]>(`${apiURL.value}/items`, { method: 'GET' });
+// const itemsFetch = ref<Item[]>(items)
+const { data: itemsFetch, refresh: itemsRefresh } = await useFetch<Item[]>(`${apiURL.value}/items`, { method: 'GET' });
 const searchItems = ref<string>("");
 const clearSearch = () => {
     searchItems.value = ""
@@ -59,7 +58,7 @@ const addItemsPOS = (item: Item | undefined) => {
             name: item.description,
             note: "",
             price: item.sale_unit_price,
-            type_item_id: item.type_item_id,
+            item_type_id: item.item_type_id,
             type_item: item.type_item,
             net_weight: 0, //peso neto
             quantity_chicken: 0,
@@ -67,11 +66,13 @@ const addItemsPOS = (item: Item | undefined) => {
             quantity_box: 1,
             // imageUrl: item.image_url,
             tare_weight: 0,
+            gross_weight: 0,
+            average_weight: 0,
             // itemCode: item.item_code,
             quantity: 0,
             status: 0,
             isDiscount: false,
-            discount: item.type_item_id === 1 ? 0.5 : 0,
+            discount: item.item_type_id === 1 ? 0.5 : 0,
             categoryId: item.category_id,
             internalId: item.internal_id,
             unitTypeId: item.unit_type_id,
@@ -88,10 +89,10 @@ const addItemsPOS = (item: Item | undefined) => {
 
 const changeValuesListItemPOS = (product: Product, index: number) => {
     try {
-        if (product.type_item_id === 1) {
+        if (product.item_type_id === 1) {
             listItemsPOS.value[index].quantity = product.quantity_chicken * (product.average_weight ?? 0)
         }
-        if (listItemsPOS.value[index].type_item_id === 2) {
+        if (listItemsPOS.value[index].item_type_id === 2) {
             listItemsPOS.value[index].quantity = product.gross_weight ?
                 (product.gross_weight ?? 0) - ((product.tare ?? 0) * (product.quantity_box ?? 0)) :
                 0
@@ -101,7 +102,7 @@ const changeValuesListItemPOS = (product: Product, index: number) => {
         }
         listItemsPOS.value[index].quantity = Number(moneyDecimal(String(product.quantity)))
         listItemsPOS.value[index].total = product.quantity * product.price -
-            (product.isDiscount ? (product.type_item_id === 1 ? product.discount * product.quantity_chicken : 0) : 0)
+            (product.isDiscount ? (product.item_type_id === 1 ? product.discount * product.quantity_chicken : 0) : 0)
     } catch (error) {
         console.log(error);
     }
@@ -300,7 +301,7 @@ const onClickAddPaymentMethods = () => {
     paymentsMethodTypes.value.push(
         {
             payment_method_type: {
-                "id": "01",
+                "id": 1,
                 "description": "Efectivo",
                 "has_card": false,
                 "charge": 0,
@@ -333,7 +334,85 @@ watch(paymentsMethodTypes.value, async (newQuestion, oldQuestion) => {
     }
 })
 
-const onClickPay = () => {
+const sendSaleNotes = () => {
+    return {
+        user_id: 0,
+        customer_id: customersSelected.value.id,
+        total: totalListPOS(),
+        observation: "",
+        items: listItemsPOS.value.map(data => {
+            return {
+                item_id: Number(data.id),
+                item_lots_group_id: null,
+                quantity: Number(data.quantity),
+                unit_price: Number(data.price),
+                item_type_id: data.item_type_id ?? null,
+                quantity_chicken: Number(data.quantity_chicken),
+                average_weight: Number(data.average_weight),
+                quantity_box: Number(data.quantity_box),
+                tare: Number(data.tare),
+                gross_weight: Number(data.gross_weight),
+                unit_type_id: data.unitTypeId
+            }
+        }),
+        payments: paymentsMethodTypes.value.map(data => {
+            return {
+                payment_method_type_id: Number(data.payment_method_type.id),
+                reference: "",
+                payment: Number(data.mount)
+            }
+        }),
+    }
+}
+import { useSnackbarStore } from '@/store/index';
+const snackbarStore = useSnackbarStore()
+const onClickPay = async () => {
+    const response = await fetch(
+        `${apiURL.value}/sales_notes`,
+
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                // "Authorization": `Bearer ${token_apiperu.value}`,
+            },
+            body: JSON.stringify(sendSaleNotes())
+        }
+    ).finally(async () => {
+        // await customersRefresh()
+        // dialogCustomer.value = false
+    });
+    let data
+    console.log(response);
+    console.log(response.ok);
+    // console.log(response.json());
+
+
+    if (response.ok) {
+        // La solicitud se completó correctamente
+        data = await response.json(); // Parsea la respuesta como JSON
+        snackbarStore.setStatus("success", "Guardado correctamente: " + data.series + "-" + data.number)
+        customersSelected.value = {
+            "id": 1,
+            "description": "99999999 - Clientes - Varios",
+            "name": "Clientes - Varios",
+            "number": "99999999",
+            "identity_document_type_id": "0",
+            "has_discount": false,
+            "discount_type": "01",
+            "discount_amount": 0
+        }
+        listItemsPOS.value = []
+        dialogConfirmSale.value = false
+        console.log(data); // Aquí tendrás los datos obtenidos
+        paymentsMethodTypes.value = []
+        await onClickAddPaymentMethods()
+    } else {
+        // La solicitud falló, maneja el error
+        snackbarStore.setStatus("error", "Error al guardar",)
+
+        console.error('Error al obtener los datos:', response.statusText);
+    }
 }
 const searchDataCustomers = async () => {
     let customer: Customer;
@@ -445,6 +524,8 @@ const searchDataCustomers = async () => {
 import { countries, departments, districts, provinces } from "@/api/locationData"
 import type { Country, Department, Province, District } from "@/interfaces/Location.interface";
 import type { Companies } from "~/interfaces/Company.interface.js";
+import type { SaleNotesFetch } from "~/interfaces/SaleNotesFetch.interace.js";
+import { cat_identity_document_types } from "./data";
 const countriesData = ref<Country[]>([...countries])
 const departmentsData = ref<Department[]>([...departments])
 const provincesData = ref<Province[]>([...provinces])
@@ -519,34 +600,35 @@ const saveCustomer = async () => {
                                         <div class="text-left font-weight-bold">{{ item.name }} - {{ item.unitTypeId }}
                                         </div>
                                     </v-col>
-                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1" v-if="item.type_item_id">
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1" v-if="item.item_type_id">
                                         <v-text-field type="number" density="compact" variant="solo"
                                             v-model="item.quantity_chicken"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             label="# Pollos"></v-text-field>
+
                                     </v-col>
-                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 2"
                                         class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
                                             v-model="item.quantity_box"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             label="#Jaba"></v-text-field>
                                     </v-col>
-                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 2"
                                         class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
                                             v-model="item.gross_weight"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             label="Peso Bruto (kg)"></v-text-field>
                                     </v-col>
-                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 2"
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 2"
                                         class="pr-1">
                                         <v-text-field density="compact" variant="solo" v-model="item.tare"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             :label="concatString('Tara(kg)', item.tare_weight ?? '')"
                                             suffix=""></v-text-field>
                                     </v-col>
-                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.type_item?.id === 1"
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 1"
                                         class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
                                             v-model="item.average_weight"
@@ -557,15 +639,16 @@ const saveCustomer = async () => {
                                         <v-text-field type="number" density="compact" variant="solo"
                                             v-model="item.quantity"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
-                                            :label="item.type_item_id ? 'Peso neto (kg)' : 'Cantidad'" color="white"
+                                            :label="item.item_type_id ? 'Peso neto (kg)' : 'Cantidad'" color="white"
                                             bg-color="success"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
                                             v-model="item.price" label="Precio" color="white"
+                                            @update:model-value="changeValuesListItemPOS(item, index)"
                                             bg-color="success"></v-text-field>
                                     </v-col>
-                                    <v-col cols="6" xs="4" sm="4" md="3" lg="3" v-if="item.type_item?.id === 1"
+                                    <v-col cols="6" xs="4" sm="4" md="3" lg="3" v-if="item.item_type_id === 1"
                                         class="pr-1 d-flex">
                                         <v-checkbox v-model="item.isDiscount"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
@@ -585,10 +668,10 @@ const saveCustomer = async () => {
                                         </div>
                                         <div v-if="item.isDiscount">
                                             <div class="text-decoration-line-through text-center"
-                                                v-if="item.type_item_id === 1">
+                                                v-if="item.item_type_id === 1">
                                                 Sub T: {{ moneyDecimal(String(item.quantity * item.price)) }}
                                             </div>
-                                            <div v-if="item.type_item_id === 1" class="text-center">
+                                            <div v-if="item.item_type_id === 1" class="text-center">
                                                 Desc: {{ moneyDecimal(String(item.discount * item.quantity_chicken)) }}
                                             </div>
                                         </div>
@@ -605,7 +688,7 @@ const saveCustomer = async () => {
                         </v-row>
                     </v-col>
                 </v-row>
-                <!-- {{ listItemsPOS }} -->
+                <!-- {{ sendSaleNotes() }} -->
             </v-container>
         </v-col>
         <!-- {{ companyFetch }} -->
@@ -683,7 +766,7 @@ const saveCustomer = async () => {
                                         </v-col>
                                         <v-col cols="4" class="d-flex justify-center pr-1">
                                             <v-text-field label="Ingrese monto" placeholder="0.00"
-                                                v-model="payment.mount">
+                                                v-model="payment.mount" type="number">
                                             </v-text-field>
                                         </v-col>
                                         <v-col cols="1" class="py-2">
@@ -701,7 +784,7 @@ const saveCustomer = async () => {
 
                                     <v-col cols="12" class="d-flex justify-center  pb-0">
                                         <v-btn color="success" block size="large" @click="dialogConfirmSale = true"
-                                            :disabled="false ? true : false"> PAGAR </v-btn>
+                                            :disabled="(totalListPOS() === 0 ? true : false)"> PAGAR </v-btn>
                                     </v-col>
                                 </v-col>
                             </v-row>

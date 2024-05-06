@@ -1,3 +1,5 @@
+import type { CatUnitTypes } from "./Company.interface";
+
 export interface Item {
     id: number | 0;
     name: string;
@@ -13,14 +15,15 @@ export interface Item {
     status: boolean;
     lots_enabled: boolean;
     currency_type_id?: string | null;
-    unit_type_id: 'NIU';
+    unit_type_id: 'NIU' | string;
+    unit_type: CatUnitTypes | null;
     category_id: number | null;
     warehouse_id: number | null;
     warehouses: Warehouses | null;
     item_lots_group?: ItemLotsGroup[] | [];
     sale_unit_price: number;
     purchase_unit_price: number;
-    type_item_id: number | null;
+    item_type_id: number | null;
     type_item: TypeItem | null;
     type_commission?: string | null;
     commission?: number | null;
@@ -58,7 +61,7 @@ export interface Product {
     name: string
     note: string
     price: number
-    type_item_id?: number | null;
+    item_type_id?: number | null;
     quantity_chicken: number;
     average_weight?: number | null;
     quantity_box?: number | null;
@@ -85,7 +88,7 @@ export interface Product {
 }
 
 export interface paymentMethodTypes {
-    id: string;
+    id: number;
     description: string;
     has_card: boolean;
     charge: number;

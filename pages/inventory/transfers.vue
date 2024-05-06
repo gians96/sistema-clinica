@@ -393,7 +393,7 @@ const save = async () => {
     } catch (error: any) {
         snackbarStore.setStatus("error", "Error", error)
     } finally {
-
+        dialog.value = false
         snackbarStore.setStatus("success", "Guardado correctamente")
     }
 }
@@ -623,7 +623,7 @@ const statusColorState: Record<StateInvetoriesTransfer['id'], string> = {
                                     <p class="pb-0"> Productos a transferir </p>
                                 </v-col>
                             </v-row>
-                            <div v-for="(item, index ) in  editedItem.inventory_transfer_items" :key="index"
+                            <div v-for="(item, index ) in editedItem.inventory_transfer_items" :key="index"
                                 :class="mobile ? 'py-4' : ''">
                                 <v-row class="d-flex" :class="mobile ? 'bg-blue-grey-lighten-5' : ''">
                                     <v-col cols="12" xs="12" md="3" lg="5" :class="mobile ? 'pb-0' : ''">

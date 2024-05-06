@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { useSnackbarStore } from '@/store/index';
+const snackbarStore = useSnackbarStore()
 import type { Item, ItemLotsGroup } from "@/interfaces/Item.interface";
 import type { Warehouse } from "~/interfaces/Warehouse.interface";
-const snackbarStore = useSnackbarStore()
 const apiURL = useCookie("apiURL");
 import { useDisplay } from 'vuetify'
 const { mobile } = useDisplay()
@@ -43,6 +43,12 @@ const editedItem = ref<Item>({
     status: true,
     lots_enabled: false,
     unit_type_id: "NIU",
+    unit_type: {
+        "id": "NIU",
+        "active": true,
+        "description": "Unidades",
+        "symbol": null
+    },
     category_id: null,
     item_lots_group: [] as ItemLotsGroup[],
     warehouses: { id: 1, description: "" },
@@ -52,8 +58,9 @@ const editedItem = ref<Item>({
     commission: 0,
     text_filter: "",
     type_item: null,
-    type_item_id: null,
+    item_type_id: null,
     warehouse_id: null
+
 })
 
 const defaultItem = ref<Item>({
@@ -70,6 +77,12 @@ const defaultItem = ref<Item>({
     status: true,
     lots_enabled: false,
     unit_type_id: "NIU",
+    unit_type: {
+        "id": "NIU",
+        "active": true,
+        "description": "Unidades",
+        "symbol": null
+    },
     category_id: null,
     item_lots_group: [] as ItemLotsGroup[],
     warehouses: { id: 1, description: "" },
@@ -79,7 +92,7 @@ const defaultItem = ref<Item>({
     commission: 0,
     text_filter: "",
     type_item: null,
-    type_item_id: null,
+    item_type_id: null,
     warehouse_id: null
 })
 let editedIndex = ref(-1)
@@ -92,7 +105,7 @@ const pageCount = computed(() => {
 const nameTitleDialog = ref("")
 const openDialogNewItem = () => {
     dialog.value = true
-    nameTitleDialog.value = "Nueva Producto"
+    nameTitleDialog.value = "Nuevo Producto"
     editedItem.value = JSON.parse(JSON.stringify(defaultItem.value))
 }
 
@@ -189,6 +202,7 @@ const itemSend = (item: Item) => {
         purchase_unit_price: item.purchase_unit_price,
         type_commission: item.type_commission,
         commission: item.commission,
+        item_type_id: item.item_type_id,
         lots: item.item_lots_group,
     }
 }
@@ -233,6 +247,9 @@ const deleteItemFetch = async (id: number) => await fetch(
 const save = () => {
     try {
         if (!itemsFetch.value) return null
+        // if (!editedItem.value.unit_type) return null
+        // editedItem.value.unit_type_id = editedItem.value.unit_type?.id
+        // editedItem.value.item_type_id = editedItem.value.type_item?.id ?? null
         if (editedIndex.value > -1) {
             // itemsFetch.value = JSON.parse(JSON.stringify(editedItem.value))
             updateItemFetch(editedItem.value)
@@ -313,7 +330,18 @@ const exportItemsXLS = async () => {
         // Maneja el error apropiadamente, por ejemplo, mostrando un mensaje al usuario
     }
 }
+import { companyStore } from '@/store/company'
+import type { Companies } from '~/interfaces/Company.interface';
+const companyFetch = ref<Companies>()
+const companyStoreObj = companyStore()
+onMounted(async () => {
+    companyFetch.value = companyStore().$state
+    refreshData()
+})
+const refreshData = async () => {
+    await companyStoreObj.requestItems()
 
+}
 </script>
 
 <template>
@@ -413,7 +441,8 @@ const exportItemsXLS = async () => {
                                                 <v-text-field v-model="editedItem.model" label="Modelo"></v-text-field>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="3">
-                                                <v-select :items="['NIU']" label="Unidad*"
+                                                <v-select :items="companyFetch?.cat_unit_types" label="Unidad*"
+                                                    :item-title="'description'" item-value="id"
                                                     v-model="editedItem.unit_type_id" required></v-select>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="3">
@@ -453,7 +482,14 @@ const exportItemsXLS = async () => {
                                             <v-col cols="12" sm="6" md="3">
                                                 <v-checkbox v-model="editedItem.active" label="Habilitado"></v-checkbox>
                                             </v-col>
-
+                                            <v-col cols="12" sm="6" md="3"
+                                                v-if="companyFetch && companyFetch.business_turns[0].active">
+                                                <v-select :items="companyFetch?.cat_item_types"
+                                                    v-model="editedItem.item_type_id" required
+                                                    :item-title="'description'" item-value="id"
+                                                    label="Tipo de producto">
+                                                </v-select>
+                                            </v-col>
                                             <!-- <v-col cols="12" sm="6" md="3">
                                                 <v-text-field type="date" label="Date"></v-text-field>
                                             </v-col> -->
@@ -482,7 +518,7 @@ const exportItemsXLS = async () => {
                                             <div v-if="!mobile"> Nuevo</div>
                                         </v-btn>
                                     </v-card-title>
-                                    <div v-for="(lot, index ) in  editedItem.item_lots_group" :key="index"
+                                    <div v-for="(lot, index ) in editedItem.item_lots_group" :key="index"
                                         :class="mobile ? 'py-4' : ''">
                                         <v-row class="d-flex" :class="mobile ? 'bg-blue-grey-lighten-5' : ''">
                                             <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'pb-0' : ''">
