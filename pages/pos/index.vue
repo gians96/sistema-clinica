@@ -16,7 +16,7 @@ const searchItems = ref<string>("");
 const clearSearch = () => {
     searchItems.value = ""
 }
-import type { Companies,Series } from "~/interfaces/Company.interface.js";
+import type { Companies, Series } from "~/interfaces/Company.interface.js";
 
 import { companyStore } from '@/store/company'
 const companyFetch = ref<Companies>()
@@ -27,7 +27,6 @@ onMounted(async () => {
 })
 const refreshData = async () => {
     await companyStoreObj.requestItems()
-
 }
 
 // const itemsFilter = computed<Item[]>(() => {
@@ -141,29 +140,26 @@ const totalListPOS = () => {
     }, 0)
 }
 const isShowModalComprobante = ref(false)
-const mountPay = ref<number>(0)
+const mountPay = () => {
+    if (!listItemsPOS.value) return 0
+    if (listItemsPOS.value.length > 0 && totalListPOS() > 0) {
+        return paymentsMethodTypes.value.reduce((acumulador, data) => {
+            return acumulador + Number(data.mount)
+        }, 0)
+    }
+}
+const vuelto = () => {
+    if (!mountPay()) return 0
+    if ((mountPay() ?? 0) < totalListPOS()) return 0
+    return (mountPay() ?? 0) - totalListPOS()
+}
+
 const accountsReceivable = () => {
-    if (totalListPOS() <= mountPay.value) return 0
-    return totalListPOS() - mountPay.value
+    if (totalListPOS() <= (mountPay() ?? 0)) return 0
+    return totalListPOS() - (mountPay() ?? 0)
 }
 const moneyDecimal = (x: string) => {
     return Number.parseFloat(x).toFixed(2);
-}
-const cleanDataForm = () => {
-    listItemsPOS.value = []
-    isShowModalComprobante.value = false
-    // saleNoteResponse.value = null
-    mountPay.value = 0
-}
-
-const vuelto = () => {
-    if (!mountPay.value) return 0
-    if (mountPay.value < totalListPOS()) return 0
-    return mountPay.value - totalListPOS()
-}
-
-const modifiedAmountPay = (x: number) => {
-    mountPay.value = x
 }
 const documentSelectedOnClick = ref("80")
 
@@ -183,7 +179,7 @@ const customerEdited = ref<Customer>({
     id: 0,
     name: "",
     number: "",
-    identity_document_type_id: null,
+    identity_document_type_id: "6",
     identity_document_type: { id: "6", active: true, description: "RUC" },
     address: "",
     internal_code: "",
@@ -230,7 +226,7 @@ const customerDefault = ref<Customer>({
     id: 0,
     name: "",
     number: "",
-    identity_document_type_id: null,
+    identity_document_type_id: "6",
     identity_document_type: { id: "6", active: true, description: "RUC" },
     address: "",
     internal_code: "",
@@ -286,7 +282,7 @@ const seriesFilterToDocumentType = computed<Series[]>(() => {
 const dialogConfirmSale = ref(false)
 const dialogCustomer = ref(false)
 const tabDialogCustomer = ref(null)
-// const onClickCloseDialogCustomer = ref()
+
 const concatString = (s1: String, s2: String | number | null) => {
     return (s1 + "|  " + moneyDecimal(String(s2)))
 }
@@ -295,15 +291,8 @@ const paymentsMethodTypes = ref<paymentPOS[]>([])
 const onClickAddPaymentMethods = () => {
     paymentsMethodTypes.value.push(
         {
-            payment_method_type: {
-                "id": 1,
-                "description": "Efectivo",
-                "has_card": false,
-                "charge": 0,
-                "number_days": 0,
-                "is_credit": false,
-                "is_cash": true
-            },
+            payment_method_type_id: 1,
+            reference: "",
             mount: 0
         }
     )
@@ -316,18 +305,6 @@ const onClickDeletePaymentMethods = (id: number) => {
 onMounted(async () => {
     await onClickAddPaymentMethods()
 })
-watch(paymentsMethodTypes.value, async (newQuestion, oldQuestion) => {
-    try {
-        mountPay.value = paymentsMethodTypes.value.reduce((acumulador, data) => {
-            return acumulador + Number(data.mount)
-        }, 0)
-    } catch (error) {
-        console.log(error);
-    } finally {
-        // loading.value = false
-    }
-})
-
 const sendSaleNotes = () => {
     return {
         user_id: 0,
@@ -351,7 +328,7 @@ const sendSaleNotes = () => {
         }),
         payments: paymentsMethodTypes.value.map(data => {
             return {
-                payment_method_type_id: Number(data.payment_method_type.id),
+                payment_method_type_id: Number(data.payment_method_type_id),
                 reference: "",
                 payment: Number(data.mount)
             }
@@ -363,7 +340,6 @@ const snackbarStore = useSnackbarStore()
 const onClickPay = async () => {
     const response = await fetch(
         `${apiURL.value}/sales_notes`,
-
         {
             method: "POST",
             headers: {
@@ -377,11 +353,6 @@ const onClickPay = async () => {
         // dialogCustomer.value = false
     });
     let data
-    console.log(response);
-    console.log(response.ok);
-    // console.log(response.json());
-
-
     if (response.ok) {
         // La solicitud se completó correctamente
         data = await response.json(); // Parsea la respuesta como JSON
@@ -397,6 +368,7 @@ const onClickPay = async () => {
             "discount_amount": 0
         }
         listItemsPOS.value = []
+        await vuelto()
         dialogConfirmSale.value = false
         console.log(data); // Aquí tendrás los datos obtenidos
         paymentsMethodTypes.value = []
@@ -409,8 +381,7 @@ const onClickPay = async () => {
     }
 }
 const searchDataCustomers = async () => {
-    let customer: Customer;
-    if (customerEdited.value.identity_document_type.id === "6") {//RUC
+    if (customerEdited.value.identity_document_type_id === "6") {//RUC
         const response = await fetch(
             `https://apiperu.dev/api/ruc/${customerEdited.value.number}`,
 
@@ -423,8 +394,6 @@ const searchDataCustomers = async () => {
                 // body: JSON.stringify(customerEdited.value.number)
             }
         ).finally(async () => {
-            // await customersRefresh()
-            // dialogCustomer.value = false
         });
         let data
         if (response.ok) {
@@ -462,7 +431,7 @@ const searchDataCustomers = async () => {
             console.error('Error al obtener los datos:', data.message);
         }
     }
-    if (customerEdited.value.identity_document_type.id === "1") {//DNI
+    if (customerEdited.value.identity_document_type_id === "1") {//DNI
         const response = await fetch(
             `https://apiperu.dev/api/dni/${customerEdited.value.number}`,
             {
@@ -474,14 +443,10 @@ const searchDataCustomers = async () => {
                 // body: JSON.stringify(customerEdited.value.number)
             }
         ).finally(async () => {
-            // await customersRefresh()
-            // dialogCustomer.value = false
         });
         let data
         if (response.ok) {
-            // La solicitud se completó correctamente
             data = await response.json(); // Parsea la respuesta como JSON
-            // console.log(data); // Aquí tendrás los datos obtenidos
         } else {
             // La solicitud falló, maneja el error
             console.error('Error al obtener los datos:', response.statusText);
@@ -547,7 +512,6 @@ const saveCustomer = async () => {
         telephone: customerEdited.value.telephone,
         email: customerEdited.value.email
     }
-
     const response = await fetch(
         `${apiURL.value}/customers`,
         {
@@ -559,10 +523,28 @@ const saveCustomer = async () => {
             body: JSON.stringify(customer)
         }
     ).finally(async () => {
-        await customersRefresh()
-        dialogCustomer.value = false
     });
-    // console.log(response);
+    let data
+    if (response.ok) {
+        data = await response.json();
+        customersSelected.value = {
+            "id": data.id,
+            "description": data.number + " - " + data.name,
+            "name": data.name,
+            "number": data.number,
+            "identity_document_type_id": data.identity_document_type_id,
+            "has_discount": false,
+            "discount_type": data.discount_type,
+            "discount_amount": 0
+        }
+        snackbarStore.setStatus("success", "Guardado correctamente: " + customerEdited.value.number + " - " + customerEdited.value.name)
+        customerEdited.value = JSON.parse(JSON.stringify(customerDefault.value))
+    } else {
+        snackbarStore.setStatus("error", "Error al guardar",)
+        console.error('Error al obtener los datos:', response.statusText);
+    }
+    await customersRefresh()
+    dialogCustomer.value = false
 }
 </script>
 
@@ -596,7 +578,6 @@ const saveCustomer = async () => {
                                             v-model="item.quantity_chicken"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             label="# Pollos"></v-text-field>
-
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 2"
                                         class="pr-1">
@@ -645,9 +626,8 @@ const saveCustomer = async () => {
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             :label="!item.isDiscount ? 'Descuento' : ''" class="pr-6"></v-checkbox>
                                         <v-text-field v-if="item.isDiscount" type="number" density="compact"
-                                            variant="solo" v-model="item.discount" label="Descuento"></v-text-field>      
+                                            variant="solo" v-model="item.discount" label="Descuento"></v-text-field>
                                     </v-col>
-                                    <!-- {{sendSaleNotes()}} -->
                                 </v-row>
                             </v-col>
                             <v-col cols="12" md="12" lg="2" sm="12" xs="12"
@@ -680,10 +660,8 @@ const saveCustomer = async () => {
                         </v-row>
                     </v-col>
                 </v-row>
-                <!-- {{ sendSaleNotes() }} -->
             </v-container>
         </v-col>
-        <!-- {{ companyFetch }} -->
         <v-col cols="12" md="5" lg="4" sm="5" xs="11" class="d-flex align-center justify-center  " height="100%"
             width="100%" v-if="companyFetch">
             <v-container fluid>
@@ -695,14 +673,15 @@ const saveCustomer = async () => {
                                 <v-btn value="80">
                                     <span>N. VENTA</span>
                                 </v-btn>
-                                <v-btn value="03">
+                                <v-btn disabled value="03">
                                     <span>BOLETA</span>
                                 </v-btn>
-                                <v-btn value="01">
+                                <v-btn disabled value="01">
                                     <span>FACTURA</span>
                                 </v-btn>
                             </v-btn-toggle>
                         </v-card-title>
+                        <!-- {{ customersSelected }} -->
                         <v-card-text>
                             <v-row class="mb-2">
                                 <v-col cols="12" :lg="false ? '6' : '12'" sm="12" class="pb-0">
@@ -750,7 +729,7 @@ const saveCustomer = async () => {
                                         <v-col cols="7" class="pr-1">
                                             <v-select class="inline select-box"
                                                 :items="companyFetch.payment_method_types"
-                                                v-model="payment.payment_method_type" variant="outlined"
+                                                v-model="payment.payment_method_type_id" variant="outlined"
                                                 item-title="description" item-value="id">
                                             </v-select>
                                         </v-col>
@@ -764,16 +743,8 @@ const saveCustomer = async () => {
                                                 icon="mdi-delete" color="red">
                                             </v-btn>
                                         </v-col>
-                                        
-                                        <!-- <v-col :cols="mobile ? '4' : '3'" class="d-flex justify-center py-1 px-1"
-                                            v-for="( row, index ) in  typeMountPayments " :key="index">
-                                            <v-btn color="success" size="large" @click="modifiedAmountPay(row)">
-                                                S/.{{ row }}</v-btn>
-                                        </v-col> -->
                                     </v-row>
-                                    {{paymentsMethodTypes}}
                                     <v-divider class="pt-3"></v-divider>
-
                                     <v-col cols="12" class="d-flex justify-center  pb-0">
                                         <v-btn color="success" block size="large" @click="dialogConfirmSale = true"
                                             :disabled="(totalListPOS() === 0 ? true : false)"> PAGAR </v-btn>
@@ -818,11 +789,10 @@ const saveCustomer = async () => {
                 <v-card-text>
                     <v-window v-model="tabDialogCustomer">
                         <v-window-item value="data">
-                            <!-- <v-container> -->
                             <v-row class="pt-6">
                                 <v-col cols="12" sm="6" md="6" class="py-0" v-if="companyFetch">
                                     <v-select class="inline select-box"
-                                        v-model="customerEdited.identity_document_type"
+                                        v-model="customerEdited.identity_document_type_id"
                                         :items="companyFetch.cat_identity_document_types" item-title="description"
                                         label="Tipo Doc. Identidad" item-value="id">
                                     </v-select>
@@ -830,7 +800,7 @@ const saveCustomer = async () => {
                                 <v-col cols="12" sm="6" md="6" class="py-0">
                                     <v-text-field label="Número" v-model="customerEdited.number">
                                         <template v-slot:append
-                                            v-if="customerEdited.identity_document_type.id === '1' || customerEdited.identity_document_type.id === '6'">
+                                            v-if="customerEdited.identity_document_type_id === '1' || customerEdited.identity_document_type_id === '6'">
                                             <v-btn icon variant="elevated" color="success"
                                                 @click="searchDataCustomers()">
                                                 <v-icon> mdi-magnify </v-icon>
@@ -951,10 +921,7 @@ const saveCustomer = async () => {
             </v-card>
         </v-dialog>
         <!-- DIALOG NEW , EDIT -->
-
-
     </v-row>
-
 </template>
 
 

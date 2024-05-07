@@ -98,6 +98,7 @@ export interface paymentMethodTypes {
 }
 
 export interface paymentPOS {
-    payment_method_type: paymentMethodTypes;
+    payment_method_type_id: number;
+    reference: string;
     mount: number;
 }
