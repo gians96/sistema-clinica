@@ -14,9 +14,9 @@ const { data: warehousesFetch } = await useFetch<Warehouse[]>(`${apiURL.value}/w
 
 const headers = ref([
     // { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
-    { key: 'n', title: 'N°' },
+    { key: 'customer.number', title: 'N°' },
     { key: 'date_of_issue', title: 'Fecha Emsión' },
-    { key: 'customer_id', title: 'Cliente' },
+    { key: 'customer.name', title: 'Cliente' },
     { key: 'series', title: 'Nota de venta' },
     { key: 'has_total_canceled', title: 'Estado Pago' },
     { key: 'total', title: 'Total' },
@@ -52,7 +52,7 @@ const openDialogEditItem = (item: SaleNoteFetch) => {
     if (!saleNotesFetch.value) return null
     dialog.value = true
     nameTitleDialog.value = "Editar nota de venta"
-    // if (item.lots_enabled && item.item_lots_group) {
+    // if (item.lots_enabled && item.item_lots_group) { 
     //     item.item_lots_group.forEach(lot => {
     //         if (!lot.date_of_due) return
     //         let fechaOriginal = new Date(lot.date_of_due);
@@ -295,10 +295,10 @@ const colorStateType: Record<StateType['id'], string> = {
                 <v-row dense>
                     <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="saleNotesFetch"
                         :items-per-page="itemsPerPage" :search="search" class="elevation-1">
-                        <template v-slot:item.n="{ index }">
+                        <template v-slot:item.customer.number="{ index }">
                             {{ index + 1 + itemsPerPage * (page - 1) }}
                         </template>
-                        <template v-slot:item.customer_id="{ item }">
+                        <template v-slot:item.customer.name="{ item }">
                             <span>
                                 <p> {{ item.raw.customer.name }}</p>
                                 <div class="text-caption">{{ item.raw.customer.number }}</div>
