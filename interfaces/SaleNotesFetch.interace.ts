@@ -121,7 +121,7 @@ export interface SaleNoteItem {
     sale_note_id:            number;
     item_id:                 number;
     item_lots_group_id:      null;
-    quantity:                string;
+    quantity:                number;
     affectation_igv_id:      string;
     percentage_igv:          string;
     unit_value:              string;
@@ -136,11 +136,11 @@ export interface SaleNoteItem {
     total_other_taxes:       string;
     total_plastic_bag_taxes: string;
     total_taxes:             string;
-    unit_price:              string;
+    unit_price:              number;
     total_value:             string;
     total_charge:            string;
     total_discount:          string;
-    total:                   string;
+    total:                   number;
     price_type_id:           string;
     additional_information:  null;
     warehouse_id:            number;
@@ -154,6 +154,34 @@ export interface SaleNoteItem {
     discount:                string;
     currency_type_id:        string;
     unit_type_id:            string;
+    item:                    Item;
+}
+
+export interface Item {
+    id:                  number;
+    name:                string;
+    description:         string;
+    second_name:         string;
+    text_filter:         string;
+    model:               string;
+    barcode:             string;
+    internal_id:         string;
+    stock:               string;
+    stock_min:           string;
+    active:              boolean;
+    status:              boolean;
+    lots_enabled:        boolean;
+    unit_type_id:        string;
+    category_id:         null;
+    warehouse_id:        number;
+    sale_unit_price:     string;
+    purchase_unit_price: string;
+    createdAt:           Date;
+    update_at:           Date;
+    type_commission:     string;
+    commission:          string;
+    currency_type_id:    string;
+    item_type_id:        number | null;
 }
 
 export interface SaleNotePayment {

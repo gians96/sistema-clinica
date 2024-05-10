@@ -8,7 +8,7 @@ import { useDisplay } from 'vuetify'
 const { mobile } = useDisplay()
 import { companyStore } from '@/store/company'
 import type { Companies } from '~/interfaces/Company.interface';
-import type { SaleNoteFetch, StateType } from '~/interfaces/SaleNotesFetch.interace';
+import type { SaleNoteFetch, StateType, Customer, SaleNoteItem } from '~/interfaces/SaleNotesFetch.interace';
 const { data: saleNotesFetch, refresh: itemsRefresh } = await useFetch<SaleNoteFetch[]>(`${apiURL.value}/sales_notes`, { method: 'GET' });
 const { data: warehousesFetch } = await useFetch<Warehouse[]>(`${apiURL.value}/warehouses`, { method: 'GET' });
 
@@ -16,13 +16,13 @@ const headers = ref([
     // { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
     { key: 'customer.number', title: 'N°' },
     { key: 'date_of_issue', title: 'Fecha Emsión' },
-    { key: 'customer.name', title: 'Cliente' },
-    { key: 'series', title: 'Nota de venta' },
+    { key: 'customer', title: 'Cliente', value: (item: any) => `${item.customer.name} - ${item.customer.number}` },
+    { key: 'series', title: 'Nota de venta', value: (item: any) => `${item.series} - ${item.number}` },
     { key: 'has_total_canceled', title: 'Estado Pago' },
     { key: 'total', title: 'Total' },
     { key: 'total_prepayment', title: 'Monto abonado' },
     { key: 'pending_amount', title: 'Saldo' },
-    // { key: 'actions', title: 'Acciones' },
+    { key: 'actions', title: 'Acciones', value: "" },
 ])
 
 const page = ref(1)
@@ -269,6 +269,112 @@ const colorStateType: Record<StateType['id'], string> = {
     "6": 'red',//Anulado
     "7": 'orange',//Por anular
 }
+const printItems = (items: SaleNoteItem[]) => {
+    const header = [
+        { text: "DESCRIPCIÓN", style: { fontSize: 12, bold: true, alignment: "center" } },
+        { text: "UNIDAD", style: { fontSize: 12, bold: true, alignment: "center" } },
+        { text: "CANTIDAD", style: { fontSize: 12, bold: true, alignment: "center" } },
+        { text: "P. UNI", style: { fontSize: 12, bold: true, alignment: "center" } },
+        { text: "TOTAL", style: { fontSize: 12, bold: true, alignment: "center" } }
+    ];
+    if (!items) return [header]
+    return [header,
+        ...items.map(item => {
+            return [
+                { text: item.item.description.toString(), style: { fontSize: 11, alignment: "center" } },
+                { text: item.unit_type_id.toString(), style: { fontSize: 11, alignment: "center" } },
+                { text: item.quantity.toString(), style: { fontSize: 11, alignment: "center" } },
+                { text: item.unit_price.toString(), style: { fontSize: 11, alignment: "center" } },
+                // { text: item.total.toString(), style: { fontSize: 11, bold: true, alignment: "center" } }
+            ];
+        })
+    ]
+};
+const printTransfer = async (id: number) => {
+    if (!id) throw Error("El id no es vacio:")
+    const response = await fetch(`${apiURL.value}/sales_notes/get/${id}`, { method: "GET" })
+    if (!response.ok) return
+    const saleNotes = await response.json()
+
+    // const saleNotes: SaleNoteFetch = {}
+    let fecha = formatDate(saleNotes.create_at.toString()) + formatTime(saleNotes.create_at.toString())
+    const pdfMake = usePDFMake();
+    pdfMake.tableLayouts = {
+        custom: {
+            paddingLeft: function () {
+                return 5;
+            },
+            paddingRight: function () {
+                return 5;
+            },
+        },
+    };
+    let isVoided = {
+        text: 'ANULADO',
+        absolutePosition: { x: 100, y: 300 },
+        alignment: 'center', // Centrar el texto
+        fontSize: 70, // Tamaño de la fuente
+        color: 'red', // Color del texto
+    }
+
+    pdfMake.createPdf({
+        pageSize: 'A4',
+        pageMargins: [35, 50, 35, 50],
+        content: [
+            saleNotes.state_type_id === 6 ? isVoided : {},
+            {
+                columns: [
+                    {
+                        text: ""
+                    },
+                    // {
+                    //     // image: logo,
+                    //     width: 100,
+                    //     alignment: "center"
+                    // },
+                    {
+                        text: ""
+                    },
+                    [{
+                        text: 'R.U.C. ' + companyFetch.value?.companies.number,
+                        style: { fontSize: 14, bold: true, alignment: "center" },
+                        margin: [0, 0, 0, 5],
+                    }, {
+                        text: companyFetch.value?.companies.name,
+                        style: { fontSize: 10, bold: true, alignment: "center" },
+                        margin: [0, 0, 0, 2],
+                    }, {
+                        text: "NOTA DE VENTA",
+                        style: { fontSize: 14, bold: true, alignment: "center" },
+                        margin: [0, 0, 0, 5],
+                    },
+                    {
+                        text: saleNotes.series + " - " + saleNotes.number,
+                        style: { fontSize: 14, bold: true, alignment: "center" },
+                        margin: [0, 0, 0, 35],
+                    },]
+                ],
+            },
+            {
+                text: `FECHA: ${fecha}`,
+                margin: [0, 0, 0, 20],
+                style: { fontSize: 12, bold: true, alignment: "left" },
+            },
+            {
+                // layout: "custom",
+                table: {
+                    heights: 1,
+                    widths: ['*', 100, '*', '*'],
+                    margin: [50, 0, 0, 50],
+
+                    alignment: "center",
+                    body: printItems(saleNotes.sale_note_items),
+                },
+            },
+        ],
+    }).print()
+    // modalPrecuenta.value = true
+};
 </script>
 
 <template>
@@ -293,12 +399,12 @@ const colorStateType: Record<StateType['id'], string> = {
                     </v-col>
                 </v-row>
                 <v-row dense>
-                    <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="saleNotesFetch"
-                        :items-per-page="itemsPerPage" :search="search" class="elevation-1">
+                    <v-data-table v.-fi v-model:page="page" v-model="selected" :headers="headers"
+                        :items="saleNotesFetch" :items-per-page="itemsPerPage" :search="search" class="elevation-1">
                         <template v-slot:item.customer.number="{ index }">
                             {{ index + 1 + itemsPerPage * (page - 1) }}
                         </template>
-                        <template v-slot:item.customer.name="{ item }">
+                        <template v-slot:item.customer="{ item }">
                             <span>
                                 <p> {{ item.raw.customer.name }}</p>
                                 <div class="text-caption">{{ item.raw.customer.number }}</div>
@@ -333,15 +439,16 @@ const colorStateType: Record<StateType['id'], string> = {
                             <p>{{ moneyDecimal(item.raw.pending_amount) }}</p>
                             <div class="text-caption">{{ item.raw.currency_type_id }}</div>
                         </template>
-                        <!-- <template v-slot:item.actions="{ item }">
-                            <div class="justify-center ">
-                                <v-btn class="me-2" rounded icon="mdi-pencil" color="yellow"
-                                    @click="openDialogEditItem(item.raw)">
-                                </v-btn>
-                                <v-btn color="red" rounded icon="mdi-delete" @click="openDialogDeleteItem(item.raw)">
-                                </v-btn>
-                            </div>
-                        </template> -->
+                        <template v-slot:item.actions="{ item }">
+                            <v-tooltip>
+                                <template v-slot:activator="{ props }">
+                                    <v-btn v-bind="props" class="me-2" rounded icon="mdi-file" color="blue-grey"
+                                        @click="printTransfer(item.raw.id)">
+                                    </v-btn>
+                                </template>
+                                <span>Imprimir</span>
+                            </v-tooltip>
+                        </template>
 
                         <template v-slot:bottom>
                             <div class="text-center pt-2">
