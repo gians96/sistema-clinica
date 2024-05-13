@@ -291,9 +291,11 @@ const paymentsMethodTypes = ref<paymentPOS[]>([])
 const onClickAddPaymentMethods = () => {
     paymentsMethodTypes.value.push(
         {
+            id: 0,
             payment_method_type_id: 1,
             reference: "",
-            mount: 0
+            mount: 0,
+            // date_of_payment: new Date(),
         }
     )
 }
@@ -328,12 +330,22 @@ const sendSaleNotes = () => {
         }),
         payments: paymentsMethodTypes.value.map(data => {
             return {
+                id: data.id,
                 payment_method_type_id: Number(data.payment_method_type_id),
                 reference: "",
+                date_of_payment: new Date(dateNow()).toISOString().split('T')[0],
                 payment: Number(data.mount)
             }
         }),
     }
+}
+const dateNow = () => {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Agrega cero a la izquierda si es necesario
+    const day = String(currentDate.getDate()).padStart(2, '0'); // Agrega cero a la izquierda si es necesario
+    const formattedDate = `${year}-${month}-${day}`;
+    return formattedDate
 }
 import { useSnackbarStore } from '@/store/index';
 const snackbarStore = useSnackbarStore()

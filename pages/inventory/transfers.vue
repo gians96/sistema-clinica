@@ -489,7 +489,7 @@ const addItems = () => {
         date_of_due: date_of_due,
         item_lots_group_id: idLote,
         quantity: cantTransfer.value,
-        
+
     })
 
 }
@@ -575,8 +575,8 @@ const statusColorState: Record<StateInvetoriesTransfer['id'], string> = {
                     </v-data-table>
                 </v-row>
                 <!-- CUADRO DIALOGO -->
-                <v-dialog v-if="warehouseData" v-model="dialog" :max-width="mobile ? '100%' : '70%'" transition="dialog-bottom-transition"
-                    persistent>
+                <v-dialog v-if="warehouseData" v-model="dialog" :max-width="mobile ? '100%' : '70%'"
+                    transition="dialog-bottom-transition" persistent>
                     <v-card>
                         <v-toolbar color="primary" :title="nameTitleDialog"> </v-toolbar>
                         <v-container>

@@ -8,10 +8,15 @@ import { useDisplay } from 'vuetify'
 const { mobile } = useDisplay()
 import { companyStore } from '@/store/company'
 import type { Companies } from '~/interfaces/Company.interface';
-import type { SaleNoteFetch, StateType, Customer, SaleNoteItem } from '~/interfaces/SaleNotesFetch.interace';
-const { data: saleNotesFetch, refresh: itemsRefresh } = await useFetch<SaleNoteFetch[]>(`${apiURL.value}/sales_notes`, { method: 'GET' });
+import type { SaleNoteFetch, StateType, Customer, SaleNoteItem, SaleNotePayment } from '~/interfaces/SaleNotesFetch.interace';
+const { data: saleNotesFetch, refresh: saleNotesRefresh } = await useFetch<SaleNoteFetch[]>(`${apiURL.value}/sales_notes`, { method: 'GET' });
 const { data: warehousesFetch } = await useFetch<Warehouse[]>(`${apiURL.value}/warehouses`, { method: 'GET' });
-
+import type { paymentPOS } from '~/interfaces/Item.interface';
+const companyFetch = ref<Companies>()
+const companyStoreObj = companyStore()
+onMounted(async () => {
+    companyFetch.value = companyStore().$state
+})
 const headers = ref([
     // { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
     { key: 'customer.number', title: 'N°' },
@@ -85,67 +90,22 @@ const closeDialogDeleteItem = () => {
         editedIndex.value = -1
     })
 }
-export interface ItemSend {
-    id?: number;
-    name: string;
-    description: string;
-    second_name: string;
-    model: string;
-    barcode: string;
-    internal_id: string;
-    stock: number;
-    stock_min: number;
-    active: boolean;
-    status: boolean;
-    lots_enabled: boolean;
-    unit_type_id: string;
-    category_id?: number | null;
-    warehouse_id: number;
-    sale_unit_price: number;
-    purchase_unit_price: number;
-    type_commission: string | null;
-    commission: number | null;
-    lots: Lot[];
-}
 
-export interface Lot {
-    id?: number;
-    item_id?: number;
-    code: string;
-    quantity: number;
-    old_quantity?: number;
-    date_of_due: string | null;
-    create_at?: Date;
-    update_at?: Date;
-}
 
-const itemSend = (item: SaleNoteFetch) => {
-    // if (!item.warehouses) return
-    // return {
-    //     //DATA
-    // }
+const dateNow = () => {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Agrega cero a la izquierda si es necesario
+    const day = String(currentDate.getDate()).padStart(2, '0'); // Agrega cero a la izquierda si es necesario
+    const formattedDate = `${year}-${month}-${day}`;
+    return formattedDate
 }
-
-const registerItemFetch = async (item: SaleNoteFetch) => await fetch(
-    `${apiURL.value}/items`,
-    {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            // Authorization: `Bearer ${userCookie.value.token}`,
-        },
-        body: JSON.stringify(itemSend(item))
-    }
-).finally(async () => {
-    await itemsRefresh()
-});
 
 const formatDate = (date: string) => {
-    let fechaOriginal = new Date(date);
-    // Obtener el día, mes y año por separado
-    let day = fechaOriginal.getUTCDate();
-    let month = fechaOriginal.getUTCMonth() + 1; // Los meses empiezan desde 0
-    let year = fechaOriginal.getUTCFullYear();
+    const currentDate = new Date(date);
+    const year = currentDate.getFullYear();
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Agrega cero a la izquierda si es necesario
+    const day = String(currentDate.getDate()).padStart(2, '0'); // Agrega cero a la izquierda si es necesario
     // Formatear la fecha en el formato DD/MM/YYYY
     let formattedDate = `${day}/${month}/${year}`;
     return formattedDate;
@@ -156,39 +116,13 @@ const formatTime = (date: string) => {
     const horas = fechaOriginal.getHours();
     const minutos = fechaOriginal.getMinutes();
     const segundos = fechaOriginal.getSeconds();
-
     // Obtener la cadena "a.m." o "p.m." según la hora
     const periodo = horas >= 12 ? 'p.m.' : 'a.m.';
-
     // Convertir la hora al formato de 12 horas
     const horas12 = horas % 12 || 12; // Si son las 0 horas, convertirlas a 12
     const formattedHour = `${horas12}:${minutos < 10 ? '0' : ''}${minutos}:${segundos < 10 ? '0' : ''}${segundos} ${periodo}`;
-
     return formattedHour;
 }
-
-const updateItemFetch = async (item: SaleNoteFetch) => await fetch(
-    `${apiURL.value}/items`,
-    {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            // Authorization: `Bearer ${userCookie.value.token}`,
-        },
-        body: JSON.stringify(itemSend(item))
-    }
-).finally(async () => {
-    await itemsRefresh()
-});
-
-const deleteItemFetch = async (id: number) => await fetch(
-    `${apiURL.value}/items/${id}`,
-    {
-        method: "DELETE",
-    }
-).finally(async () => {
-    await itemsRefresh()
-});
 
 const save = () => {
     try {
@@ -207,6 +141,55 @@ const save = () => {
         snackbarStore.setStatus("success", "Guardado correctamente")
     }
 }
+
+const saveMethodsPayments = async () => {
+    // console.log("ENTRA");
+    if (!getSaleNote.value) throw Error("")
+    getSaleNote.value.sale_note_payments.forEach(payment => {
+        if (!payment.date_of_payment) return
+        payment.date_of_payment = new Date(payment.date_of_payment).toISOString().split('T')[0];
+
+    })
+    const response = await fetch(`${apiURL.value}/sales_notes/payments`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                // Authorization: `Bearer ${userCookie.value.token}`,
+            },
+            body: JSON.stringify(getSaleNote.value)
+        }
+    ).finally(async () => {
+        // await dialogListPaymentSaleNote(getSaleNote.value?.id ?? 0)
+    });
+    if (response.ok) {
+        snackbarStore.setStatus("success", "Se ha guardado correctamente:")
+        dialogListPayments.value = false
+        saleNotesRefresh()
+        return response.ok
+    } else {
+        snackbarStore.setStatus("error", "Error al guardar",)
+        console.error('Error al obtener los datos:', response);
+    }
+}
+
+const deletePayment = async (id: number) => {
+    const response = await fetch(`${apiURL.value}/sales_notes/${id}`,
+        {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                // Authorization: `Bearer ${userCookie.value.token}`,
+            },
+        }
+    )
+    if (response.ok) {
+        return response.ok
+    } else {
+        return
+    }
+}
+
 const deleteItemConfirm = () => {
     try {
         if (!saleNotesFetch.value) return null
@@ -245,17 +228,6 @@ const exportItemsXLS = async () => {
     //     console.error('Error al descargar el archivo Excel:', error);
     // }
 }
-
-const companyFetch = ref<Companies>()
-const companyStoreObj = companyStore()
-onMounted(async () => {
-    companyFetch.value = companyStore().$state
-    refreshData()
-})
-const refreshData = async () => {
-    await companyStoreObj.requestItems()
-
-}
 const moneyDecimal = (x: string) => {
     return Number.parseFloat(x).toFixed(2);
 }
@@ -284,12 +256,45 @@ const printItems = (items: SaleNoteItem[]) => {
                 { text: item.item.description.toString(), style: { fontSize: 11, alignment: "center" } },
                 { text: item.unit_type_id.toString(), style: { fontSize: 11, alignment: "center" } },
                 { text: item.quantity.toString(), style: { fontSize: 11, alignment: "center" } },
-                { text: item.unit_price.toString(), style: { fontSize: 11, alignment: "center" } },
-                // { text: item.total.toString(), style: { fontSize: 11, bold: true, alignment: "center" } }
+                { text: moneyDecimal(item.unit_price.toString()), style: { fontSize: 11, alignment: "center" } },
+                { text: "S/." + moneyDecimal(item.total.toString()), style: { fontSize: 11, bold: true, alignment: "center" } }
             ];
         })
     ]
 };
+
+
+const dialogListPayments = ref(false)
+const getSaleNote = ref<SaleNoteFetch>()
+const onClickAddPaymentMethods = () => {
+    if (!getSaleNote.value) throw Error("Sale note vacio")
+    getSaleNote.value.sale_note_payments.push(
+        {
+            id: 0,
+            sale_note_id: 0,
+            date_of_payment: dateNow(),
+            payment_method_type_id: 1,
+            reference: "",
+            payment: 0,
+            change: null
+        }
+    )
+}
+const dialogListPaymentSaleNote = async (id: number) => {
+    if (!id) throw Error("El id no es vacio:")
+    const response = await fetch(`${apiURL.value}/sales_notes/get/${id}`, { method: "GET" })
+    if (!response.ok) return
+    dialogListPayments.value = true
+    const saleNotes = await response.json()
+    getSaleNote.value = saleNotes as SaleNoteFetch
+
+    getSaleNote.value.sale_note_payments.forEach(payment => {
+        if (!payment.date_of_payment) return
+        payment.date_of_payment = new Date(payment.date_of_payment).toISOString().split('T')[0];
+    })
+}
+
+
 const printTransfer = async (id: number) => {
     if (!id) throw Error("El id no es vacio:")
     const response = await fetch(`${apiURL.value}/sales_notes/get/${id}`, { method: "GET" })
@@ -297,7 +302,7 @@ const printTransfer = async (id: number) => {
     const saleNotes = await response.json()
 
     // const saleNotes: SaleNoteFetch = {}
-    let fecha = formatDate(saleNotes.create_at.toString()) + formatTime(saleNotes.create_at.toString())
+    let fecha = formatDate(saleNotes.create_at.toString()) + " " + formatTime(saleNotes.create_at.toString())
     const pdfMake = usePDFMake();
     pdfMake.tableLayouts = {
         custom: {
@@ -356,6 +361,16 @@ const printTransfer = async (id: number) => {
                 ],
             },
             {
+                text: `Cliente: ${saleNotes.customer.name}`,
+                margin: [0, 0, 0, 5],
+                style: { fontSize: 12, bold: true, alignment: "left" },
+            },
+            {
+                text: `DNI/RUC: ${saleNotes.customer.number}`,
+                margin: [0, 0, 0, 5],
+                style: { fontSize: 12, bold: true, alignment: "left" },
+            },
+            {
                 text: `FECHA: ${fecha}`,
                 margin: [0, 0, 0, 20],
                 style: { fontSize: 12, bold: true, alignment: "left" },
@@ -364,17 +379,67 @@ const printTransfer = async (id: number) => {
                 // layout: "custom",
                 table: {
                     heights: 1,
-                    widths: ['*', 100, '*', '*'],
+                    widths: [200, '*', '*', '*', '*'],
                     margin: [50, 0, 0, 50],
 
                     alignment: "center",
                     body: printItems(saleNotes.sale_note_items),
                 },
+            }, {
+                text: ""
             },
+            {
+                columns: [
+                    {
+                        text: ""
+                    },
+                    {
+                        text: ""
+                    },
+                    [{
+                        text: "TOTAL: S/." + moneyDecimal(saleNotes.total),
+                        style: { fontSize: 14, bold: true, alignment: "right" },
+                        margin: [0, 20, 0, 0],
+                    }]
+                ],
+            }
         ],
     }).print()
     // modalPrecuenta.value = true
 };
+// const paymentsMethodTypes = ref<paymentPOS[]>([])
+const onClickDeletePaymentMethods = async (index: number) => {
+    if (!getSaleNote.value) throw Error("Hubo un error al eliminar")
+    if (!getSaleNote.value?.sale_note_payments) throw Error("No hay que borrar")
+    if (!getSaleNote.value?.sale_note_payments[index].id) {
+        getSaleNote.value.sale_note_payments.splice(index, 1);
+        return
+    }
+    let response = await deletePayment(getSaleNote.value?.sale_note_payments[index].id)
+    if (response) {
+        snackbarStore.setStatus("success", "Eliminado correctamente:")
+        getSaleNote.value.sale_note_payments.splice(index, 1);
+        saleNotesRefresh()
+    } else {
+        // La solicitud falló, maneja el error
+        snackbarStore.setStatus("error", "Error al guardar",)
+        console.error('Error al obtener los datos:', response);
+    }
+}
+
+const mountPay = () => {
+    if (!getSaleNote.value?.sale_note_payments) return 0
+    if (getSaleNote.value?.sale_note_payments.length > 0 && getSaleNote.value?.total > 0) {
+        return getSaleNote.value?.sale_note_payments.reduce((acumulador, data) => {
+            return acumulador + Number(data.payment)
+        }, 0)
+    }
+}
+const accountsReceivable = () => {
+    if (!getSaleNote.value?.sale_note_payments) return 0
+    if (getSaleNote.value?.total <= (mountPay() ?? 0)) return 0
+    return getSaleNote.value?.total - (mountPay() ?? 0)
+}
 </script>
 
 <template>
@@ -427,7 +492,7 @@ const printTransfer = async (id: number) => {
                         </template>
                         <template v-slot:item.has_total_canceled="{ item }">
                             <v-chip :color="item.raw.has_total_canceled ? 'success' : 'warning'"
-                                class="font-weight-bold">
+                                class="font-weight-bold" @click="dialogListPaymentSaleNote(item.raw.id)">
                                 {{ item.raw.has_total_canceled ? "Pagado" : "Pendiente" }}
                             </v-chip>
                         </template>
@@ -552,6 +617,79 @@ const printTransfer = async (id: number) => {
                     </v-card>
                 </v-dialog>
                 <!-- DIALOG NEW , EDIT -->
+                <!-- DIALGO LIST PAYMENT SALE NOTES -->
+                <v-dialog v-model="dialogListPayments" v-if="getSaleNote?.sale_note_payments"
+                    :max-width="mobile ? '100%' : '65%'" persistent>
+                    <v-toolbar floating>
+                        <v-toolbar-title>Listado de pagos:
+                            <v-btn variant="flat" icon="mdi-add" color="success" @click="onClickAddPaymentMethods()">
+                            </v-btn></v-toolbar-title>
+                        <v-spacer></v-spacer>
+                        <v-btn icon="mdi-close" @click="dialogListPayments = false"></v-btn>
+                    </v-toolbar>
+                    <v-card>
+                        <v-card-title>
+                            <p> {{ getSaleNote.series }} - {{ getSaleNote.number }} </p>
+                            <p> {{ getSaleNote.customer.number }} - {{ getSaleNote.customer.name }} </p>
+                        </v-card-title>
+                        <v-card-text v-if="companyFetch">
+                            <div v-if="getSaleNote?.sale_note_payments.length !== 0"
+                                v-for="(payment, index) in getSaleNote?.sale_note_payments" :key="index"
+                                :class="mobile ? 'py-4' : ''">
+                                <v-row justify="center" class="d-flex" :class="mobile ? 'bg-blue-grey-lighten-5' : ''">
+                                    <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'pb-0' : ''">
+                                        <v-select class="inline select-box" :items="companyFetch.payment_method_types"
+                                            v-model="payment.payment_method_type_id" label="Método de pago"
+                                            variant="outlined" item-title="description" item-value="id">
+                                        </v-select>
+                                    </v-col>
+                                    <v-col cols="12" xs="12" md="2" lg="2" :class="mobile ? 'py-0' : ''">
+                                        <v-text-field label="Ingrese monto" placeholder="0.00" v-model="payment.payment"
+                                            type="number">
+                                        </v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'py-0' : ''">
+                                        <v-text-field type="date" label="Fecha de pago"
+                                            v-model="payment.date_of_payment"></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" xs="12" md="3" lg="3" :class="mobile ? 'py-0' : ''">
+                                        <v-text-field label="Referencia" v-model="payment.reference">
+                                        </v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" xs="12" md="1" lg="1" class="d-flex aling-center justify-center"
+                                        :class="mobile ? 'py-0' : ''">
+                                        <v-btn @click="onClickDeletePaymentMethods(index)" variant="flat"
+                                            icon="mdi-delete" color="red">
+                                        </v-btn>
+                                    </v-col>
+                                </v-row>
+                            </div>
+                            <v-row>
+                                <v-col cols="12" class="d-flex justify-end align-end">SALDO: S/.
+                                    {{ moneyDecimal(accountsReceivable().toString()) }}
+                                </v-col>
+                                <v-col cols="12" class="py-0 d-flex justify-end align-end">MONTO PAGADO: S/.
+                                    {{ moneyDecimal(String(mountPay())) }}
+                                </v-col>
+                                <v-col cols="12" class="d-flex justify-end align-end">
+                                    <span class="font-weight-bold">
+                                        TOTAL: S/.{{ moneyDecimal(String(getSaleNote.total)) }}
+                                    </span>
+                                </v-col>
+                            </v-row>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="success" variant="elevated" @click="saveMethodsPayments()">Guardar
+                            </v-btn>
+                        </v-card-actions>
+                        <v-btn position="fixed" width="50px" height="50px" border location="bottom left"
+                            v-if="(mobile ? 'true' : false)" variant="elevated" color="success"
+                            @click="onClickAddPaymentMethods()" icon="mdi-add" id="id-btn">
+                        </v-btn>
+                    </v-card>
+                </v-dialog>
+                <!-- DIALOG -->
                 <!-- DIALGO DELETE -->
                 <v-dialog v-model="dialogDelete" max-width="500px" persistent>
                     <v-card>
@@ -570,3 +708,11 @@ const printTransfer = async (id: number) => {
         </v-card>
     </v-container>
 </template>
+
+<style>
+#id-btn {
+    height: 38px;
+    bottom: 20px !important;
+    left: 20px !important;
+}
+</style>

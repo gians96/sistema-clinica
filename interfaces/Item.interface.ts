@@ -98,7 +98,9 @@ export interface paymentMethodTypes {
 }
 
 export interface paymentPOS {
+    id: number | null
     payment_method_type_id: number;
     reference: string;
     mount: number;
+    date_of_payment?: string | null
 }
