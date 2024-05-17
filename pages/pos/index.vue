@@ -10,14 +10,12 @@ const { mobile } = useDisplay();
 // const typeMountPayments = [10, 20, 50, 100, 200]
 const { data: customersFetch, refresh: customersRefresh } = await useFetch<CustomerIPOS[]>(`${apiURL.value}/customers/pos`, { method: 'GET' });
 import type { CustomerIPOS, Customer, DocumentType } from '~/interfaces/Customer.interface';
-// const itemsFetch = ref<Item[]>(items)
 const { data: itemsFetch, refresh: itemsRefresh } = await useFetch<Item[]>(`${apiURL.value}/items`, { method: 'GET' });
 const searchItems = ref<string>("");
 const clearSearch = () => {
     searchItems.value = ""
 }
 import type { Companies, Series } from "~/interfaces/Company.interface.js";
-
 import { companyStore } from '@/store/company'
 const companyFetch = ref<Companies>()
 const companyStoreObj = companyStore()

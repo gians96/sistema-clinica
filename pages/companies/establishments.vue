@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { useSnackbarStore } from '@/store/index';
-import type { Items, Item, ItemLotsGroup } from "@/interfaces/Item.interface";
 import type { Warehouse } from "~/interfaces/Warehouse.interface";
 const snackbarStore = useSnackbarStore()
 const apiURL = useCookie("apiURL");
@@ -8,12 +7,11 @@ import { useDisplay } from 'vuetify'
 import type { Establishment } from '~/interfaces/Establishments.interface';
 const { mobile } = useDisplay()
 const { data: establishmentsFetch, refresh: establishmentsRefresh } = await useFetch<Establishment[]>(`${apiURL.value}/establishments`, { method: 'GET' });
-const { data: warehousesFetch } = await useFetch<Warehouse[]>(`${apiURL.value}/warehouses`, { method: 'GET' });
 
 const headers = ref([
     // { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
     { key: 'n', title: 'N°' },
-    { key: 'id', title: 'ID' },
+    // { key: 'id', title: 'ID' },
     { key: 'description', title: 'Descripción' },
     { key: 'code', title: 'Código' },
     { key: 'actions', title: 'Acciones' },
@@ -28,46 +26,42 @@ const dialogDelete = ref(false)
 const editedItem = ref<Establishment>({
     id: 0,
     description: '',
-    country_id: null,
+    country_id: "PE",
     department_id: null,
     province_id: null,
     district_id: null,
-    country: '',
-    department: '',
-    province: '',
-    district: '',
-    address: '',
-    email: '',
-    telephone: '',
-    code: '',
-    aditional_information: '',
-    web_address: '',
-    trade_address: '',
-    create_at: null,
-    update_at: null,
+    country: null,
+    department: null,
+    province: null,
+    district: null,
+    address: null,
+    email: null,
+    telephone: null,
+    code: null,
+    aditional_information: null,
+    web_address: null,
+    trade_address: null,
     warehouse: null,
 })
 
 const defaultItem = ref<Establishment>({
     id: 0,
     description: '',
-    country_id: null,
+    country_id: "PE",
     department_id: null,
     province_id: null,
     district_id: null,
-    country: '',
-    department: '',
-    province: '',
-    district: '',
-    address: '',
-    email: '',
-    telephone: '',
-    code: '',
-    aditional_information: '',
-    web_address: '',
-    trade_address: '',
-    create_at: null,
-    update_at: null,
+    country: null,
+    department: null,
+    province: null,
+    district: null,
+    address: null,
+    email: null,
+    telephone: null,
+    code: null,
+    aditional_information: null,
+    web_address: null,
+    trade_address: null,
     warehouse: null,
 })
 let editedIndex = ref(-1)
@@ -87,16 +81,11 @@ const openDialogNewItem = () => {
 const openDialogEditItem = (item: Establishment) => {
     if (!establishmentsFetch.value) return null
     dialog.value = true
-    nameTitleDialog.value = "Editar Producto"
-    // if (item.lots_enabled && item.item_lots_group) {
-    //     item.item_lots_group.forEach(lot => {
-    //         if (!lot.date_of_due) return
-    //         let fechaOriginal = new Date(lot.date_of_due);
-    //         lot.date_of_due = fechaOriginal.toISOString().split('T')[0]
-    //     })
-    // }
+    nameTitleDialog.value = "Editar Sucursal"
     editedItem.value = JSON.parse(JSON.stringify(item))
     editedIndex.value = establishmentsFetch.value.indexOf(item)
+    provincesFilter.value = provincesData.value.filter(data => editedItem.value.department ? data.department_id === editedItem.value.department?.id : null)
+    districtsFilter.value = districtsData.value.filter(data => editedItem.value.province ? data.province_id === editedItem.value.province?.id : null)
 }
 
 const openDialogDeleteItem = (item: Establishment) => {
@@ -122,31 +111,7 @@ const closeDialogDeleteItem = () => {
     })
 }
 
-const itemSend = (item: Establishment) => {
-    if (!item.description) return
-    return {
-        id: item.id,
-        description: item.description,
-        country_id: item.country_id,
-        department_id: item.department_id,
-        province_id: item.province_id,
-        district_id: item.district_id,
-        country: item.country,
-        department: item.department,
-        province: item.province,
-        district: item.district,
-        address: item.address,
-        email: item.email,
-        telephone: item.telephone,
-        code: item.code,
-        aditional_information: item.aditional_information,
-        web_address: item.web_address,
-        trade_address: item.trade_address,
-        create_at: item.create_at,
-        update_at: item.update_at,
-        warehouse: item.warehouse
-    }
-}
+
 
 const registerItemFetch = async (item: Establishment) => await fetch(
     `${apiURL.value}/establishments`,
@@ -156,7 +121,7 @@ const registerItemFetch = async (item: Establishment) => await fetch(
             "Content-Type": "application/json",
             // Authorization: `Bearer ${userCookie.value.token}`,
         },
-        body: JSON.stringify(itemSend(item))
+        body: JSON.stringify(item)
     }
 ).finally(async () => {
     await establishmentsRefresh()
@@ -170,7 +135,7 @@ const updateItemFetch = async (item: Establishment) => await fetch(
             "Content-Type": "application/json",
             // Authorization: `Bearer ${userCookie.value.token}`,
         },
-        body: JSON.stringify(itemSend(item))
+        body: JSON.stringify(item)
     }
 ).finally(async () => {
     await establishmentsRefresh()
@@ -222,22 +187,23 @@ const deleteItemConfirm = () => {
     }
 
 }
-const tab = ref(null)
-const newLotsOnClick = () => {
-    // if (!editedItem.value.item_lots_group) { return }
-    // editedItem.value.item_lots_group.push({
-    //     id: 0,
-    //     item_id: 0,
-    //     code: '',
-    //     quantity: 0,
-    //     old_quantity: 0,
-    //     date_of_due: null,
-    // })
+import { countries, departments, districts, provinces } from "@/api/locationData"
+import type { Country, Department, Province, District } from "@/interfaces/Location.interface";
+const countriesData = ref<Country[]>([...countries])
+const departmentsData = ref<Department[]>([...departments])
+const provincesData = ref<Province[]>([...provinces])
+const districtsData = ref<District[]>([...districts])
 
+const provincesFilter = ref(provincesData.value.filter(data => editedItem.value.department ? data.department_id === editedItem.value.department?.id : null))
+const districtsFilter = ref(districtsData.value.filter(data => editedItem.value.province ? data.province_id === editedItem.value.province?.id : null))
+const filterProvinces = () => {
+    editedItem.value.province = null
+    editedItem.value.district = null
+    provincesFilter.value = provincesData.value.filter(data => editedItem.value.department ? data.department_id === editedItem.value.department?.id : null)
 }
-const deleteLotOnClick = (index: number) => {
-    // if (!editedItem.value.item_lots_group) { return }
-    // editedItem.value.item_lots_group.splice(index, 1);
+const filterDistrits = () => {
+    editedItem.value.district = null
+    districtsFilter.value = districtsData.value.filter(data => editedItem.value.province ? data.province_id === editedItem.value.province?.id : null)
 }
 </script>
 
@@ -245,8 +211,8 @@ const deleteLotOnClick = (index: number) => {
     <v-container fluid v-if="establishmentsFetch">
         <v-app-bar class="justify-center" flat append>
             <div class="justify-center mx-4">
-                <v-icon class="me-1" icon="mdi-pill-multiple"></v-icon>
-                <span class="subheading">Productos</span>
+                <v-icon class="me-1" icon="mdi-domain"></v-icon>
+                <span class="subheading">Establecimiento</span>
             </div>
             <v-spacer></v-spacer>
             <v-btn append-icon="mdi-plus-circle" color="primary" variant="flat"
@@ -296,86 +262,55 @@ const deleteLotOnClick = (index: number) => {
                 <v-dialog v-model="dialog" :max-width="mobile ? '100%' : '70%'" transition="dialog-bottom-transition"
                     persistent>
                     <v-card>
-                        <v-toolbar color="primary" :title="nameTitleDialog"> </v-toolbar>
-                        <v-card-title class="px-0 py-0">
-                            <v-tabs v-model="tab" bg-color="primary">
-                                <v-tab value="general">General</v-tab>
-                                <!-- <v-tab value="lots" v-if="editedItem.lots_enabled">Lotes</v-tab> -->
-                            </v-tabs>
-                        </v-card-title>
+                        <v-toolbar floating>
+                            <v-toolbar-title>Establecimiento:
+                            </v-toolbar-title>
+                            <v-spacer></v-spacer>
+                            <v-btn icon="mdi-close" @click="dialog = false"></v-btn>
+                        </v-toolbar>
                         <v-card-text>
-                            <v-window v-model="tab">
-                                <v-window-item value="general">
-                                    <v-container>
-                                        <v-row>
-                                            <v-col cols="12" sm="6" md="6">
-                                                <v-text-field v-model="editedItem.description"
-                                                    label="Descripción (*)"></v-text-field>
-                                            </v-col>
-                                            <!-- <v-col cols="12" sm="6" md="8">
-                                                <v-text-field v-model="editedItem.name"
-                                                    label="Nombre des"></v-text-field>
-                                            </v-col> -->
-                                            <!-- <v-col cols="12" sm="6" md="6">
-                                                <v-text-field v-model="editedItem.second_name"
-                                                    label="Nombre secundario"></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3">
-                                                <v-text-field v-model="editedItem.model" label="Modelo"></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3">
-                                                <v-select :items="['NIU']" label="Unidad*"
-                                                    v-model="editedItem.unit_type_id" required></v-select>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3">
-                                                <v-text-field v-model="editedItem.sale_unit_price"
-                                                    label="Precio de venta x unidad"></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3">
-                                                <v-text-field v-model="editedItem.purchase_unit_price"
-                                                    label="Precio de compra x unidad"></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3">
-                                                <v-select v-model="editedItem.warehouses" required
-                                                    :items="warehousesFetch" :item-title="'description'" item-value="id"
-                                                    label="Área">
-                                                </v-select>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3">
-                                                <v-text-field v-model="editedItem.stock" label="Stock Inicial"
-                                                    :disabled="editedItem.lots_enabled"></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3">
-                                                <v-text-field v-model="editedItem.stock_min"
-                                                    label="Stock Mínimo"></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3">
-                                                <v-text-field v-model="editedItem.barcode"
-                                                    label="Código de barra"></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3">
-                                                <v-text-field v-model="editedItem.internal_id"
-                                                    label="Código Interno"></v-text-field>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3">
-                                                <v-checkbox v-model="editedItem.lots_enabled"
-                                                    label="¿Maneja lote?"></v-checkbox>
-                                            </v-col>
-                                            <v-col cols="12" sm="6" md="3">
-                                                <v-checkbox v-model="editedItem.active" label="Habilitado"></v-checkbox>
-                                            </v-col> -->
-                                        </v-row>
-                                    </v-container>
-                                </v-window-item>
-
-                            </v-window>
+                            <p>{{ editedItem.department_id }}</p>
+                            <p>{{ editedItem.department }}</p>
+                            <p>{{ editedItem.province_id }}</p>
+                            <p>{{ editedItem.province }}</p>
+                            <p>{{ editedItem.district_id }}</p>
+                            <p>{{ editedItem.district }}</p>
+                            <v-row>
+                                <v-col cols="12" sm="6" md="6">
+                                    <v-text-field v-model="editedItem.description"
+                                        label="Descripción (*)"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="4" md="4">
+                                    <v-combobox v-model="editedItem.department" :items="departmentsData"
+                                        @update:modelValue="filterProvinces" item-title="description" item-value="id"
+                                        label="Departamento">
+                                    </v-combobox>
+                                </v-col>
+                                <v-col cols="12" sm="4" md="4">
+                                    <v-combobox v-model="editedItem.province" :items="provincesFilter"
+                                        @update:modelValue="filterDistrits" item-title="description" item-value="id"
+                                        label="Provincia">
+                                    </v-combobox>
+                                </v-col>
+                                <v-col cols="12" sm="4" md="4">
+                                    <v-combobox v-model="editedItem.district" :items="districtsFilter"
+                                        item-title="description" item-value="id" label="Distrito">
+                                    </v-combobox>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="6">
+                                    <v-text-field v-model="editedItem.address" label="Dirección"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="3">
+                                    <v-text-field v-model="editedItem.telephone" label="Teléfono"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="3">
+                                    <v-text-field v-model="editedItem.email" label="Correo de contacto"></v-text-field>
+                                </v-col>
+                            </v-row>
                         </v-card-text>
 
                         <v-card-actions class="mb-2">
                             <v-spacer></v-spacer>
-                            <v-btn class="mx-2" color="blue-darken-1" variant="text" @click="closeDialogItem()">
-                                Cancelar
-                            </v-btn>
                             <v-btn color="blue-darken-1" variant="elevated" @click="save()">
                                 Guardar
                             </v-btn>

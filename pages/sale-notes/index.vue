@@ -174,7 +174,7 @@ const saveMethodsPayments = async () => {
 }
 
 const deletePayment = async (id: number) => {
-    const response = await fetch(`${apiURL.value}/sales_notes/${id}`,
+    const response = await fetch(`${apiURL.value}/sales_notes/payments/${id}`,
         {
             method: "DELETE",
             headers: {
