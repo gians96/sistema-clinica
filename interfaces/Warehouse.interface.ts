@@ -3,13 +3,12 @@ import type { Establishment } from "./Establishments.interface";
 
 export interface Warehouse {
     id: number;
-    user_id: number | null;
-    establishments?: Establishment;
-    // establishment_id: number;
-    text: string,
+    establishment_id: number | null;
     description: string;
+    user_id: number | null;
+    status?: boolean;
+    establishments: Establishment | null;
+    users: Users | null;
     create_at?: Date;
     update_at?: null;
-    users: Users | null;
 }
-

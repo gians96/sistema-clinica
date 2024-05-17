@@ -30,7 +30,11 @@ const editedItem = ref<Establishment>({
     department_id: null,
     province_id: null,
     district_id: null,
-    country: null,
+    country: {
+        id: "PE",
+        description: "PERU",
+        active: true
+    },
     department: null,
     province: null,
     district: null,
@@ -51,7 +55,11 @@ const defaultItem = ref<Establishment>({
     department_id: null,
     province_id: null,
     district_id: null,
-    country: null,
+    country: {
+        id: "PE",
+        description: "PERU",
+        active: true
+    },
     department: null,
     province: null,
     district: null,
@@ -74,14 +82,15 @@ const pageCount = computed(() => {
 const nameTitleDialog = ref("")
 const openDialogNewItem = () => {
     dialog.value = true
-    nameTitleDialog.value = "Nueva Producto"
+    editedIndex.value = -1
+    nameTitleDialog.value = "Nueva Establecimiento"
     editedItem.value = JSON.parse(JSON.stringify(defaultItem.value))
 }
 
 const openDialogEditItem = (item: Establishment) => {
     if (!establishmentsFetch.value) return null
     dialog.value = true
-    nameTitleDialog.value = "Editar Sucursal"
+    nameTitleDialog.value = "Editar Establecimiento"
     editedItem.value = JSON.parse(JSON.stringify(item))
     editedIndex.value = establishmentsFetch.value.indexOf(item)
     provincesFilter.value = provincesData.value.filter(data => editedItem.value.department ? data.department_id === editedItem.value.department?.id : null)
@@ -91,7 +100,7 @@ const openDialogEditItem = (item: Establishment) => {
 const openDialogDeleteItem = (item: Establishment) => {
     if (!establishmentsFetch.value) return null
     dialogDelete.value = true
-    nameTitleDialog.value = "Eliminar Especialidad"
+    nameTitleDialog.value = "Eliminar Establecimiento"
     // editedIndex.value = itemsFetch.value.indexOf(item)
     editedItem.value = item
 }
@@ -110,51 +119,77 @@ const closeDialogDeleteItem = () => {
         editedIndex.value = -1
     })
 }
-
-
-
-const registerItemFetch = async (item: Establishment) => await fetch(
-    `${apiURL.value}/establishments`,
-    {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            // Authorization: `Bearer ${userCookie.value.token}`,
-        },
-        body: JSON.stringify(item)
+const sendEstablishment = (item: Establishment) => {
+    return {
+        id: item.id,
+        description: item.description,
+        country_id: item.country?.id ?? null, // Usa encadenamiento opcional y coalescencia nula
+        department_id: item.department?.id ?? null,
+        province_id: item.province?.id ?? null,
+        district_id: item.district?.id ?? null,
+        address: item.address,
+        email: item.email,
+        telephone: item.telephone,
+        code: item.code,
+        aditional_information: item.aditional_information,
+        web_address: item.web_address,
+        trade_address: item.trade_address
     }
-).finally(async () => {
-    await establishmentsRefresh()
-});
-
-const updateItemFetch = async (item: Establishment) => await fetch(
-    `${apiURL.value}/establishments`,
-    {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            // Authorization: `Bearer ${userCookie.value.token}`,
-        },
-        body: JSON.stringify(item)
+}
+const registerItemFetch = async (item: Establishment) => {
+    const response = await fetch(
+        `${apiURL.value}/establishments`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                // Authorization: `Bearer ${userCookie.value.token}`,
+            },
+            body: JSON.stringify(sendEstablishment(item))
+        }
+    )
+    if (response.ok) {
+        snackbarStore.setStatus("success", "Guardado correctamente")
+        await establishmentsRefresh()
+    } else {
+        snackbarStore.setStatus("error", "Error", String(response))
     }
-).finally(async () => {
-    await establishmentsRefresh()
-});
+}
 
-const deleteItemFetch = async (id: number) => await fetch(
-    `${apiURL.value}/items/${id}`,
-    {
-        method: "DELETE",
+const updateItemFetch = async (item: Establishment) => {
+    const response = await fetch(
+        `${apiURL.value}/establishments`,
+        {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                // Authorization: `Bearer ${userCookie.value.token}`,
+            },
+            body: JSON.stringify(sendEstablishment(item))
+        }
+    )
+    if (response.ok) {
+        snackbarStore.setStatus("success", "Editado correctamente")
+        await establishmentsRefresh()
+    } else {
+        snackbarStore.setStatus("error", "Error", String(response))
     }
-).finally(async () => {
-    await establishmentsRefresh()
-});
+}
 
+const deleteItemFetch = async (id: number) => {
+    const response = await fetch(
+        `${apiURL.value}/establishments/${id}`, { method: "DELETE" }
+    )
+    if (response.ok) {
+        snackbarStore.setStatus("success", "Eliminado correctamente")
+        await establishmentsRefresh()
+    } else {
+        snackbarStore.setStatus("error", "Error", String(response))
+    }
+}
 const save = () => {
     try {
         if (!establishmentsFetch.value) return null
-        if (!establishmentsFetch.value) return null
-
         if (editedIndex.value > -1) {
             // itemsFetch.value = JSON.parse(JSON.stringify(editedItem.value))
             updateItemFetch(editedItem.value)
@@ -165,9 +200,6 @@ const save = () => {
         closeDialogItem()
     } catch (error: any) {
         snackbarStore.setStatus("error", "Error", error)
-    } finally {
-
-        snackbarStore.setStatus("success", "Guardado correctamente")
     }
 }
 const deleteItemConfirm = () => {
@@ -259,52 +291,62 @@ const filterDistrits = () => {
                     </v-data-table>
                 </v-row>
                 <!-- CUADRO DIALOGO -->
-                <v-dialog v-model="dialog" :max-width="mobile ? '100%' : '70%'" transition="dialog-bottom-transition"
+                <v-dialog v-model="dialog" :max-width="mobile ? '100%' : '60%'" transition="dialog-bottom-transition"
                     persistent>
                     <v-card>
                         <v-toolbar floating>
-                            <v-toolbar-title>Establecimiento:
-                            </v-toolbar-title>
+                            <v-toolbar-title>{{ nameTitleDialog }} </v-toolbar-title>
                             <v-spacer></v-spacer>
                             <v-btn icon="mdi-close" @click="dialog = false"></v-btn>
                         </v-toolbar>
                         <v-card-text>
-                            <p>{{ editedItem.department_id }}</p>
-                            <p>{{ editedItem.department }}</p>
-                            <p>{{ editedItem.province_id }}</p>
-                            <p>{{ editedItem.province }}</p>
-                            <p>{{ editedItem.district_id }}</p>
-                            <p>{{ editedItem.district }}</p>
                             <v-row>
-                                <v-col cols="12" sm="6" md="6">
+                                <v-col cols="12" sm="8" md="8">
                                     <v-text-field v-model="editedItem.description"
                                         label="Descripción (*)"></v-text-field>
                                 </v-col>
                                 <v-col cols="12" sm="4" md="4">
+                                    <v-text-field v-model="editedItem.code"
+                                        label="Código Domicilio Fiscal (*)"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="3" md="3">
+                                    <v-combobox v-model="editedItem.country" :items="countriesData"
+                                        @update:modelValue="filterProvinces" item-title="description" item-value="id"
+                                        label="País">
+                                    </v-combobox>
+                                </v-col>
+                                <v-col cols="12" sm="3" md="3">
                                     <v-combobox v-model="editedItem.department" :items="departmentsData"
                                         @update:modelValue="filterProvinces" item-title="description" item-value="id"
                                         label="Departamento">
                                     </v-combobox>
                                 </v-col>
-                                <v-col cols="12" sm="4" md="4">
+                                <v-col cols="12" sm="3" md="3">
                                     <v-combobox v-model="editedItem.province" :items="provincesFilter"
                                         @update:modelValue="filterDistrits" item-title="description" item-value="id"
                                         label="Provincia">
                                     </v-combobox>
                                 </v-col>
-                                <v-col cols="12" sm="4" md="4">
+                                <v-col cols="12" sm="3" md="3">
                                     <v-combobox v-model="editedItem.district" :items="districtsFilter"
                                         item-title="description" item-value="id" label="Distrito">
                                     </v-combobox>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="6">
-                                    <v-text-field v-model="editedItem.address" label="Dirección"></v-text-field>
+                                    <v-text-field v-model="editedItem.address" label="Dirección fiscal"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="6">
+                                    <v-text-field v-model="editedItem.trade_address"
+                                        label="Dirección comercial"></v-text-field>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="3">
                                     <v-text-field v-model="editedItem.telephone" label="Teléfono"></v-text-field>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="3">
                                     <v-text-field v-model="editedItem.email" label="Correo de contacto"></v-text-field>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="6">
+                                    <v-text-field v-model="editedItem.web_address" label="Dirección Web"></v-text-field>
                                 </v-col>
                             </v-row>
                         </v-card-text>

@@ -36,7 +36,6 @@ const save = async () => {
 <template>
     <v-container fluid>
         <v-row>
-            {{ editedItem }}
             <v-col cols="12" sm="6" md="6">
                 <v-row>
                     <!-- DATOS DE LA EMPRESA-->
