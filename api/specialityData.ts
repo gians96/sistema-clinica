@@ -1,4 +1,4 @@
-import { Specialty } from "@/interfaces/Speciality.interface";
+import type { Specialty } from "@/interfaces/Speciality.interface";
 
 const data: Specialty[] = [
   {

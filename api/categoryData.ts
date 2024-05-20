@@ -1,4 +1,4 @@
-import { Category } from "interfaces/Category.interface";
+import type { Category } from "@/interfaces/Category.interface";
 
 const data: Category[] = [
   { id: null, name: null },

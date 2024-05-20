@@ -1,8 +1,217 @@
 <script lang="ts" setup>
+const permissions = ref([
+    {
+        name: 'Ventas',
+        checked: false,
+        expanded: false,
+        children: [
+            { name: 'Lista de comprobantes', checked: false },
+            { name: 'Cotizaciones', checked: false }, { name: 'Usuarios', checked: false },
+            { name: 'Usuarios', checked: false },
+        ],
+    },
+    {
+        name: 'Compras',
+        checked: false,
+        expanded: false,
+        children: [],
+    },
+    {
+        name: 'Configuración',
+        checked: false,
+        expanded: false,
+        children: [
+            { name: 'Empresa', checked: false },
+            { name: 'Usuarios', checked: false },
+            { name: 'Usuarios', checked: false },
+            { name: 'Usuarios', checked: false },
+            { name: 'Usuarios', checked: false },
+            { name: 'Usuarios', checked: false },
+
+        ],
+    },
+],);
+const toggleChildren = (permission: any) => {
+    if (permission.children) {
+        permission.children.forEach((child: any) => {
+            child.checked = permission.checked;
+        });
+    }
+}
+const toggleParent = (permission: any) => {
+    if (permission.children) {
+        permission.checked = true// permission.children.every((child: any) => child.checked);
+    }
+}
 
 </script>
-<template lang="">
-    <div>
-        Usuarios
+<template>
+    <div class="container">
+        <div class="permission-group" v-for="(permission, index) in permissions" :key="index">
+            <div class="permission-item">
+                <input type="checkbox" v-model="permission.checked" @change="toggleChildren(permission)" />
+                <span class="toggle-icon cursor" @click="permission.expanded = !permission.expanded"
+                    :class="{ 'rotated': permission.expanded }"> <label class="px-2 cursor">{{ permission.name
+                        }}</label>
+                    <i :class="{ 'arrow-right': !permission.expanded, 'arrow-down': permission.expanded }"></i></span>
+            </div>
+            <transition name="expand">
+                <div class="children" v-if="permission.expanded">
+                    <div class="permission-item child px-2" v-for="(child, childIndex) in permission.children"
+                        :key="childIndex">
+                        <input type="checkbox" v-model="child.checked" @change="toggleParent(permission)" />
+                        <label>{{ child.name }}</label>
+                    </div>
+                </div>
+            </transition>
+        </div>
     </div>
 </template>
+
+<style>
+*,
+*:before,
+*:after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+}
+
+form {
+    display: grid;
+    place-content: center;
+    min-height: 100vh;
+}
+
+.form-control {
+    font-family: system-ui, sans-serif;
+    font-size: 2rem;
+    font-weight: bold;
+    line-height: 1.1;
+    display: grid;
+    grid-template-columns: 1em auto;
+    gap: 0.5em;
+}
+
+.form-control+.form-control {
+    margin-top: 1em;
+}
+
+.form-control--disabled {
+    color: var(--form-control-disabled);
+    cursor: not-allowed;
+}
+
+input[type="checkbox"] {
+    /* Add if not using autoprefixer */
+    -webkit-appearance: none;
+    /* Remove most all native input styles */
+    appearance: none;
+    /* For iOS < 15 */
+    background-color: var(--form-background);
+    /* Not removed via appearance */
+    margin: 0;
+
+    font: inherit;
+    color: currentColor;
+    width: 1.15em;
+    height: 1.15em;
+    border: 0.15em solid currentColor;
+    border-radius: 0.15em;
+    transform: translateY(-0.075em);
+
+    display: grid;
+    place-content: center;
+}
+
+input[type="checkbox"]::before {
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    transform: scale(0);
+    transform-origin: bottom left;
+    transition: 100ms transform ease-in-out;
+    box-shadow: inset 1em 1em var(--form-control-color);
+    /* Windows High Contrast Mode */
+    background-color: CanvasText;
+}
+
+input[type="checkbox"]:checked::before {
+    transform: scale(1);
+}
+
+input[type="checkbox"]:focus {
+    outline: max(2px, 0.15em) solid currentColor;
+    outline-offset: max(2px, 0.15em);
+}
+
+input[type="checkbox"]:disabled {
+    --form-control-color: var(--form-control-disabled);
+
+    color: var(--form-control-disabled);
+    cursor: not-allowed;
+}
+
+.container {
+    margin: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.permission-group {
+    margin-bottom: 10px;
+}
+
+.permission-item {
+    display: flex;
+    align-items: center;
+}
+
+.permission-item input {
+    margin-right: 10px;
+}
+
+.children {
+    margin-left: 20px;
+    overflow: hidden;
+}
+
+.child {
+    margin-top: 5px;
+}
+
+.cursor {
+    cursor: pointer;
+}
+
+.toggle-icon::before {
+    content: '▼';
+    display: inline-block;
+    transition: transform 0.3s ease;
+    /* Transición suave */
+}
+
+.toggle-icon.rotated::before {
+    transform: rotate(-90deg);
+    /* Rotación de 90 grados */
+}
+
+.expand-enter-active,
+.expand-leave-active {
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+    max-height: 0;
+    opacity: 0;
+}
+
+.expand-enter-to,
+.expand-leave-from {
+    max-height: 500px;
+    opacity: 1;
+}
+</style>
