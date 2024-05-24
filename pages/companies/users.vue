@@ -39,10 +39,16 @@ const toggleChildren = (permission: any) => {
     }
 }
 const toggleParent = (permission: any) => {
-    if (permission.children) {
-        permission.checked = true// permission.children.every((child: any) => child.checked);
+    if (!permission.children) throw Error("No data in levels")
+
+    if (permission.children.every((child: any) => !child.checked)) {
+        permission.checked = false
+    } else {
+        permission.checked = true
     }
 }
+
+
 
 </script>
 <template>
