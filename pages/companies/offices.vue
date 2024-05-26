@@ -2,13 +2,13 @@
 import { useSnackbarStore } from '@/store/index';
 import type { Establishment } from '~/interfaces/Establishments.interface';
 import type { Warehouse } from "~/interfaces/Warehouse.interface";
-import type { Users } from "~/interfaces/User";
+import type { User } from "~/interfaces/User";
 const snackbarStore = useSnackbarStore()
 const apiURL = useCookie("apiURL");
 import { useDisplay } from 'vuetify'
 const { mobile } = useDisplay()
 const { data: establishmentsFetch, refresh: establishmentsRefresh } = await useFetch<Establishment[]>(`${apiURL.value}/establishments`, { method: 'GET' });
-const { data: usersFetch, refresh: usersRefresh } = await useFetch<Users[]>(`${apiURL.value}/users`, { method: 'GET' });
+const { data: usersFetch, refresh: usersRefresh } = await useFetch<User[]>(`${apiURL.value}/users`, { method: 'GET' });
 const { data: warehousesFetch, refresh: warehousesRefresh } = await useFetch<Warehouse[]>(`${apiURL.value}/warehouses`, { method: 'GET' });
 
 const headers = ref([

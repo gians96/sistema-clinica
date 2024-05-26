@@ -367,15 +367,8 @@ const refreshData = async () => {
                         <v-btn append-icon="mdi-plus-circle" color="primary" variant="flat"
                             @click="openDialogNewItem()">Nuevo</v-btn>
                     </v-col>
-
-
-
-                    <v-col cols="2">
-
-
-                    </v-col>
+                    <v-col cols="2"> </v-col>
                     <v-col cols="12" lg="2" md="4" sm="12" xs="12">
-
                     </v-col>
                 </v-row>
                 <!-- {{ editedItem }} -->
