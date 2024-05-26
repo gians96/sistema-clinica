@@ -22,6 +22,7 @@ export interface ModulesUser {
     id: number;
     module_id: number;
     user_id: number;
+    module?: Module;
     level_user: LevelUser[];
 }
 
@@ -30,4 +31,24 @@ export interface LevelUser {
     module_user_id: number;
     level_id: number;
     user_id: number;
+    level?: Level;
+}
+
+export interface Module {
+    id: number;
+    module_id?: number;
+    title: string;
+    value: string;
+    enabled: boolean;
+    path: string;
+    icon?: string;
+}
+
+
+export interface Level {
+    id: number;
+    title: string;
+    value: string;
+    enabled: boolean;
+    path: string;
 }

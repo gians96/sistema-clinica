@@ -342,7 +342,7 @@ const deleteItemFetch = async (id: number) => {
                 @click="openDialogNewItem()">Nuevo</v-btn>
         </v-app-bar>
         <!-- {{ apiURL }}asds -->
-        <!-- {{ usersFetch }} -->
+        <!-- {{ permissions }} -->
         <v-card class="justify-self-end mx-4" elevation="0">
             <v-container fluid>
                 <v-row dense>

@@ -241,6 +241,44 @@ const colorStateType: Record<StateType['id'], string> = {
     "6": 'red',//Anulado
     "7": 'orange',//Por anular
 }
+
+const formatPrintType = (item: SaleNoteItem) => {
+
+    let description = item.item.description.toString()
+    let itemTypeId = item.item_type_id
+    let allDescription = {}
+    console.log(itemTypeId);
+    if (!itemTypeId) {
+        return allDescription = {
+            text: description,
+            style: { fontSize: 11, alignment: "left" }
+        }
+    }
+    if (itemTypeId === 1) {
+        allDescription = {
+            text: description + `\nN° Pollos: ${item.quantity_chicken}\nPeso promedio: ${item.average_weight}`,
+            style: { fontSize: 11, alignment: "left" }
+        }
+    }
+    if (itemTypeId === 2) {
+        allDescription = {
+            text: description + `\nN° Pollos: ${item.quantity_chicken}\nN° Jaba: ${item.quantity_box}\nPeso bruto: ${item.gross_weight}\nTara: ${item.tare}`,
+            style: { fontSize: 11, alignment: "left" }
+        }
+    }
+    if (itemTypeId === 3) {
+        allDescription = {
+            text: description + `\nN° Pollos: ${item.quantity_chicken}`,
+            style: { fontSize: 11, alignment: "left" }
+        }
+    }
+    return allDescription
+    // return {
+    //     text: `F\nAdditional Data 1: ${item.additionalData1}\nAdditional Data 2: ${item.additionalData2}\nAdditional Data 3: ${item.additionalData3}`,
+    //     style: { fontSize: 11, alignment: "left" }
+    // },
+}
+
 const printItems = (items: SaleNoteItem[]) => {
     const header = [
         { text: "DESCRIPCIÓN", style: { fontSize: 12, bold: true, alignment: "center" } },
@@ -253,7 +291,8 @@ const printItems = (items: SaleNoteItem[]) => {
     return [header,
         ...items.map(item => {
             return [
-                { text: item.item.description.toString(), style: { fontSize: 11, alignment: "center" } },
+                // { text: item.item.description.toString(), style: { fontSize: 11, alignment: "center" } },
+                formatPrintType(item),
                 { text: item.unit_type_id.toString(), style: { fontSize: 11, alignment: "center" } },
                 { text: item.quantity.toString(), style: { fontSize: 11, alignment: "center" } },
                 { text: moneyDecimal(item.unit_price.toString()), style: { fontSize: 11, alignment: "center" } },
