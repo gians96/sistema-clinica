@@ -3,9 +3,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     const userLogin = useCookie<Login>("user");
     const apiURL = useCookie("apiURL");
 
-    if (to.path === "/") return
-    if (!userLogin.value || !userLogin.value.token || !userLogin.value.modules) return navigateTo('/')
+    if (to.path === "/" || to.path === "/buscar") return
 
+    if (!userLogin.value || !userLogin.value.token || !userLogin.value.modules) return navigateTo('/')
 
     const { data: resRefreshToken } = await useFetch<Login>(`${apiURL.value}/auth/refresh-token`,
         {
@@ -29,7 +29,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     for (const module of userLogin.value.modules) {
         if (module.path !== "#") return navigateTo(module.path)
         for (const level of module.module_levels) {
-            if (module.path !== "#") return navigateTo(level.path)
+            if (level.path !== "#") return navigateTo(level.path)
         }
     }
 })

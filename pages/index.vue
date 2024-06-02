@@ -4,14 +4,21 @@ const apiURL = useCookie("apiURL");
 const userLogin = useCookie<Login>("user");
 const email = ref("");
 const password = ref("");
+const loadingLogin = ref(false)
 const SingUp = () => {
   navigateTo('/characters')
 };
 const { ruleEmail, rulePassLen, ruleRequired } = useFormRules();
 const decodeToken = ref()
-
+const msgAlert = ref("")
 const submit = async () => {
-  const { data: resLogin } = await useFetch<Login>(`${apiURL.value}/auth/login`,
+  loadingLogin.value = true
+  if (!email.value || !password.value) {
+    msgAlert.value = "Llene los datos correctamente";
+    loadingLogin.value = false;
+    return;
+  }
+  const { data: resLogin, pending: pendingLogin, error } = await useFetch<Login>(`${apiURL.value}/auth/login`,
     {
       method: "POST",
       body: {
@@ -23,11 +30,15 @@ const submit = async () => {
       },
     }
   );
-  if (!resLogin.value) throw Error("Error en obtener datos del login")
-  if (resLogin.value.status) {
-    userLogin.value = resLogin.value
-    navigateTo("/items")
+  if (!resLogin.value?.status) {
+    msgAlert.value = "Las credenciales proporcionadas no son correctos";
+    loadingLogin.value = false;
+    return;
   }
+  userLogin.value = resLogin.value
+  loadingLogin.value = false;
+  navigateTo("/items")
+
 };
 
 const decodeTokenBtn = async () => {
@@ -76,9 +87,13 @@ definePageMeta({
                 <VTextField :rules="[ruleRequired, rulePassLen]" v-model="password"
                   prepend-inner-icon="fluent:password-20-regular" id="password" name="password" type="password" />
               </div>
+              <div class="my-2">
+                <v-alert v-if="msgAlert" color="error">{{ msgAlert }}</v-alert>
+              </div>
               <div class="mt-5">
                 <!-- <VBtn type="submit" block min-height="44" class="gradient primary" to="/characters">Ingresar</VBtn> -->
-                <v-btn type="submit" block min-height="44" class="gradient primary">Ingresar</v-btn>
+                <v-btn type="submit" :loading="loadingLogin" block min-height="44"
+                  class="gradient primary">Ingresar</v-btn>
               </div>
             </VForm>
             <!-- <p class="text-body-2 mt-10">
