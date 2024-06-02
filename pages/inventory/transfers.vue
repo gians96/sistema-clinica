@@ -577,8 +577,12 @@ const statusColorState: Record<StateInvetoriesTransfer['id'], string> = {
                 <!-- CUADRO DIALOGO -->
                 <v-dialog v-if="warehouseData" v-model="dialog" :max-width="mobile ? '100%' : '70%'"
                     transition="dialog-bottom-transition" persistent>
+                    <v-toolbar color="primary" floating>
+                        <v-toolbar-title>{{ nameTitleDialog }} </v-toolbar-title>
+                        <v-spacer></v-spacer>
+                        <v-btn icon="mdi-close" variant="elevated" @click="closeDialogItem()"></v-btn>
+                    </v-toolbar>
                     <v-card>
-                        <v-toolbar color="primary" :title="nameTitleDialog"> </v-toolbar>
                         <v-container>
                             <v-row>
                                 <v-col cols="12" sm="6" md="3">
@@ -655,9 +659,6 @@ const statusColorState: Record<StateInvetoriesTransfer['id'], string> = {
 
                         <v-card-actions class="mb-2">
                             <v-spacer></v-spacer>
-                            <v-btn class="mx-2" color="blue-darken-1" variant="text" @click="closeDialogItem()">
-                                Cancelar
-                            </v-btn>
                             <v-btn color="blue-darken-1" variant="elevated" @click="save()">
                                 Guardar
                             </v-btn>

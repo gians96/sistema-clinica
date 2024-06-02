@@ -659,12 +659,12 @@ const accountsReceivable = () => {
                 <!-- DIALGO LIST PAYMENT SALE NOTES -->
                 <v-dialog v-model="dialogListPayments" v-if="getSaleNote?.sale_note_payments"
                     :max-width="mobile ? '100%' : '65%'" persistent>
-                    <v-toolbar floating>
+                    <v-toolbar color="primary" floating>
                         <v-toolbar-title>Listado de pagos:
                             <v-btn variant="flat" icon="mdi-add" color="success" @click="onClickAddPaymentMethods()">
                             </v-btn></v-toolbar-title>
                         <v-spacer></v-spacer>
-                        <v-btn icon="mdi-close" @click="dialogListPayments = false"></v-btn>
+                        <v-btn icon="mdi-close" variant="elevated" @click="dialogListPayments = false"></v-btn>
                     </v-toolbar>
                     <v-card>
                         <v-card-title>

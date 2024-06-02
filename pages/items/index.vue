@@ -405,8 +405,12 @@ const refreshData = async () => {
                 <!-- CUADRO DIALOGO -->
                 <v-dialog v-model="dialog" :max-width="mobile ? '100%' : '70%'" transition="dialog-bottom-transition"
                     persistent>
+                    <v-toolbar color="primary" floating>
+                        <v-toolbar-title>{{ nameTitleDialog }} </v-toolbar-title>
+                        <v-spacer></v-spacer>
+                        <v-btn icon="mdi-close" variant="elevated" @click="closeDialogItem()"></v-btn>
+                    </v-toolbar>
                     <v-card>
-                        <v-toolbar color="primary" :title="nameTitleDialog"> </v-toolbar>
                         <v-card-title class="px-0 py-0">
                             <v-tabs v-model="tab" bg-color="primary">
                                 <v-tab value="general">General</v-tab>
@@ -447,9 +451,8 @@ const refreshData = async () => {
                                                     label="Precio de compra x unidad"></v-text-field>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="3" v-if="warehousesFetch">
-                                                <v-select v-model="editedItem.warehouses" required
-                                                    :items="warehousesFetch" :item-title="'description'" item-value="id"
-                                                    label="Área">
+                                                <v-select v-model="editedItem.warehouses" required :items="warehousesFetch"
+                                                    :item-title="'description'" item-value="id" label="Área">
                                                 </v-select>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="3">
@@ -478,9 +481,8 @@ const refreshData = async () => {
                                             <v-col cols="12" sm="6" md="3"
                                                 v-if="companyFetch && companyFetch.business_turns[0].active">
                                                 <v-select :items="companyFetch?.cat_item_types"
-                                                    v-model="editedItem.item_type_id" required
-                                                    :item-title="'description'" item-value="id"
-                                                    label="Tipo de producto">
+                                                    v-model="editedItem.item_type_id" required :item-title="'description'"
+                                                    item-value="id" label="Tipo de producto">
                                                 </v-select>
                                             </v-col>
                                             <!-- <v-col cols="12" sm="6" md="3">
@@ -530,32 +532,13 @@ const refreshData = async () => {
                                                 <v-btn icon="mdi-delete" color="error" @click="deleteLotOnClick(index)">
                                                 </v-btn>
                                             </v-col>
-                                            <!-- {{ lot.id }},{{ lot.item_id }},{{ lot.code }} -->
-                                            <!-- <v-col cols="12" xs="12" md="2" lg="2"
-                                                class="d-flex aling-center justify-center"
-                                                :class="mobile ? 'py-0' : ''">
-                                                <v-spacer></v-spacer>
-                                                <v-spacer></v-spacer>
-                                                
-                                                <v-spacer></v-spacer>
-                                            </v-col> -->
-
                                         </v-row>
-
                                     </div>
-                                    <!-- <p>{{ editedItem }}</p> -->
-                                    <!-- <p>-----------------</p> -->
-                                    <!-- <p>{{ editedItemLotsGroup }}</p> -->
-
                                 </v-window-item>
                             </v-window>
                         </v-card-text>
-
                         <v-card-actions class="mb-2">
                             <v-spacer></v-spacer>
-                            <v-btn class="mx-2" color="blue-darken-1" variant="text" @click="closeDialogItem()">
-                                Cancelar
-                            </v-btn>
                             <v-btn color="blue-darken-1" variant="elevated" @click="save()">
                                 Guardar
                             </v-btn>

@@ -589,44 +589,39 @@ const saveCustomer = async () => {
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             label="# Pollos"></v-text-field>
                                     </v-col>
-                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 2"
-                                        class="pr-1">
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 2" class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
                                             v-model="item.quantity_box"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             label="#Jaba"></v-text-field>
                                     </v-col>
-                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 2"
-                                        class="pr-1">
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 2" class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
                                             v-model="item.gross_weight"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             label="Peso Bruto (kg)"></v-text-field>
                                     </v-col>
-                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 2"
-                                        class="pr-1">
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 2" class="pr-1">
                                         <v-text-field density="compact" variant="solo" v-model="item.tare"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             :label="concatString('Tara(kg)', item.tare_weight ?? '')"
                                             suffix=""></v-text-field>
                                     </v-col>
-                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 1"
-                                        class="pr-1">
+                                    <v-col cols="4" xs="4" sm="4" md="2" lg="2" v-if="item.item_type_id === 1" class="pr-1">
                                         <v-text-field type="number" density="compact" variant="solo"
                                             v-model="item.average_weight"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             label="Peso Promedio (kg)"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1">
-                                        <v-text-field type="number" density="compact" variant="solo"
-                                            v-model="item.quantity"
+                                        <v-text-field type="number" density="compact" variant="solo" v-model="item.quantity"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             :label="item.item_type_id ? 'Peso neto (kg)' : 'Cantidad'" color="white"
                                             bg-color="success"></v-text-field>
                                     </v-col>
                                     <v-col cols="4" xs="4" sm="4" md="2" lg="2" class="pr-1">
-                                        <v-text-field type="number" density="compact" variant="solo"
-                                            v-model="item.price" label="Precio" color="white"
+                                        <v-text-field type="number" density="compact" variant="solo" v-model="item.price"
+                                            label="Precio" color="white"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             bg-color="success"></v-text-field>
                                     </v-col>
@@ -635,13 +630,12 @@ const saveCustomer = async () => {
                                         <v-checkbox v-model="item.isDiscount"
                                             @update:model-value="changeValuesListItemPOS(item, index)"
                                             :label="!item.isDiscount ? 'Descuento' : ''" class="pr-6"></v-checkbox>
-                                        <v-text-field v-if="item.isDiscount" type="number" density="compact"
-                                            variant="solo" v-model="item.discount" label="Descuento"></v-text-field>
+                                        <v-text-field v-if="item.isDiscount" type="number" density="compact" variant="solo"
+                                            v-model="item.discount" label="Descuento"></v-text-field>
                                     </v-col>
                                 </v-row>
                             </v-col>
-                            <v-col cols="12" md="12" lg="2" sm="12" xs="12"
-                                class="d-flex align-center justify-center pb-4">
+                            <v-col cols="12" md="12" lg="2" sm="12" xs="12" class="d-flex align-center justify-center pb-4">
                                 <v-row no-gutters class="d-flex align-center justify-center">
                                     <v-col :cols='mobile ? "10" : "9"' class="d-flex align-center flex-column">
                                         <div class="text-h5 py-2 ">
@@ -660,8 +654,7 @@ const saveCustomer = async () => {
                                     </v-col>
                                     <v-col :cols='mobile ? "2" : "3"' class="d-flex align-center "
                                         :class='mobile ? "justify-center" : "justify-end"'>
-                                        <v-btn @click="deleteItemPOS(index)" icon="mdi-delete-forever"
-                                            color="red"></v-btn>
+                                        <v-btn @click="deleteItemPOS(index)" icon="mdi-delete-forever" color="red"></v-btn>
                                     </v-col>
                                 </v-row>
                             </v-col>
@@ -737,15 +730,14 @@ const saveCustomer = async () => {
                                     <v-row no-gutters justify="center" v-if="paymentsMethodTypes.length !== 0"
                                         v-for="(payment, index) in paymentsMethodTypes" :key="index">
                                         <v-col cols="7" class="pr-1">
-                                            <v-select class="inline select-box"
-                                                :items="companyFetch.payment_method_types"
+                                            <v-select class="inline select-box" :items="companyFetch.payment_method_types"
                                                 v-model="payment.payment_method_type_id" variant="outlined"
                                                 item-title="description" item-value="id">
                                             </v-select>
                                         </v-col>
                                         <v-col cols="4" class="d-flex justify-center pr-1">
-                                            <v-text-field label="Ingrese monto" placeholder="0.00"
-                                                v-model="payment.mount" type="number">
+                                            <v-text-field label="Ingrese monto" placeholder="0.00" v-model="payment.mount"
+                                                type="number">
                                             </v-text-field>
                                         </v-col>
                                         <v-col cols="1" class="py-2">
@@ -787,8 +779,12 @@ const saveCustomer = async () => {
         <!-- CUADRO DIALOGO CLIENTE -->
         <v-dialog v-model="dialogCustomer" :max-width="mobile ? '100%' : '60%'" transition="dialog-bottom-transition"
             persistent>
+            <v-toolbar color="primary" floating>
+                <v-toolbar-title>Nuevo Cliente </v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-btn icon="mdi-close" variant="elevated" @click="dialogCustomer = false"></v-btn>
+            </v-toolbar>
             <v-card>
-                <v-toolbar color="primary" title="Nuevo Cliente"> </v-toolbar>
                 <v-card-title class="px-0 py-0">
                     <v-tabs v-model="tabDialogCustomer" bg-color="primary">
                         <v-tab value="data">Datos de cliente</v-tab>
@@ -801,8 +797,7 @@ const saveCustomer = async () => {
                         <v-window-item value="data">
                             <v-row class="pt-6">
                                 <v-col cols="12" sm="6" md="6" class="py-0" v-if="companyFetch">
-                                    <v-select class="inline select-box"
-                                        v-model="customerEdited.identity_document_type_id"
+                                    <v-select class="inline select-box" v-model="customerEdited.identity_document_type_id"
                                         :items="companyFetch.cat_identity_document_types" item-title="description"
                                         label="Tipo Doc. Identidad" item-value="id">
                                     </v-select>
@@ -811,8 +806,7 @@ const saveCustomer = async () => {
                                     <v-text-field label="Número" v-model="customerEdited.number">
                                         <template v-slot:append
                                             v-if="customerEdited.identity_document_type_id === '1' || customerEdited.identity_document_type_id === '6'">
-                                            <v-btn icon variant="elevated" color="success"
-                                                @click="searchDataCustomers()">
+                                            <v-btn icon variant="elevated" color="success" @click="searchDataCustomers()">
                                                 <v-icon> mdi-magnify </v-icon>
                                             </v-btn>
                                         </template>
@@ -849,8 +843,7 @@ const saveCustomer = async () => {
                                     <v-text-field v-model="customerEdited.telephone" label="Teléfono"></v-text-field>
                                 </v-col>
                                 <v-col cols="12" sm="6" md="3">
-                                    <v-text-field v-model="customerEdited.email"
-                                        label="Correo de contacto"></v-text-field>
+                                    <v-text-field v-model="customerEdited.email" label="Correo de contacto"></v-text-field>
                                 </v-col>
                             </v-row>
                         </v-window-item>
@@ -921,9 +914,6 @@ const saveCustomer = async () => {
 
                 <v-card-actions class="mb-2">
                     <v-spacer></v-spacer>
-                    <v-btn class="mx-2" color="blue-darken-1" variant="text" @click="dialogCustomer = false">
-                        Cancelar
-                    </v-btn>
                     <v-btn color="blue-darken-1" variant="elevated" @click="saveCustomer">
                         Guardar
                     </v-btn>

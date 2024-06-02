@@ -1,19 +1,49 @@
 <script setup lang="ts">
-
-const route = useRoute()
+import type { Login } from "@/interfaces/Login.Interface"
+const apiURL = useCookie("apiURL");
+const userLogin = useCookie<Login>("user");
 const email = ref("");
 const password = ref("");
 const SingUp = () => {
   navigateTo('/characters')
 };
 const { ruleEmail, rulePassLen, ruleRequired } = useFormRules();
+const decodeToken = ref()
 
 const submit = async () => {
-  console.log("entra");
-
+  const { data: resLogin } = await useFetch<Login>(`${apiURL.value}/auth/login`,
+    {
+      method: "POST",
+      body: {
+        email: email.value,
+        password: password.value,
+      },
+      headers: {
+        // Authorization: `Bearer ${userCookie.value.token}`,
+      },
+    }
+  );
+  if (!resLogin.value) throw Error("Error en obtener datos del login")
+  if (resLogin.value.status) {
+    userLogin.value = resLogin.value
+    navigateTo("/items")
+  }
 };
-navigateTo("/items")
 
+const decodeTokenBtn = async () => {
+  const { data: tokenDec } = await useFetch<Login>(`${apiURL.value}/auth/refresh-token`,
+    {
+      method: "POST",
+      body: {
+        token: userLogin.value.token
+      },
+      headers: {
+        // Authorization: `Bearer ${userCookie.value.token}`,
+      },
+    }
+  );
+  decodeToken.value = tokenDec.value
+}
 definePageMeta({
   layout: "auth",
 });
@@ -25,10 +55,10 @@ definePageMeta({
       <VCol cols="12" md="6" lg="5" sm="6">
         <VRow no-gutters align="center" justify="center">
           <VCol cols="12" md="6">
-            <div class=" d-flex align-center justify-center mb-4">
-              <v-img src="https://cmecocasma.nt-suite.one/storage/uploads/logos/logo_20541751832.jpg" cover
+            <div class=" d-flex align-center justify-center mb-4 my-12">
+              <!-- <v-img src="https://cmecocasma.nt-suite.one/storage/uploads/logos/logo_20541751832.jpg" cover
                 max-height="130" max-width="130">
-              </v-img>
+              </v-img> -->
             </div>
             <h1>Iniciar sesión</h1>
             <p class="text-medium-emphasis">Ingresa tus datos</p>
@@ -38,8 +68,8 @@ definePageMeta({
             <VForm @submit.prevent="submit" class="mt-7">
               <div class="mt-1">
                 <label class="label text-grey-darken-2" for="email">Email</label>
-                <VTextField :rules="[ruleRequired, ruleEmail]" v-model="email"
-                  prepend-inner-icon="fluent:mail-24-regular" id="email" name="email" type="email" />
+                <VTextField :rules="[ruleRequired, ruleEmail]" v-model="email" prepend-inner-icon="fluent:mail-24-regular"
+                  id="email" name="email" type="email" />
               </div>
               <div class="mt-1">
                 <label class="label text-grey-darken-2" for="password">Contraseña</label>
@@ -59,6 +89,8 @@ definePageMeta({
                 <NuxtLink to="/signup" class="font-weight-bold text-primary">Registrate</NuxtLink>
               </span>
             </p> -->
+            <!-- <v-btn block min-height="44" @click="decodeTokenBtn()" class="gradient primary">decodetoken</v-btn> -->
+
           </VCol>
         </VRow>
       </VCol>
@@ -67,12 +99,11 @@ definePageMeta({
           class="h-100 rounded-xl d-flex align-center justify-center">
           <div class="text-center w-50 text-white mx-auto align-center">
 
-            <h2 class="mb-4">CENTRO MEDICO ECOCASMA E.I.R.L.</h2>
-            <p>
-              Software médico, ideal para clínicas y consultorios.
-              Ahorra tiempo y mejora la salud de tus pacientes organizando,
-              llevando tus historias clínicas y realizando videollamadas en una sola plataforma integrada.
-            </p>
+            <h2 class="mb-4">Sistema de Gestión Empresarial</h2>
+            <!-- <p>
+              Ventas.
+              Inventario.
+            </p> -->
           </div>
         </VImg>
       </VCol>

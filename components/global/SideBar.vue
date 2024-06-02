@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { useStore } from '@/store/index'
 import { useDisplay } from 'vuetify'
+import type { Login } from '~/interfaces/Login.Interface';
 const store = useStore()
 const { mobile } = useDisplay()
-
+const userLogin = useCookie<Login>("user");
 const menus = ref([
   { icon: "mdi-view-dashboard", title: "Dasboard", value: "dashboard", to: "/dashboard", toSub: null, view: false },
   { icon: "mdi-monitor", title: "Escritorio", value: "escritorio", to: "/desktop", toSub: null, view: false },
   { icon: "mdi-account-plus", title: "Reg. Atención", value: "careRecord", to: "/care_record", toSub: null, view: false },
   { icon: "mdi-thermometer", title: "Triaje", value: "triage", to: "/triage", toSub: null, view: false },
   { icon: "mdi-medical-bag", title: "Atención Médica", value: "medicalAttention", to: "/medical_attention", toSub: null, view: false },
-  
+
   {
     icon: "mdi-sale", title: "Ventas", value: "sale", to: "#", view: true,
     toSub: [
@@ -71,17 +72,17 @@ const menus = ref([
     </v-list-item>
     <v-divider></v-divider>
 
-    <v-list nav>
-      <div v-for="menu in menus" :key="menu.to">
-        <v-list-item v-if="!menu.toSub && menu.view" :prepend-icon="menu.icon" :title="menu.title" :value="menu.value"
-          :to="menu.to"></v-list-item>
-        <v-list-group v-if="menu.toSub && menu.view" :value="menu.title" class="v-list-group__items">
+    <v-list nav v-if="userLogin">
+      <div v-for="menu in userLogin.modules" :key="menu.path">
+        <v-list-item v-if="!menu.module_levels && menu.checked" :prepend-icon="menu.icon" :title="menu.title" :value="menu.value"
+          :to="menu.path"></v-list-item>
+        <v-list-group v-if="menu.module_levels && menu.checked" :value="menu.title" class="v-list-group__items">
           <template v-slot:activator="{ props }">
             <v-list-item v-bind="props" :prepend-icon="menu.icon" :title="menu.title"></v-list-item>
           </template>
-          <div v-for="subMenu in menu.toSub" :key="subMenu.to">
-            <v-list-item v-if="subMenu.view" height="12px" prepend-icon="mdi-vector-point" :title="subMenu.title"
-              :value="subMenu.value" :to="subMenu.to">
+          <div v-for="subMenu in menu.module_levels" :key="subMenu.path">
+            <v-list-item v-if="subMenu.checked" height="12px" prepend-icon="mdi-vector-point" :title="subMenu.title"
+              :value="subMenu.value" :to="subMenu.path">
             </v-list-item>
           </div>
 
