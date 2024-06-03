@@ -1,6 +1,6 @@
 import type { Login } from "~/interfaces/Login.Interface";
 export default defineNuxtRouteMiddleware(async (to, from) => {
-    const userLogin = useCookie<Login>("user");
+    const userLogin = useCookie<Login | null>("user");
     const apiURL = useCookie("apiURL");
 
     if (to.path === "/" || to.path === "/buscar") return
@@ -15,7 +15,10 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
             }
         }
     );
-    if (!resRefreshToken.value) return
+    if (!resRefreshToken.value) {
+        userLogin.value = null
+        return navigateTo('/')
+    }
 
     userLogin.value = resRefreshToken.value
 

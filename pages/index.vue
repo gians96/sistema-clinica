@@ -11,7 +11,7 @@ const SingUp = () => {
 const { ruleEmail, rulePassLen, ruleRequired } = useFormRules();
 const decodeToken = ref()
 const msgAlert = ref("")
-const submit = async () => {
+const onClickLogin = async () => {
   loadingLogin.value = true
   if (!email.value || !password.value) {
     msgAlert.value = "Llene los datos correctamente";
@@ -61,11 +61,11 @@ definePageMeta({
 </script>
 
 <template>
-  <VContainer fluid class="fill-height">
-    <VRow no-gutters align="center" justify="center" class="fill-height">
-      <VCol cols="12" md="6" lg="5" sm="6">
-        <VRow no-gutters align="center" justify="center">
-          <VCol cols="12" md="6">
+  <v-container fluid class="fill-height">
+    <v-row  no-gutters class="fill-height d-flex align-center justify-center" >
+      <v-col cols="12" md="6" lg="5" sm="6">
+        <v-row no-gutters class="d-flex align-center justify-center">
+          <v-col cols="12" md="6" >
             <div class=" d-flex align-center justify-center mb-4 my-12">
               <!-- <v-img src="https://cmecocasma.nt-suite.one/storage/uploads/logos/logo_20541751832.jpg" cover
                 max-height="130" max-width="130">
@@ -76,7 +76,7 @@ definePageMeta({
 
             <!-- <UtilsTextanimate></UtilsTextanimate> -->
 
-            <VForm @submit.prevent="submit" class="mt-7">
+            <!-- <VForm @submit.prevent="submit" class="mt-7"> -->
               <div class="mt-1">
                 <label class="label text-grey-darken-2" for="email">Email</label>
                 <VTextField :rules="[ruleRequired, ruleEmail]" v-model="email" prepend-inner-icon="fluent:mail-24-regular"
@@ -92,10 +92,10 @@ definePageMeta({
               </div>
               <div class="mt-5">
                 <!-- <VBtn type="submit" block min-height="44" class="gradient primary" to="/characters">Ingresar</VBtn> -->
-                <v-btn type="submit" :loading="loadingLogin" block min-height="44"
+                <v-btn @click="onClickLogin" :loading="loadingLogin" block min-height="44"
                   class="gradient primary">Ingresar</v-btn>
               </div>
-            </VForm>
+            <!-- </VForm> -->
             <!-- <p class="text-body-2 mt-10">
               <NuxtLink to="/reset-password" class="font-weight-bold text-primary">¿Has olvidado tu contraseña?</NuxtLink>
             </p>
@@ -106,15 +106,15 @@ definePageMeta({
             </p> -->
             <!-- <v-btn block min-height="44" @click="decodeTokenBtn()" class="gradient primary">decodetoken</v-btn> -->
 
-          </VCol>
-        </VRow>
-      </VCol>
-      <VCol class="hidden-md-and-down fill-height" md="6" lg="7">
-        <VImg src="https://wallpaper.dog/large/5557744.jpg" cover
-          class="h-100 rounded-xl d-flex align-center justify-center">
+          </v-col>
+        </v-row>
+      </v-col>
+      <VCol class="hidden-md-and-down fill-height d-flex align-center justify-center" md="6" lg="7">
+        <VImg src="fondo/fondo1.png"  max-width="75%" 
+          >
           <div class="text-center w-50 text-white mx-auto align-center">
 
-            <h2 class="mb-4">Sistema de Gestión Empresarial</h2>
+            <!-- <h2 class="mb-4">Sistema de Gestión Empresarial</h2> -->
             <!-- <p>
               Ventas.
               Inventario.
@@ -122,7 +122,7 @@ definePageMeta({
           </div>
         </VImg>
       </VCol>
-    </VRow>
+    </v-row>
 
-  </VContainer>
+  </v-container>
 </template>
