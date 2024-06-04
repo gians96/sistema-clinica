@@ -80,12 +80,12 @@ definePageMeta({
               <div class="mt-1">
                 <label class="label text-grey-darken-2" for="email">Email</label>
                 <VTextField :rules="[ruleRequired, ruleEmail]" v-model="email" prepend-inner-icon="fluent:mail-24-regular"
-                  id="email" name="email" type="email" />
+                  id="email" name="email" type="email"    @keydown.enter="onClickLogin" />
               </div>
               <div class="mt-1">
                 <label class="label text-grey-darken-2" for="password">Contraseña</label>
                 <VTextField :rules="[ruleRequired, rulePassLen]" v-model="password"
-                  prepend-inner-icon="fluent:password-20-regular" id="password" name="password" type="password" />
+                  prepend-inner-icon="fluent:password-20-regular" id="password" name="password" type="password"  @keydown.enter="onClickLogin" />
               </div>
               <div class="my-2">
                 <v-alert v-if="msgAlert" color="error">{{ msgAlert }}</v-alert>

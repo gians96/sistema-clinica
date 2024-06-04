@@ -1,32 +1,24 @@
 <script lang="ts" setup>
 import { useSnackbarStore } from '@/store/index';
 const snackbarStore = useSnackbarStore()
-// import type { Item, ItemLotsGroup } from "@/interfaces/Item.interface";
 import type { Warehouse } from "~/interfaces/Warehouse.interface";
 const apiURL = useCookie("apiURL");
 import { useDisplay } from 'vuetify'
 const { mobile } = useDisplay()
 import { companyStore } from '@/store/company'
 import type { Companies } from '~/interfaces/Company.interface';
-import type { SaleNoteFetch, StateType, Customer, SaleNoteItem, SaleNotePayment } from '~/interfaces/SaleNotesFetch.interace';
-const { data: saleNotesFetch, refresh: saleNotesRefresh } = await useFetch<SaleNoteFetch[]>(`${apiURL.value}/sales_notes`, { method: 'GET' });
-const { data: warehousesFetch } = await useFetch<Warehouse[]>(`${apiURL.value}/warehouses`, { method: 'GET' });
-import type { paymentPOS } from '~/interfaces/Item.interface';
+import type { Unpaid, SaleNote, StateType } from '~/interfaces/Unpaid.interface';
+const { data: unpaidFetch, refresh: saleNotesRefresh } = await useFetch<Unpaid[]>(`${apiURL.value}/finance/unpaid`, { method: 'GET' });
 const companyFetch = ref<Companies>()
-const companyStoreObj = companyStore()
 onMounted(async () => {
     companyFetch.value = companyStore().$state
 })
 const headers = ref([
     // { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
     { key: 'customer.number', title: 'N°' },
-    { key: 'date_of_issue', title: 'Fecha Emsión' },
     { key: 'customer', title: 'Cliente', value: (item: any) => `${item.customer.name} - ${item.customer.number}` },
-    { key: 'series', title: 'Nota de venta', value: (item: any) => `${item.series} - ${item.number}` },
-    { key: 'has_total_canceled', title: 'Estado Pago' },
-    { key: 'total', title: 'Total' },
-    { key: 'total_prepayment', title: 'Monto abonado' },
-    { key: 'pending_amount', title: 'Saldo' },
+    // { key: 'series', title: 'Nota de venta', value: (item: any) => `${item.series} - ${item.number}` },
+    { key: 'total', title: 'Por pagar' },
     { key: 'actions', title: 'Acciones', value: "" },
 ])
 
@@ -36,14 +28,14 @@ const search = ref('')
 const selected = ref([])
 const dialog = ref(false)
 const dialogDelete = ref(false)
-const editedItem = ref<SaleNoteFetch>()
+const editedItem = ref<Unpaid>()
 
-const defaultItem = ref<SaleNoteFetch>()
+const defaultItem = ref<Unpaid>()
 let editedIndex = ref(-1)
 
 const pageCount = computed(() => {
-    if (!saleNotesFetch.value) return 1
-    return Math.ceil(saleNotesFetch.value.length / itemsPerPage.value)
+    if (!unpaidFetch.value) return 1
+    return Math.ceil(unpaidFetch.value.length / itemsPerPage.value)
 })
 
 const nameTitleDialog = ref("")
@@ -53,8 +45,8 @@ const openDialogNewItem = () => {
     editedItem.value = JSON.parse(JSON.stringify(defaultItem.value))
 }
 
-const openDialogEditItem = (item: SaleNoteFetch) => {
-    if (!saleNotesFetch.value) return null
+const openDialogEditItem = (item: Unpaid) => {
+    if (!unpaidFetch.value) return null
     dialog.value = true
     nameTitleDialog.value = "Editar nota de venta"
     // if (item.lots_enabled && item.item_lots_group) { 
@@ -65,14 +57,14 @@ const openDialogEditItem = (item: SaleNoteFetch) => {
     //     })
     // }
     editedItem.value = JSON.parse(JSON.stringify(item))
-    editedIndex.value = saleNotesFetch.value.indexOf(item)
+    editedIndex.value = unpaidFetch.value.indexOf(item)
 }
 
-const openDialogDeleteItem = (item: SaleNoteFetch) => {
-    if (!saleNotesFetch.value) return null
+const openDialogDeleteItem = (item: Unpaid) => {
+    if (!unpaidFetch.value) return null
     dialogDelete.value = true
     nameTitleDialog.value = "Eliminar Especialidad"
-    // editedIndex.value = saleNotesFetch.value.indexOf(item)
+    // editedIndex.value = unpaidFetch.value.indexOf(item)
     editedItem.value = item
 }
 
@@ -126,7 +118,7 @@ const formatTime = (date: string) => {
 
 const save = () => {
     try {
-        if (!saleNotesFetch.value) return null
+        if (!unpaidFetch.value) return null
 
         if (editedIndex.value > -1) {
             // updateItemFetch(editedItem.value)
@@ -145,11 +137,11 @@ const save = () => {
 const saveMethodsPayments = async () => {
     // console.log("ENTRA");
     if (!getSaleNote.value) throw Error("")
-    getSaleNote.value.sale_note_payments.forEach(payment => {
-        if (!payment.date_of_payment) return
-        payment.date_of_payment = new Date(payment.date_of_payment).toISOString().split('T')[0];
+    // getSaleNote.value.sale_note_payments.forEach(payment => {
+    //     if (!payment.date_of_payment) return
+    //     payment.date_of_payment = new Date(payment.date_of_payment).toISOString().split('T')[0];
 
-    })
+    // })
     const response = await fetch(`${apiURL.value}/sales_notes/payments`,
         {
             method: "POST",
@@ -192,7 +184,7 @@ const deletePayment = async (id: number) => {
 
 const deleteItemConfirm = () => {
     try {
-        if (!saleNotesFetch.value) return null
+        if (!unpaidFetch.value) return null
         // deleteItemFetch(editedItem.value.id)
 
         closeDialogDeleteItem()
@@ -242,36 +234,36 @@ const colorStateType: Record<StateType['id'], string> = {
     "7": 'orange',//Por anular
 }
 
-const formatPrintType = (item: SaleNoteItem) => {
+const formatPrintType = (item: Unpaid) => {
 
-    let description = item.item.description.toString()
-    let itemTypeId = item.item_type_id
+    // let description = item.item.description.toString()
+    // let itemTypeId = item.item_type_id
     let allDescription = {}
-    console.log(itemTypeId);
-    if (!itemTypeId) {
-        return allDescription = {
-            text: description,
-            style: { fontSize: 11, alignment: "left" }
-        }
-    }
-    if (itemTypeId === 1) {
-        allDescription = {
-            text: description + `\nN° Pollos: ${item.quantity_chicken}\nPeso promedio: ${item.average_weight}`,
-            style: { fontSize: 11, alignment: "left" }
-        }
-    }
-    if (itemTypeId === 2) {
-        allDescription = {
-            text: description + `\nN° Pollos: ${item.quantity_chicken}\nN° Jaba: ${item.quantity_box}\nPeso bruto: ${item.gross_weight}\nTara: ${item.tare}`,
-            style: { fontSize: 11, alignment: "left" }
-        }
-    }
-    if (itemTypeId === 3) {
-        allDescription = {
-            text: description + `\nN° Pollos: ${item.quantity_chicken}`,
-            style: { fontSize: 11, alignment: "left" }
-        }
-    }
+    // console.log(itemTypeId);
+    // if (!itemTypeId) {
+    //     return allDescription = {
+    //         text: description,
+    //         style: { fontSize: 11, alignment: "left" }
+    //     }
+    // }
+    // if (itemTypeId === 1) {
+    //     allDescription = {
+    //         text: description + `\nN° Pollos: ${item.quantity_chicken}\nPeso promedio: ${item.average_weight}`,
+    //         style: { fontSize: 11, alignment: "left" }
+    //     }
+    // }
+    // if (itemTypeId === 2) {
+    //     allDescription = {
+    //         text: description + `\nN° Pollos: ${item.quantity_chicken}\nN° Jaba: ${item.quantity_box}\nPeso bruto: ${item.gross_weight}\nTara: ${item.tare}`,
+    //         style: { fontSize: 11, alignment: "left" }
+    //     }
+    // }
+    // if (itemTypeId === 3) {
+    //     allDescription = {
+    //         text: description + `\nN° Pollos: ${item.quantity_chicken}`,
+    //         style: { fontSize: 11, alignment: "left" }
+    //     }
+    // }
     return allDescription
     // return {
     //     text: `F\nAdditional Data 1: ${item.additionalData1}\nAdditional Data 2: ${item.additionalData2}\nAdditional Data 3: ${item.additionalData3}`,
@@ -279,7 +271,7 @@ const formatPrintType = (item: SaleNoteItem) => {
     // },
 }
 
-const printItems = (items: SaleNoteItem[]) => {
+const printItems = (items: Unpaid[]) => {
     const header = [
         { text: "DESCRIPCIÓN", style: { fontSize: 12, bold: true, alignment: "center" } },
         { text: "UNIDAD", style: { fontSize: 12, bold: true, alignment: "center" } },
@@ -288,7 +280,7 @@ const printItems = (items: SaleNoteItem[]) => {
         { text: "TOTAL", style: { fontSize: 12, bold: true, alignment: "center" } }
     ];
     if (!items) return [header]
-    return [header,
+    return /* [header,
         ...items.map(item => {
             return [
                 // { text: item.item.description.toString(), style: { fontSize: 11, alignment: "center" } },
@@ -299,38 +291,38 @@ const printItems = (items: SaleNoteItem[]) => {
                 { text: "S/." + moneyDecimal(item.total.toString()), style: { fontSize: 11, bold: true, alignment: "center" } }
             ];
         })
-    ]
+    ]*/
 };
 
 
 const dialogListPayments = ref(false)
-const getSaleNote = ref<SaleNoteFetch>()
+const getSaleNote = ref<SaleNote>()
 const onClickAddPaymentMethods = () => {
     if (!getSaleNote.value) throw Error("Sale note vacio")
-    getSaleNote.value.sale_note_payments.push(
-        {
-            id: 0,
-            sale_note_id: 0,
-            date_of_payment: dateNow(),
-            payment_method_type_id: 1,
-            reference: "",
-            payment: 0,
-            change: null
-        }
-    )
+    // getSaleNote.value.sale_note_payments.push(
+    //     {
+    //         id: 0,
+    //         sale_note_id: 0,
+    //         date_of_payment: dateNow(),
+    //         payment_method_type_id: 1,
+    //         reference: "",
+    //         payment: 0,
+    //         change: null
+    //     }
+    // )
 }
 const dialogListPaymentSaleNote = async (id: number) => {
-    if (!id) throw Error("El id no es vacio:")
-    const response = await fetch(`${apiURL.value}/sales_notes/get/${id}`, { method: "GET" })
-    if (!response.ok) return
-    dialogListPayments.value = true
-    const saleNotes = await response.json()
-    getSaleNote.value = saleNotes as SaleNoteFetch
+    // if (!id) throw Error("El id no es vacio:")
+    // const response = await fetch(`${apiURL.value}/sales_notes/get/${id}`, { method: "GET" })
+    // if (!response.ok) return
+    // dialogListPayments.value = true
+    // const saleNotes = await response.json()
+    // getSaleNote.value = saleNotes as SaleNote
 
-    getSaleNote.value.sale_note_payments.forEach(payment => {
-        if (!payment.date_of_payment) return
-        payment.date_of_payment = new Date(payment.date_of_payment).toISOString().split('T')[0];
-    })
+    // getSaleNote.value.sale_note_payments.forEach(payment => {
+    //     if (!payment.date_of_payment) return
+    //     payment.date_of_payment = new Date(payment.date_of_payment).toISOString().split('T')[0];
+    // })
 }
 
 
@@ -340,7 +332,7 @@ const printTransfer = async (id: number) => {
     if (!response.ok) return
     const saleNotes = await response.json()
 
-    // const saleNotes: SaleNoteFetch = {}
+    // const saleNotes: SaleNote = {}
     let fecha = formatDate(saleNotes.create_at.toString()) + " " + formatTime(saleNotes.create_at.toString())
     const pdfMake = usePDFMake();
     pdfMake.tableLayouts = {
@@ -448,41 +440,41 @@ const printTransfer = async (id: number) => {
 };
 // const paymentsMethodTypes = ref<paymentPOS[]>([])
 const onClickDeletePaymentMethods = async (index: number) => {
-    if (!getSaleNote.value) throw Error("Hubo un error al eliminar")
-    if (!getSaleNote.value?.sale_note_payments) throw Error("No hay que borrar")
-    if (!getSaleNote.value?.sale_note_payments[index].id) {
-        getSaleNote.value.sale_note_payments.splice(index, 1);
-        return
-    }
-    let response = await deletePayment(getSaleNote.value?.sale_note_payments[index].id)
-    if (response) {
-        snackbarStore.setStatus("success", "Eliminado correctamente:")
-        getSaleNote.value.sale_note_payments.splice(index, 1);
-        saleNotesRefresh()
-    } else {
-        // La solicitud falló, maneja el error
-        snackbarStore.setStatus("error", "Error al guardar",)
-        console.error('Error al obtener los datos:', response);
-    }
+    // if (!getSaleNote.value) throw Error("Hubo un error al eliminar")
+    // if (!getSaleNote.value?.sale_note_payments) throw Error("No hay que borrar")
+    // if (!getSaleNote.value?.sale_note_payments[index].id) {
+    //     getSaleNote.value.sale_note_payments.splice(index, 1);
+    //     return
+    // }
+    // let response = await deletePayment(getSaleNote.value?.sale_note_payments[index].id)
+    // if (response) {
+    //     snackbarStore.setStatus("success", "Eliminado correctamente:")
+    //     getSaleNote.value.sale_note_payments.splice(index, 1);
+    //     saleNotesRefresh()
+    // } else {
+    //     // La solicitud falló, maneja el error
+    //     snackbarStore.setStatus("error", "Error al guardar",)
+    //     console.error('Error al obtener los datos:', response);
+    // }
 }
 
 const mountPay = () => {
-    if (!getSaleNote.value?.sale_note_payments) return 0
-    if (getSaleNote.value?.sale_note_payments.length > 0 && getSaleNote.value?.total > 0) {
-        return getSaleNote.value?.sale_note_payments.reduce((acumulador, data) => {
-            return acumulador + Number(data.payment)
-        }, 0)
-    }
+    // if (!getSaleNote.value?.sale_note_payments) return 0
+    // if (getSaleNote.value?.sale_note_payments.length > 0 && getSaleNote.value?.total > 0) {
+    //     return getSaleNote.value?.sale_note_payments.reduce((acumulador, data) => {
+    //         return acumulador + Number(data.payment)
+    //     }, 0)
+    // }
 }
 const accountsReceivable = () => {
-    if (!getSaleNote.value?.sale_note_payments) return 0
-    if (getSaleNote.value?.total <= (mountPay() ?? 0)) return 0
-    return getSaleNote.value?.total - (mountPay() ?? 0)
+    // if (!getSaleNote.value?.sale_note_payments) return 0
+    // if (getSaleNote.value?.total <= (mountPay() ?? 0)) return 0
+    // return getSaleNote.value?.total - (mountPay() ?? 0)
 }
 </script>
 
 <template>
-    <v-container fluid v-if="saleNotesFetch">
+    <v-container fluid v-if="unpaidFetch">
         <v-app-bar class="justify-center" flat append>
             <div class="justify-center mx-4">
                 <v-icon class="me-1" icon="mdi-cash-sync"></v-icon>
@@ -503,8 +495,8 @@ const accountsReceivable = () => {
                     </v-col>
                 </v-row>
                 <v-row dense>
-                    <v-data-table v.-fi v-model:page="page" v-model="selected" :headers="headers"
-                        :items="saleNotesFetch" :items-per-page="itemsPerPage" :search="search" class="elevation-1">
+                    <v-data-table v.-fi v-model:page="page" v-model="selected" :headers="headers" :items="unpaidFetch"
+                        :items-per-page="itemsPerPage" :search="search" class="elevation-1">
                         <template v-slot:item.customer.number="{ index }">
                             {{ index + 1 + itemsPerPage * (page - 1) }}
                         </template>
