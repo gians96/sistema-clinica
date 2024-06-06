@@ -2,14 +2,6 @@
 import { useStore } from '@/store/index'
 const store = useStore()
 const userLogin = useCookie<Login | null>("user");
-const user = ref({
-  initials: 'GA',
-  fullName: 'Gianmarcos Daniel Arias Bonifacio',
-  shorName: 'Gianmarcos',
-  rule: "Administrador",
-  email: 'john.doe@doe.com',
-})
-
 import { useDisplay } from 'vuetify'
 import type { Login } from '~/interfaces/Login.Interface';
 const { mobile } = useDisplay()
@@ -21,7 +13,8 @@ const logOut = async () => {
 
 <template>
   <v-app-bar>
-    <v-btn variant="text" icon="mdi-menu" @click.stop="mobile ? store.setChangeDrawer() : store.setChangeRail()"></v-btn>
+    <v-btn variant="text" icon="mdi-menu"
+      @click.stop="mobile ? store.setChangeDrawer() : store.setChangeRail()"></v-btn>
     <v-spacer></v-spacer>
 
     <!-- <v-avatar class="hidden-sm-and-down" color="grey-darken-1" size="32" ></v-avatar> -->
@@ -29,7 +22,7 @@ const logOut = async () => {
     <v-menu rounded :close-on-content-click="false" v-if="userLogin">
       <template v-slot:activator="{ props }">
         <v-list v-if="!mobile" class="hidden-sm-and-down" v-bind="props" style="cursor: pointer">
-          <v-list-item prepend-avatar="https://cdn.vuetifyjs.com/images/john.png" :title="userLogin.name"
+          <v-list-item  :title="userLogin.name"
             :subtitle="userLogin.email">
           </v-list-item>
         </v-list>
