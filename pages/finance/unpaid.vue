@@ -398,6 +398,31 @@ const colorStateType: Record<StateType['id'], string> = {
     "6": 'red',//Anulado
     "7": 'orange',//Por anular
 }
+const process = ref([
+    {
+        // id: 1,
+        name: 'NOTAS DE VENTAS',
+        icon: 'mdi-sale',
+        color: 'blue-accent-4',
+        show: true
+    },
+    { id: 2, name: 'GENERAR PAGOS', icon: 'mdi-cash', color: 'red-accent-4', show: false },
+    {
+        id: 3,
+        name: 'PAGOS GENERADOS',
+        icon: 'mdi-cash-multiple',
+        color: 'yellow-accent-4',
+        show: false
+    },
+    // {
+    //     id: 4,
+    //     name: 'ENTREGADO',
+    //     icon: 'mdi-upload-circle',
+    //     color: 'yellow-accent-4',
+    //     show: true
+    // }
+])
+
 </script>
 
 <template>
@@ -483,44 +508,71 @@ const colorStateType: Record<StateType['id'], string> = {
                     <v-card>
                         <v-card-title>
                             <p> {{ customerSelected.customer.name }} - {{ customerSelected.customer.number }} </p>
-                            <p class="text-body-2"> POR PAGAR: {{ moneyDecimal(String(customerSelected.pending_amount))
-                                }} </p>
-                            <p class="text-body-2"> TOTAL: {{ moneyDecimal(String(customerSelected.total)) }} </p>
                         </v-card-title>
-                        <v-card-text v-if="customerSelected">
-                            <v-data-table v-model:page="page_customer_sale_notes" :headers="headers_customer_sale_notes"
-                                :items="customerSelected.sale_notes" :items-per-page="itemsPerPage" class="elevation-1">
-                                <template v-slot:item.customer.number="{ index }">
-                                    {{ index + 1 + itemsPerPage * (page - 1) }}
-                                </template>
-                                <template v-slot:item.date_of_issue="{ item }">
-                                    <p> {{ formatDate(item.raw.date_of_issue) }}</p>
-                                    <div class="text-caption"> {{ formatTime(item.raw.date_of_issue) }}</div>
-                                </template>
-                                <template v-slot:item.series="{ item }">
-                                    <p> {{ item.raw.series }} - {{ item.raw.number }}</p>
-                                    <v-chip size="x-small" :color="colorStateType[item.raw.state_type.id]">
-                                        {{ item.raw.state_type.description }}
-                                    </v-chip>
-                                </template>
-                                <template v-slot:item.pending_amount="{ item }">
-                                    <p>{{ moneyDecimal(item.raw.pending_amount) }}</p>
-                                    <div class="text-caption">{{ item.raw.currency_type_id }}</div>
-                                </template>
-                                <template v-slot:item.total="{ item }">
-                                    <p>{{ moneyDecimal(item.raw.total) }}</p>
-                                    <div class="text-caption">{{ item.raw.currency_type_id }}</div>
-                                </template>
-                                <template v-slot:bottom>
-                                    <div class="text-center pt-2">
-                                        <v-pagination v-model="page"
-                                            :length="pageCount_customer_sale_notes"></v-pagination>
-                                        <!-- <v-text-field :model-value="itemsPerPage" class="pa-2" label="Items per page" type="number" min="-1"
-                    max="15" hide-details @update:model-value="itemsPerPage = parseInt($event, 10)"></v-text-field> -->
+
+                        <v-col cols="12" lg="12">
+                            <v-card class="mx-auto">
+                                <v-card-actions>
+                                    <v-list width="100%" class="py-0">
+                                        <v-list-item link :prepend-icon="process[0].icon"
+                                            @click="process[0].show = !process[0].show" :color="process[0].icon">
+                                            <template v-slot:prepend>
+                                                <v-icon :color="process[0].color">{{ process[0].icon }}</v-icon>
+                                            </template>
+                                            <template v-slot:title>
+                                                <span>{{ process[0].name }}</span>
+                                                <p class="text-body-2 font-weight-bold"> SALDO: {{
+        moneyDecimal(String(customerSelected.pending_amount))
+    }} </p>
+                                                <!-- <p class="text-body-2"> TOTAL: {{
+            moneyDecimal(String(customerSelected.total)) }} </p> -->
+                                            </template>
+                                            <template v-slot:append>
+                                                <v-badge :color="process[0].color"
+                                                    :content="customerSelected.sale_notes.length" inline></v-badge>
+                                            </template>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-card-actions>
+                                <v-divider></v-divider>
+                                <v-expand-transition>
+                                    <div v-if="process[0].show">
+                                        <v-data-table v-model:page="page_customer_sale_notes"
+                                            :headers="headers_customer_sale_notes" :items="customerSelected.sale_notes"
+                                            :items-per-page="itemsPerPage" class="elevation-1">
+                                            <template v-slot:item.customer.number="{ index }">
+                                                {{ index + 1 + itemsPerPage * (page - 1) }}
+                                            </template>
+                                            <template v-slot:item.date_of_issue="{ item }">
+                                                <p> {{ formatDate(item.raw.date_of_issue) }}</p>
+                                                <div class="text-caption"> {{ formatTime(item.raw.date_of_issue) }}
+                                                </div>
+                                            </template>
+                                            <template v-slot:item.series="{ item }">
+                                                <p> {{ item.raw.series }} - {{ item.raw.number }}</p>
+                                                <v-chip size="x-small" :color="colorStateType[item.raw.state_type.id]">
+                                                    {{ item.raw.state_type.description }}
+                                                </v-chip>
+                                            </template>
+                                            <template v-slot:item.pending_amount="{ item }">
+                                                <p>{{ moneyDecimal(item.raw.pending_amount) }}</p>
+                                                <div class="text-caption">{{ item.raw.currency_type_id }}</div>
+                                            </template>
+                                            <template v-slot:item.total="{ item }">
+                                                <p>{{ moneyDecimal(item.raw.total) }}</p>
+                                                <div class="text-caption">{{ item.raw.currency_type_id }}</div>
+                                            </template>
+                                            <template v-slot:bottom>
+                                                <div class="text-center pt-2">
+                                                    <v-pagination v-model="page"
+                                                        :length="pageCount_customer_sale_notes"></v-pagination>
+                                                </div>
+                                            </template>
+                                        </v-data-table>
                                     </div>
-                                </template>
-                            </v-data-table>
-                        </v-card-text>
+                                </v-expand-transition>
+                            </v-card>
+                        </v-col>
                         <v-card-actions>
                             <v-spacer></v-spacer>
                             <v-btn color="success" variant="elevated" @click="saveMethodsPayments()">Guardar
