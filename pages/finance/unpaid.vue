@@ -1,14 +1,17 @@
 <script lang="ts" setup>
-import { useSnackbarStore } from '@/store/index';
+import { useSnackbarStore } from '@/store/index'
 const snackbarStore = useSnackbarStore()
-import type { Warehouse } from "~/interfaces/Warehouse.interface";
-const apiURL = useCookie("apiURL");
+import type { Warehouse } from '~/interfaces/Warehouse.interface'
+const apiURL = useCookie('apiURL')
 import { useDisplay } from 'vuetify'
 const { mobile } = useDisplay()
 import { companyStore } from '@/store/company'
-import type { Companies } from '~/interfaces/Company.interface';
-import type { Unpaid, SaleNote, StateType } from '~/interfaces/Unpaid.interface';
-const { data: unpaidFetch, refresh: saleNotesRefresh } = await useFetch<Unpaid[]>(`${apiURL.value}/finance/unpaid`, { method: 'GET' });
+import type { Companies } from '~/interfaces/Company.interface'
+import type { Unpaid, SaleNote, StateType } from '~/interfaces/Unpaid.interface'
+import type { SaleNotePayment } from '~/interfaces/SaleNotesFetch.interace';
+const { data: unpaidFetch, refresh: saleNotesRefresh } = await useFetch<
+    Unpaid[]
+>(`${apiURL.value}/finance/unpaid`, { method: 'GET' })
 const companyFetch = ref<Companies>()
 onMounted(async () => {
     companyFetch.value = companyStore().$state
@@ -16,11 +19,15 @@ onMounted(async () => {
 const headers = ref([
     // { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
     { key: 'customer.number', title: 'N°' },
-    { key: 'customer', title: 'Cliente', value: (item: any) => `${item.customer.name} - ${item.customer.number}` },
+    {
+        key: 'customer',
+        title: 'Cliente',
+        value: (item: any) => `${item.customer.name} - ${item.customer.number}`
+    },
     // { key: 'series', title: 'Nota de venta', value: (item: any) => `${item.series} - ${item.number}` },
     { key: 'pending_amount', title: 'Por pagar' },
     { key: 'total', title: 'Total' },
-    { key: 'actions', title: 'Acciones', value: "" },
+    { key: 'actions', title: 'Acciones', value: '' }
 ])
 
 const page = ref(1)
@@ -38,79 +45,73 @@ const pageCount = computed(() => {
     return Math.ceil(unpaidFetch.value.length / itemsPerPage.value)
 })
 
-
-
 const dateNow = () => {
-    const currentDate = new Date();
-    const year = currentDate.getFullYear();
-    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Agrega cero a la izquierda si es necesario
-    const day = String(currentDate.getDate()).padStart(2, '0'); // Agrega cero a la izquierda si es necesario
-    const formattedDate = `${year}-${month}-${day}`;
+    const currentDate = new Date()
+    const year = currentDate.getFullYear()
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0') // Agrega cero a la izquierda si es necesario
+    const day = String(currentDate.getDate()).padStart(2, '0') // Agrega cero a la izquierda si es necesario
+    const formattedDate = `${year}-${month}-${day}`
     return formattedDate
 }
 
 const formatDate = (date: string) => {
-    const currentDate = new Date(date);
-    const year = currentDate.getFullYear();
-    const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Agrega cero a la izquierda si es necesario
-    const day = String(currentDate.getDate()).padStart(2, '0'); // Agrega cero a la izquierda si es necesario
+    const currentDate = new Date(date)
+    const year = currentDate.getFullYear()
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0') // Agrega cero a la izquierda si es necesario
+    const day = String(currentDate.getDate()).padStart(2, '0') // Agrega cero a la izquierda si es necesario
     // Formatear la fecha en el formato DD/MM/YYYY
-    let formattedDate = `${day}/${month}/${year}`;
-    return formattedDate;
+    let formattedDate = `${day}/${month}/${year}`
+    return formattedDate
 }
 
 const formatTime = (date: string) => {
-    const fechaOriginal = new Date(date);
-    const horas = fechaOriginal.getHours();
-    const minutos = fechaOriginal.getMinutes();
-    const segundos = fechaOriginal.getSeconds();
+    const fechaOriginal = new Date(date)
+    const horas = fechaOriginal.getHours()
+    const minutos = fechaOriginal.getMinutes()
+    const segundos = fechaOriginal.getSeconds()
     // Obtener la cadena "a.m." o "p.m." según la hora
-    const periodo = horas >= 12 ? 'p.m.' : 'a.m.';
+    const periodo = horas >= 12 ? 'p.m.' : 'a.m.'
     // Convertir la hora al formato de 12 horas
-    const horas12 = horas % 12 || 12; // Si son las 0 horas, convertirlas a 12
-    const formattedHour = `${horas12}:${minutos < 10 ? '0' : ''}${minutos}:${segundos < 10 ? '0' : ''}${segundos} ${periodo}`;
-    return formattedHour;
+    const horas12 = horas % 12 || 12 // Si son las 0 horas, convertirlas a 12
+    const formattedHour = `${horas12}:${minutos < 10 ? '0' : ''}${minutos}:${segundos < 10 ? '0' : ''
+        }${segundos} ${periodo}`
+    return formattedHour
 }
 
-
 const saveMethodsPayments = async () => {
-    if (!customerSelected.value) throw Error("")
+    if (!customerSelected.value) throw Error('')
     // customerSelected.value.sale_note_payments.forEach(payment => {
     //     if (!payment.date_of_payment) return
     //     payment.date_of_payment = new Date(payment.date_of_payment).toISOString().split('T')[0];
 
     // })
-    const response = await fetch(`${apiURL.value}/sales_notes/payments`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                // Authorization: `Bearer ${userCookie.value.token}`,
-            },
-            body: JSON.stringify(customerSelected.value)
-        }
-    )
+    const response = await fetch(`${apiURL.value}/sales_notes/payments`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+            // Authorization: `Bearer ${userCookie.value.token}`,
+        },
+        body: JSON.stringify(customerSelected.value)
+    })
     if (response.ok) {
-        snackbarStore.setStatus("success", "Se ha guardado correctamente:")
+        snackbarStore.setStatus('success', 'Se ha guardado correctamente:')
         dialogListPayments.value = false
         saleNotesRefresh()
         return response.ok
     } else {
-        snackbarStore.setStatus("error", "Error al guardar",)
-        console.error('Error al obtener los datos:', response);
+        snackbarStore.setStatus('error', 'Error al guardar')
+        console.error('Error al obtener los datos:', response)
     }
 }
 
 const deletePayment = async (id: number) => {
-    const response = await fetch(`${apiURL.value}/sales_notes/payments/${id}`,
-        {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                // Authorization: `Bearer ${userCookie.value.token}`,
-            },
+    const response = await fetch(`${apiURL.value}/sales_notes/payments/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+            // Authorization: `Bearer ${userCookie.value.token}`,
         }
-    )
+    })
     if (response.ok) {
         return response.ok
     } else {
@@ -133,18 +134,16 @@ const exportItemsXLS = async () => {
     //     link.setAttribute('download', 'items.xlsx');
     //     document.body.appendChild(link);
     //     link.click();
-
     //     document.body.removeChild(link);
     // } catch (error) {
     //     console.error('Error al descargar el archivo Excel:', error);
     // }
 }
 const moneyDecimal = (x: string) => {
-    return Number.parseFloat(x).toFixed(2);
+    return Number.parseFloat(x).toFixed(2)
 }
 
 const formatPrintType = (item: Unpaid) => {
-
     // let description = item.item.description.toString()
     // let itemTypeId = item.item_type_id
     let allDescription = {}
@@ -182,22 +181,9 @@ const formatPrintType = (item: Unpaid) => {
 
 const dialogListPayments = ref(false)
 const customerSelected = ref<Unpaid>()
-const onClickAddPaymentMethods = () => {
-    if (!customerSelected.value) throw Error("Sale note vacio")
-    // customerSelected.value.sale_note_payments.push(
-    //     {
-    //         id: 0,
-    //         sale_note_id: 0,
-    //         date_of_payment: dateNow(),
-    //         payment_method_type_id: 1,
-    //         reference: "",
-    //         payment: 0,
-    //         change: null
-    //     }
-    // )
-}
+
 const dialogListPaymentSaleNote = async (item: Unpaid) => {
-    if (!item) throw Error("Datos del cliente esta vacio:")
+    if (!item) throw Error('Datos del cliente esta vacio:')
 
     dialogListPayments.value = true
     customerSelected.value = item
@@ -209,12 +195,24 @@ const dialogListPaymentSaleNote = async (item: Unpaid) => {
 
 const printItems = (items: Unpaid[]) => {
     const header = [
-        { text: "DESCRIPCIÓN", style: { fontSize: 12, bold: true, alignment: "center" } },
-        { text: "UNIDAD", style: { fontSize: 12, bold: true, alignment: "center" } },
-        { text: "CANTIDAD", style: { fontSize: 12, bold: true, alignment: "center" } },
-        { text: "P. UNI", style: { fontSize: 12, bold: true, alignment: "center" } },
-        { text: "TOTAL", style: { fontSize: 12, bold: true, alignment: "center" } }
-    ];
+        {
+            text: 'DESCRIPCIÓN',
+            style: { fontSize: 12, bold: true, alignment: 'center' }
+        },
+        {
+            text: 'UNIDAD',
+            style: { fontSize: 12, bold: true, alignment: 'center' }
+        },
+        {
+            text: 'CANTIDAD',
+            style: { fontSize: 12, bold: true, alignment: 'center' }
+        },
+        {
+            text: 'P. UNI',
+            style: { fontSize: 12, bold: true, alignment: 'center' }
+        },
+        { text: 'TOTAL', style: { fontSize: 12, bold: true, alignment: 'center' } }
+    ]
     if (!items) return [header]
     return /* [header,
         ...items.map(item => {
@@ -228,140 +226,134 @@ const printItems = (items: Unpaid[]) => {
             ];
         })
     ]*/
-};
+}
 
 const printTransfer = async (id: number) => {
-    if (!id) throw Error("El id no es vacio:")
-    const response = await fetch(`${apiURL.value}/sales_notes/get/${id}`, { method: "GET" })
+    if (!id) throw Error('El id no es vacio:')
+    const response = await fetch(`${apiURL.value}/sales_notes/get/${id}`, {
+        method: 'GET'
+    })
     if (!response.ok) return
     const saleNotes = await response.json()
 
     // const saleNotes: SaleNote = {}
-    let fecha = formatDate(saleNotes.create_at.toString()) + " " + formatTime(saleNotes.create_at.toString())
-    const pdfMake = usePDFMake();
+    let fecha =
+        formatDate(saleNotes.create_at.toString()) +
+        ' ' +
+        formatTime(saleNotes.create_at.toString())
+    const pdfMake = usePDFMake()
     pdfMake.tableLayouts = {
         custom: {
             paddingLeft: function () {
-                return 5;
+                return 5
             },
             paddingRight: function () {
-                return 5;
-            },
-        },
-    };
+                return 5
+            }
+        }
+    }
     let isVoided = {
         text: 'ANULADO',
         absolutePosition: { x: 100, y: 300 },
         alignment: 'center', // Centrar el texto
         fontSize: 70, // Tamaño de la fuente
-        color: 'red', // Color del texto
+        color: 'red' // Color del texto
     }
 
-    pdfMake.createPdf({
-        pageSize: 'A4',
-        pageMargins: [35, 50, 35, 50],
-        content: [
-            saleNotes.state_type_id === 6 ? isVoided : {},
-            {
-                columns: [
-                    {
-                        text: ""
-                    },
-                    // {
-                    //     // image: logo,
-                    //     width: 100,
-                    //     alignment: "center"
-                    // },
-                    {
-                        text: ""
-                    },
-                    [{
-                        text: 'R.U.C. ' + companyFetch.value?.companies.number,
-                        style: { fontSize: 14, bold: true, alignment: "center" },
-                        margin: [0, 0, 0, 5],
-                    }, {
-                        text: companyFetch.value?.companies.name,
-                        style: { fontSize: 10, bold: true, alignment: "center" },
-                        margin: [0, 0, 0, 2],
-                    }, {
-                        text: "NOTA DE VENTA",
-                        style: { fontSize: 14, bold: true, alignment: "center" },
-                        margin: [0, 0, 0, 5],
-                    },
-                    {
-                        text: saleNotes.series + " - " + saleNotes.number,
-                        style: { fontSize: 14, bold: true, alignment: "center" },
-                        margin: [0, 0, 0, 35],
-                    },]
-                ],
-            },
-            {
-                text: `Cliente: ${saleNotes.customer.name}`,
-                margin: [0, 0, 0, 5],
-                style: { fontSize: 12, bold: true, alignment: "left" },
-            },
-            {
-                text: `DNI/RUC: ${saleNotes.customer.number}`,
-                margin: [0, 0, 0, 5],
-                style: { fontSize: 12, bold: true, alignment: "left" },
-            },
-            {
-                text: `FECHA: ${fecha}`,
-                margin: [0, 0, 0, 20],
-                style: { fontSize: 12, bold: true, alignment: "left" },
-            },
-            {
-                // layout: "custom",
-                table: {
-                    heights: 1,
-                    widths: [200, '*', '*', '*', '*'],
-                    margin: [50, 0, 0, 50],
-
-                    alignment: "center",
-                    body: printItems(saleNotes.sale_note_items),
+    pdfMake
+        .createPdf({
+            pageSize: 'A4',
+            pageMargins: [35, 50, 35, 50],
+            content: [
+                saleNotes.state_type_id === 6 ? isVoided : {},
+                {
+                    columns: [
+                        {
+                            text: ''
+                        },
+                        // {
+                        //     // image: logo,
+                        //     width: 100,
+                        //     alignment: "center"
+                        // },
+                        {
+                            text: ''
+                        },
+                        [
+                            {
+                                text: 'R.U.C. ' + companyFetch.value?.companies.number,
+                                style: { fontSize: 14, bold: true, alignment: 'center' },
+                                margin: [0, 0, 0, 5]
+                            },
+                            {
+                                text: companyFetch.value?.companies.name,
+                                style: { fontSize: 10, bold: true, alignment: 'center' },
+                                margin: [0, 0, 0, 2]
+                            },
+                            {
+                                text: 'NOTA DE VENTA',
+                                style: { fontSize: 14, bold: true, alignment: 'center' },
+                                margin: [0, 0, 0, 5]
+                            },
+                            {
+                                text: saleNotes.series + ' - ' + saleNotes.number,
+                                style: { fontSize: 14, bold: true, alignment: 'center' },
+                                margin: [0, 0, 0, 35]
+                            }
+                        ]
+                    ]
                 },
-            }, {
-                text: ""
-            },
-            {
-                columns: [
-                    {
-                        text: ""
-                    },
-                    {
-                        text: ""
-                    },
-                    [{
-                        text: "TOTAL: S/." + moneyDecimal(saleNotes.total),
-                        style: { fontSize: 14, bold: true, alignment: "right" },
-                        margin: [0, 20, 0, 0],
-                    }]
-                ],
-            }
-        ],
-    }).print()
-    // modalPrecuenta.value = true
-};
-// const paymentsMethodTypes = ref<paymentPOS[]>([])
-const onClickDeletePaymentMethods = async (index: number) => {
-    // if (!customerSelected.value) throw Error("Hubo un error al eliminar")
-    // if (!customerSelected.value?.sale_note_payments) throw Error("No hay que borrar")
-    // if (!customerSelected.value?.sale_note_payments[index].id) {
-    //     customerSelected.value.sale_note_payments.splice(index, 1);
-    //     return
-    // }
-    // let response = await deletePayment(customerSelected.value?.sale_note_payments[index].id)
-    // if (response) {
-    //     snackbarStore.setStatus("success", "Eliminado correctamente:")
-    //     customerSelected.value.sale_note_payments.splice(index, 1);
-    //     saleNotesRefresh()
-    // } else {
-    //     // La solicitud falló, maneja el error
-    //     snackbarStore.setStatus("error", "Error al guardar",)
-    //     console.error('Error al obtener los datos:', response);
-    // }
-}
+                {
+                    text: `Cliente: ${saleNotes.customer.name}`,
+                    margin: [0, 0, 0, 5],
+                    style: { fontSize: 12, bold: true, alignment: 'left' }
+                },
+                {
+                    text: `DNI/RUC: ${saleNotes.customer.number}`,
+                    margin: [0, 0, 0, 5],
+                    style: { fontSize: 12, bold: true, alignment: 'left' }
+                },
+                {
+                    text: `FECHA: ${fecha}`,
+                    margin: [0, 0, 0, 20],
+                    style: { fontSize: 12, bold: true, alignment: 'left' }
+                },
+                {
+                    // layout: "custom",
+                    table: {
+                        heights: 1,
+                        widths: [200, '*', '*', '*', '*'],
+                        margin: [50, 0, 0, 50],
 
+                        alignment: 'center',
+                        body: printItems(saleNotes.sale_note_items)
+                    }
+                },
+                {
+                    text: ''
+                },
+                {
+                    columns: [
+                        {
+                            text: ''
+                        },
+                        {
+                            text: ''
+                        },
+                        [
+                            {
+                                text: 'TOTAL: S/.' + moneyDecimal(saleNotes.total),
+                                style: { fontSize: 14, bold: true, alignment: 'right' },
+                                margin: [0, 20, 0, 0]
+                            }
+                        ]
+                    ]
+                }
+            ]
+        })
+        .print()
+    // modalPrecuenta.value = true
+}
 const mountPay = () => {
     // if (!customerSelected.value?.sale_note_payments) return 0
     // if (customerSelected.value?.sale_note_payments.length > 0 && customerSelected.value?.total > 0) {
@@ -385,18 +377,22 @@ const headers_customer_sale_notes = ref([
     // { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
     { key: 'customer.number', title: 'N°' },
     { key: 'date_of_issue', title: 'Fecha Emisión' },
-    { key: 'series', title: 'Nota de venta', value: (item: any) => `${item.serie} - ${item.number}` },
+    {
+        key: 'series',
+        title: 'Nota de venta',
+        value: (item: any) => `${item.serie} - ${item.number}`
+    },
     { key: 'pending_amount', title: 'Saldo' },
-    { key: 'total', title: 'Total   ' },
+    { key: 'total', title: 'Total   ' }
 ])
 const colorStateType: Record<StateType['id'], string> = {
-    "1": 'default',//Registrado
-    "2": 'blue',//Enviado
-    "3": 'success',//Aceptado
-    "4": 'purple',//Observado
-    "5": 'secondary',//rechzado
-    "6": 'red',//Anulado
-    "7": 'orange',//Por anular
+    '1': 'default', //Registrado
+    '2': 'blue', //Enviado
+    '3': 'success', //Aceptado
+    '4': 'purple', //Observado
+    '5': 'secondary', //rechzado
+    '6': 'red', //Anulado
+    '7': 'orange' //Por anular
 }
 const process = ref([
     {
@@ -404,16 +400,22 @@ const process = ref([
         name: 'NOTAS DE VENTAS',
         icon: 'mdi-sale',
         color: 'blue-accent-4',
-        show: true
+        show: false
     },
-    { id: 2, name: 'GENERAR PAGOS', icon: 'mdi-cash', color: 'red-accent-4', show: false },
+    {
+        id: 2,
+        name: 'GENERAR PAGOS',
+        icon: 'mdi-cash',
+        color: 'red-accent-4',
+        show: false
+    },
     {
         id: 3,
         name: 'PAGOS GENERADOS',
         icon: 'mdi-cash-multiple',
         color: 'yellow-accent-4',
         show: false
-    },
+    }
     // {
     //     id: 4,
     //     name: 'ENTREGADO',
@@ -423,6 +425,37 @@ const process = ref([
     // }
 ])
 
+const addMethodsPayment = ref<SaleNotePayment[]>([{
+    id: 0,
+    sale_note_id: 0,
+    date_of_payment: dateNow(),
+    payment_method_type_id: 1,
+    reference: "",
+    payment: 0,
+    change: null
+}])
+const onClickAddPaymentMethods = () => {
+    if (!addMethodsPayment.value) throw Error("Sale note vacio")
+    addMethodsPayment.value.push(
+        {
+            id: 0,
+            sale_note_id: 0,
+            date_of_payment: dateNow(),
+            payment_method_type_id: 1,
+            reference: "",
+            payment: 0,
+            change: null
+        }
+    )
+}
+const onClickDeletePaymentMethods = async (index: number) => {
+    
+    if (!addMethodsPayment) throw Error("No hay que borrar")
+    if (!addMethodsPayment.value[index].id) {
+        addMethodsPayment.value.splice(index, 1);
+    }
+    
+}
 </script>
 
 <template>
@@ -437,7 +470,7 @@ const process = ref([
         <v-card class="justify-self-end mx-4" elevation="0">
             <v-container fluid>
                 <v-row>
-                    <v-col cols="12" class=" d-flex justify-center align-center">
+                    <v-col cols="12" class="d-flex justify-center align-center">
                         <v-text-field v-model="search" append-inner-icon="mdi-magnify" label="Buscar"></v-text-field>
                         <v-spacer></v-spacer>
                         <!-- <v-btn append-icon="mdi-export" color="green" variant="flat"
@@ -454,14 +487,14 @@ const process = ref([
                         </template>
                         <template v-slot:item.customer="{ item }">
                             <span>
-                                <p> {{ item.raw.customer.name }}</p>
+                                <p>{{ item.raw.customer.name }}</p>
                                 <div class="text-caption">{{ item.raw.customer.number }}</div>
                             </span>
                         </template>
                         <template v-slot:item.pending_amount="{ item }">
                             <v-tooltip>
                                 <template v-slot:activator="{ props }">
-                                    <v-chip v-bind="props" color='warning' class="font-weight-bold"
+                                    <v-chip v-bind="props" color="warning" class="font-weight-bold"
                                         @click="dialogListPaymentSaleNote(item.raw)">
                                         {{ moneyDecimal(item.raw.pending_amount) }}
                                         <!-- <div class="text-caption">{{ item.raw.currency_type_id }}</div> -->
@@ -469,7 +502,6 @@ const process = ref([
                                 </template>
                                 <span>Pagar</span>
                             </v-tooltip>
-
                         </template>
                         <template v-slot:item.total="{ item }">
                             {{ moneyDecimal(item.raw.total) }}
@@ -499,37 +531,39 @@ const process = ref([
                 <v-dialog v-model="dialogListPayments" v-if="customerSelected" :max-width="mobile ? '100%' : '65%'"
                     persistent>
                     <v-toolbar color="primary" floating>
-                        <v-toolbar-title>Listado de pagos:
-                            <v-btn variant="flat" icon="mdi-add" color="success" @click="onClickAddPaymentMethods()">
-                            </v-btn></v-toolbar-title>
+                        <v-toolbar-title>Cuentas por pagar del cliente
+                            <!-- <v-btn variant="flat" icon="mdi-add" color="success" @click="onClickAddPaymentMethods()">
+                            </v-btn> -->
+                        </v-toolbar-title>
                         <v-spacer></v-spacer>
                         <v-btn icon="mdi-close" variant="elevated" @click="dialogListPayments = false"></v-btn>
                     </v-toolbar>
                     <v-card>
                         <v-card-title>
-                            <p> {{ customerSelected.customer.name }} - {{ customerSelected.customer.number }} </p>
+                            <p>
+                                {{ customerSelected.customer.name }} -
+                                {{ customerSelected.customer.number }}
+                            </p>
                         </v-card-title>
-
+                        <!--DESPLEGABLE NOTAS de ventas -->
                         <v-col cols="12" lg="12">
-                            <v-card class="mx-auto">
+                            <v-card color="indigo">
                                 <v-card-actions>
-                                    <v-list width="100%" class="py-0">
+                                    <v-list width="100%" class="py-0" bg-color="transparent">
                                         <v-list-item link :prepend-icon="process[0].icon"
-                                            @click="process[0].show = !process[0].show" :color="process[0].icon">
+                                            @click="process[0].show = !process[0].show">
                                             <template v-slot:prepend>
-                                                <v-icon :color="process[0].color">{{ process[0].icon }}</v-icon>
+                                                <v-icon>{{ process[0].icon }}</v-icon>
                                             </template>
                                             <template v-slot:title>
                                                 <span>{{ process[0].name }}</span>
-                                                <p class="text-body-2 font-weight-bold"> SALDO: {{
-        moneyDecimal(String(customerSelected.pending_amount))
-    }} </p>
-                                                <!-- <p class="text-body-2"> TOTAL: {{
-            moneyDecimal(String(customerSelected.total)) }} </p> -->
+                                                <p class="text-body-2 font-weight-bold">
+                                                    SALDO: {{ moneyDecimal(String(customerSelected.pending_amount)) }}
+                                                </p>
                                             </template>
                                             <template v-slot:append>
-                                                <v-badge :color="process[0].color"
-                                                    :content="customerSelected.sale_notes.length" inline></v-badge>
+                                                <v-badge color="indigo" :content="customerSelected.sale_notes.length"
+                                                    inline></v-badge>
                                             </template>
                                         </v-list-item>
                                     </v-list>
@@ -544,23 +578,28 @@ const process = ref([
                                                 {{ index + 1 + itemsPerPage * (page - 1) }}
                                             </template>
                                             <template v-slot:item.date_of_issue="{ item }">
-                                                <p> {{ formatDate(item.raw.date_of_issue) }}</p>
-                                                <div class="text-caption"> {{ formatTime(item.raw.date_of_issue) }}
+                                                <p>{{ formatDate(item.raw.date_of_issue) }}</p>
+                                                <div class="text-caption">
+                                                    {{ formatTime(item.raw.date_of_issue) }}
                                                 </div>
                                             </template>
                                             <template v-slot:item.series="{ item }">
-                                                <p> {{ item.raw.series }} - {{ item.raw.number }}</p>
+                                                <p>{{ item.raw.series }} - {{ item.raw.number }}</p>
                                                 <v-chip size="x-small" :color="colorStateType[item.raw.state_type.id]">
                                                     {{ item.raw.state_type.description }}
                                                 </v-chip>
                                             </template>
                                             <template v-slot:item.pending_amount="{ item }">
                                                 <p>{{ moneyDecimal(item.raw.pending_amount) }}</p>
-                                                <div class="text-caption">{{ item.raw.currency_type_id }}</div>
+                                                <div class="text-caption">
+                                                    {{ item.raw.currency_type_id }}
+                                                </div>
                                             </template>
                                             <template v-slot:item.total="{ item }">
                                                 <p>{{ moneyDecimal(item.raw.total) }}</p>
-                                                <div class="text-caption">{{ item.raw.currency_type_id }}</div>
+                                                <div class="text-caption">
+                                                    {{ item.raw.currency_type_id }}
+                                                </div>
                                             </template>
                                             <template v-slot:bottom>
                                                 <div class="text-center pt-2">
@@ -573,15 +612,128 @@ const process = ref([
                                 </v-expand-transition>
                             </v-card>
                         </v-col>
+                        <!--DESPLEGABLE NOTAS de ventas  -->
+                        <!--DESPLEGABLE PAGOS -->
+
+                        <v-col cols="12" lg="12">
+                            <v-card color="teal">
+                                <v-card-actions>
+                                    <v-list width="100%" class="py-0" bg-color="transparent">
+                                        <v-list-item link :prepend-icon="process[1].icon"
+                                            @click="process[1].show = !process[1].show">
+                                            <template v-slot:prepend>
+                                                <v-icon>{{ process[1].icon }}</v-icon>
+                                            </template>
+                                            <template v-slot:title>
+                                                <span>{{ process[1].name }}</span>
+                                                <p class="text-body-2 font-weight-bold">
+                                                    SALDO: {{ moneyDecimal(String(customerSelected.pending_amount)) }}
+                                                </p>
+                                            </template>
+                                            <template v-slot:append>
+                                                <v-badge color="teal" :content="customerSelected.sale_notes.length"
+                                                    inline></v-badge>
+                                            </template>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-card-actions>
+                                <v-divider></v-divider>
+                                <v-expand-transition>
+                                    <div v-if="process[1].show">
+                                        <v-card>
+                                            <v-card-title>
+                                                <span>Añadir pagos</span>
+                                                <v-btn variant="flat" icon="mdi-add" color="success"
+                                                    @click="onClickAddPaymentMethods()"></v-btn>
+
+                                            </v-card-title>
+                                            <v-card-text v-if="companyFetch">
+                                                <div v-if="addMethodsPayment.length !== 0"
+                                                    v-for="(payment, index) in addMethodsPayment" :key="index"
+                                                    :class="mobile ? 'py-4' : ''">
+                                                    <v-row justify="center" class="d-flex"
+                                                        :class="mobile ? 'bg-blue-grey-lighten-5' : ''">
+                                                        <v-col cols="12" xs="12" md="3" lg="3"
+                                                            :class="mobile ? 'pb-0' : ''">
+                                                            <v-select class="inline select-box"
+                                                                :items="companyFetch.payment_method_types"
+                                                                v-model="payment.payment_method_type_id"
+                                                                label="Método de pago" variant="outlined"
+                                                                item-title="description" item-value="id">
+                                                            </v-select>
+                                                        </v-col>
+                                                        <v-col cols="12" xs="12" md="2" lg="2"
+                                                            :class="mobile ? 'py-0' : ''">
+                                                            <v-text-field label="Ingrese monto" placeholder="0.00"
+                                                                v-model="payment.payment" type="number">
+                                                            </v-text-field>
+                                                        </v-col>
+                                                        <v-col cols="12" xs="12" md="3" lg="3"
+                                                            :class="mobile ? 'py-0' : ''">
+                                                            <v-text-field type="date" label="Fecha de pago"
+                                                                v-model="payment.date_of_payment"></v-text-field>
+                                                        </v-col>
+                                                        <v-col cols="12" xs="12" md="3" lg="3"
+                                                            :class="mobile ? 'py-0' : ''">
+                                                            <v-text-field label="Referencia"
+                                                                v-model="payment.reference">
+                                                            </v-text-field>
+                                                        </v-col>
+                                                        <v-col cols="12" xs="12" md="1" lg="1"
+                                                            class="d-flex aling-center justify-center"
+                                                            :class="mobile ? 'py-0' : ''">
+                                                            <v-btn @click="onClickDeletePaymentMethods(index)"
+                                                                variant="flat" icon="mdi-delete" color="red">
+                                                            </v-btn>
+                                                        </v-col>
+                                                    </v-row>
+                                                </div>
+                                            </v-card-text>
+                                        </v-card>
+                                    </div>
+                                </v-expand-transition>
+                            </v-card>
+                        </v-col>
+                        <!--DESPLEGABLE PAGOS -->
+
+                        <!--DESPLEGABLE GENERACION PAGOS -->
+
+                        <v-col cols="12" lg="12">
+                            <v-card color="deep-orange">
+                                <v-card-actions>
+                                    <v-list width="100%" class="py-0" bg-color="transparent">
+                                        <v-list-item link :prepend-icon="process[2].icon"
+                                            @click="process[2].show = !process[2].show">
+                                            <template v-slot:prepend>
+                                                <v-icon>{{ process[2].icon }}</v-icon>
+                                            </template>
+                                            <template v-slot:title>
+                                                <span>{{ process[2].name }}</span>
+                                                <p class="text-body-2 font-weight-bold">
+                                                    SALDO: {{ moneyDecimal(String(customerSelected.pending_amount)) }}
+                                                </p>
+                                            </template>
+                                            <template v-slot:append>
+                                                <v-badge color="deep-orange"
+                                                    :content="customerSelected.sale_notes.length" inline></v-badge>
+                                            </template>
+                                        </v-list-item>
+                                    </v-list>
+                                </v-card-actions>
+                                <v-divider></v-divider>
+                                <v-expand-transition>
+                                    <div v-if="process[2].show">
+                                        FF
+                                    </div>
+                                </v-expand-transition>
+                            </v-card>
+                        </v-col>
+                        <!--DESPLEGABLE GENERACION PAGOS -->
                         <v-card-actions>
                             <v-spacer></v-spacer>
                             <v-btn color="success" variant="elevated" @click="saveMethodsPayments()">Guardar
                             </v-btn>
                         </v-card-actions>
-                        <v-btn position="fixed" width="50px" height="50px" border location="bottom left"
-                            v-if="(mobile ? 'true' : false)" variant="elevated" color="success"
-                            @click="onClickAddPaymentMethods()" icon="mdi-add" id="id-btn">
-                        </v-btn>
                     </v-card>
                 </v-dialog>
                 <!-- DIALOG -->
