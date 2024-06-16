@@ -251,6 +251,17 @@ const printTransfer = async (id: number) => {
     }).print()
     // modalPrecuenta.value = true
 };
+
+const unpaidAmount = () => {
+    if (!saleNotesFetch.value) throw Error("No hay items buscados")
+    let sum = 0
+    for (let i = 0; i < saleNotesFetch.value?.length; i++) {
+        if (!saleNotesFetch.value[i].has_total_canceled) {
+            sum = + saleNotesFetch.value[i].pending_amount
+        }
+    }
+    return sum
+}
 </script>
 
 <template>
@@ -276,6 +287,10 @@ const printTransfer = async (id: number) => {
                 </v-card-text>
             </v-card>
         </v-row>
+        <v-col cols=12 class="d-flex" v-if="saleNotesFetch">
+            <p class="text-h6 font-weight-bold">TOTAL PENDIENTE DE PAGO: {{ moneyDecimal(String(unpaidAmount())) }} </p>
+
+        </v-col>
         <v-row dense v-if="saleNotesFetch">
             <v-data-table v-model:page="page" v-model="selected" :headers="headers" :items="saleNotesFetch"
                 :items-per-page="itemsPerPage" :search="search" class="elevation-1">

@@ -145,6 +145,11 @@ const save = () => {
 const saveMethodsPayments = async () => {
     // console.log("ENTRA");
     if (!getSaleNote.value) throw Error("")
+    if ((mountPay() ?? 0) > getSaleNote.value.total) {
+        snackbarStore.setStatus('error', 'El suma total del monto a pagar no debe ser mayor al saldo', "PAGAR: " + (mountPay() ?? 0) + " SALDO: " + moneyDecimal(String(getSaleNote.value.total)))
+        return
+    }
+
     getSaleNote.value.sale_note_payments.forEach(payment => {
         if (!payment.date_of_payment) return
         payment.date_of_payment = new Date(payment.date_of_payment).toISOString().split('T')[0];

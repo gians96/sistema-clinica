@@ -9,7 +9,7 @@ import { companyStore } from '@/store/company'
 import type { Companies } from '~/interfaces/Company.interface'
 import type { Unpaid, SaleNote, StateType } from '~/interfaces/Unpaid.interface'
 import type { SaleNotePayment } from '~/interfaces/SaleNotesFetch.interace';
-const { data: unpaidFetch, refresh: saleNotesRefresh } = await useFetch<
+const { data: unpaidFetch, refresh: unpaidRefresh } = await useFetch<
     Unpaid[]
 >(`${apiURL.value}/finance/unpaid`, { method: 'GET' })
 const companyFetch = ref<Companies>()
@@ -27,7 +27,7 @@ const headers = ref([
     // { key: 'series', title: 'Nota de venta', value: (item: any) => `${item.series} - ${item.number}` },
     { key: 'pending_amount', title: 'Por pagar' },
     { key: 'total', title: 'Total' },
-    { key: 'actions', title: 'Acciones', value: '' }
+    // { key: 'actions', title: 'Acciones', value: '' }
 ])
 
 const page = ref(1)
@@ -80,23 +80,25 @@ const formatTime = (date: string) => {
 
 const saveMethodsPayments = async () => {
     if (!customerSelected.value) throw Error('')
-    // customerSelected.value.sale_note_payments.forEach(payment => {
-    //     if (!payment.date_of_payment) return
-    //     payment.date_of_payment = new Date(payment.date_of_payment).toISOString().split('T')[0];
+    if (!addMethodsPayment.value) throw Error('')
+    if (distributePayments().sale_notes.length === 0) throw Error("")
 
-    // })
-    const response = await fetch(`${apiURL.value}/sales_notes/payments`, {
+    if (sumOfAmountPaid(addMethodsPayment.value) > customerSelected.value.pending_amount) {
+        snackbarStore.setStatus('error', 'El suma total del monto a pagar no debe ser mayor al saldo', "PAGAR: " + sumOfAmountPaid(addMethodsPayment.value) + " SALDO: " + moneyDecimal(String(customerSelected.value.pending_amount)))
+        return
+    }
+    const response = await fetch(`${apiURL.value}/finance/unpaid/payments`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
             // Authorization: `Bearer ${userCookie.value.token}`,
         },
-        body: JSON.stringify(customerSelected.value)
+        body: JSON.stringify(distributePayments().sale_notes)
     })
     if (response.ok) {
         snackbarStore.setStatus('success', 'Se ha guardado correctamente:')
-        dialogListPayments.value = false
-        saleNotesRefresh()
+        onClickCloseDialogListPayments()
+        unpaidRefresh()
         return response.ok
     } else {
         snackbarStore.setStatus('error', 'Error al guardar')
@@ -354,14 +356,7 @@ const printTransfer = async (id: number) => {
         .print()
     // modalPrecuenta.value = true
 }
-const mountPay = () => {
-    // if (!customerSelected.value?.sale_note_payments) return 0
-    // if (customerSelected.value?.sale_note_payments.length > 0 && customerSelected.value?.total > 0) {
-    //     return customerSelected.value?.sale_note_payments.reduce((acumulador, data) => {
-    //         return acumulador + Number(data.payment)
-    //     }, 0)
-    // }
-}
+
 const accountsReceivable = () => {
     // if (!customerSelected.value?.sale_note_payments) return 0
     // if (customerSelected.value?.total <= (mountPay() ?? 0)) return 0
@@ -449,13 +444,139 @@ const onClickAddPaymentMethods = () => {
     )
 }
 const onClickDeletePaymentMethods = async (index: number) => {
-    
+
     if (!addMethodsPayment) throw Error("No hay que borrar")
     if (!addMethodsPayment.value[index].id) {
         addMethodsPayment.value.splice(index, 1);
     }
-    
 }
+
+const sumOfAmountPaid = (addMethodsPayment: SaleNotePayment[]) => {
+    if (!addMethodsPayment) return 0
+    return addMethodsPayment.reduce((acumulador, data) => {
+        return acumulador + Number(data.payment)
+    }, 0)
+}
+
+const onClickCloseDialogListPayments = () => {
+    dialogListPayments.value = false
+    addMethodsPayment.value = [{
+        id: 0,
+        sale_note_id: 0,
+        date_of_payment: dateNow(),
+        payment_method_type_id: 1,
+        reference: "",
+        payment: 0,
+        change: null
+    }]
+
+}
+
+// const onClickGeneratePayments = () => {
+//     distributePayments()
+
+// }
+const page_generate_payments = ref(1)
+
+const pageCount_generate_payments = computed(() => {
+    if (!distributePayments) return 1
+    return Math.ceil(distributePayments.length / itemsPerPage.value)
+})
+const headers_generate_payments = ref([
+    // { align: 'start', key: 'name', sortable: true, title: 'Especialidad', },
+    { key: 'customer.number', title: 'N°' },
+    { key: 'date_of_issue', title: 'Fecha Emisión' },
+    {
+        key: 'series',
+        title: 'Nota de venta',
+        value: (item: any) => `${item.serie} - ${item.number}`
+    },
+    { key: 'pending_amount_after', title: 'Pendiente' },
+    {
+        key: 'method_payment',
+        title: 'Metodo de pago',
+        value: (item: any) => `${item.payment.payment} - ${item.payment.payment_method_type.description}`
+    }
+])
+
+const distributePayments = () => {
+    if (!customerSelected.value) throw Error("No se ha selecionado al cliente");
+
+    let result: Unpaid = {
+        id: customerSelected.value.id,
+        customer: customerSelected.value.customer,
+        total: customerSelected.value.total,
+        pending_amount: customerSelected.value.pending_amount,
+        sale_notes: []
+    };
+
+    let paymentIndex = 0;
+    let currentPayment = addMethodsPayment.value[paymentIndex];
+    let remainingPaymentAmount = currentPayment.payment;
+
+    customerSelected.value.sale_notes.forEach(note => {
+        let pendingAmount = note.pending_amount;
+        while (pendingAmount > 0 && paymentIndex < addMethodsPayment.value.length) {
+            if (remainingPaymentAmount > 0) {
+                let paymentAmount = Math.min(remainingPaymentAmount, pendingAmount);
+                let pendingAmountBefore = pendingAmount;
+                let pendingAmountAfter = pendingAmountBefore - paymentAmount;
+                if (!companyFetch.value) throw Error("Error al obtener company");
+                let method_payment = companyFetch.value.payment_method_types.filter(method => currentPayment.payment_method_type_id === method.id)[0]
+                result.sale_notes.push({
+                    id: note.id,
+                    total: note.total,
+                    series: note.series,
+                    number: note.number,
+                    currency_type_id: note.currency_type_id,
+                    pending_amount: pendingAmount,
+                    pending_amount_before: pendingAmountBefore,
+                    pending_amount_after: pendingAmountAfter,
+                    payment: {
+                        id: currentPayment.id,
+                        sale_note_id: currentPayment.sale_note_id,
+                        date_of_payment: currentPayment.date_of_payment,
+                        payment_method_type_id: currentPayment.payment_method_type_id,
+                        payment_method_type: {
+                            id: method_payment.id,
+                            charge: null,
+                            description: method_payment.description,
+                            has_card: method_payment.has_card,
+                            number_days: null,
+                            is_credit: method_payment.is_credit,
+                            is_cash: method_payment.is_cash,
+                        },
+                        reference: currentPayment.reference,
+                        payment: Number(moneyDecimal(String(paymentAmount))),
+                        change: currentPayment.change
+                    },
+                    date_of_issue: note.date_of_issue,
+                    state_type: note.state_type
+                });
+
+                pendingAmount = pendingAmountAfter;
+                remainingPaymentAmount -= paymentAmount;
+
+                if (remainingPaymentAmount === 0 && paymentIndex < addMethodsPayment.value.length - 1) {
+                    paymentIndex++;
+                    currentPayment = addMethodsPayment.value[paymentIndex];
+                    remainingPaymentAmount = currentPayment.payment;
+                }
+            } else {
+                paymentIndex++;
+                if (paymentIndex < addMethodsPayment.value.length) {
+                    currentPayment = addMethodsPayment.value[paymentIndex];
+                    remainingPaymentAmount = currentPayment.payment;
+                }
+            }
+        }
+    });
+
+    return result;
+};
+
+
+
 </script>
 
 <template>
@@ -506,7 +627,7 @@ const onClickDeletePaymentMethods = async (index: number) => {
                         <template v-slot:item.total="{ item }">
                             {{ moneyDecimal(item.raw.total) }}
                         </template>
-                        <template v-slot:item.actions="{ item }">
+                        <!-- <template v-slot:item.actions="{ item }">
                             <v-tooltip>
                                 <template v-slot:activator="{ props }">
                                     <v-btn v-bind="props" class="me-2" rounded icon="mdi-file" color="blue-grey"
@@ -515,7 +636,7 @@ const onClickDeletePaymentMethods = async (index: number) => {
                                 </template>
                                 <span>Imprimir</span>
                             </v-tooltip>
-                        </template>
+                        </template> -->
 
                         <template v-slot:bottom>
                             <div class="text-center pt-2">
@@ -536,7 +657,7 @@ const onClickDeletePaymentMethods = async (index: number) => {
                             </v-btn> -->
                         </v-toolbar-title>
                         <v-spacer></v-spacer>
-                        <v-btn icon="mdi-close" variant="elevated" @click="dialogListPayments = false"></v-btn>
+                        <v-btn icon="mdi-close" variant="elevated" @click="onClickCloseDialogListPayments"></v-btn>
                     </v-toolbar>
                     <v-card>
                         <v-card-title>
@@ -571,6 +692,7 @@ const onClickDeletePaymentMethods = async (index: number) => {
                                 <v-divider></v-divider>
                                 <v-expand-transition>
                                     <div v-if="process[0].show">
+                                        <!-- {{ customerSelected.sale_notes }} -->
                                         <v-data-table v-model:page="page_customer_sale_notes"
                                             :headers="headers_customer_sale_notes" :items="customerSelected.sale_notes"
                                             :items-per-page="itemsPerPage" class="elevation-1">
@@ -627,11 +749,12 @@ const onClickDeletePaymentMethods = async (index: number) => {
                                             <template v-slot:title>
                                                 <span>{{ process[1].name }}</span>
                                                 <p class="text-body-2 font-weight-bold">
-                                                    SALDO: {{ moneyDecimal(String(customerSelected.pending_amount)) }}
+                                                    PAGANDO: {{ moneyDecimal(String(sumOfAmountPaid(addMethodsPayment)))
+                                                    }}
                                                 </p>
                                             </template>
                                             <template v-slot:append>
-                                                <v-badge color="teal" :content="customerSelected.sale_notes.length"
+                                                <v-badge color="teal" :content="addMethodsPayment.length"
                                                     inline></v-badge>
                                             </template>
                                         </v-list-item>
@@ -642,12 +765,32 @@ const onClickDeletePaymentMethods = async (index: number) => {
                                     <div v-if="process[1].show">
                                         <v-card>
                                             <v-card-title>
-                                                <span>Añadir pagos</span>
-                                                <v-btn variant="flat" icon="mdi-add" color="success"
-                                                    @click="onClickAddPaymentMethods()"></v-btn>
-
+                                                <v-col class="d-flex px-2">
+                                                    <span>Añadir pagos </span>
+                                                    <v-btn variant="flat" icon="mdi-add" color="success"
+                                                        @click="onClickAddPaymentMethods()"></v-btn>
+                                                    <!-- <v-spacer></v-spacer> -->
+                                                    <!-- <v-tooltip v-if="!mobile">
+                                                        <template v-slot:activator="{ props }">
+                                                            <v-btn v-bind="props" class="me-2" rounded color="primary"
+                                                                @click="onClickGeneratePayments()">
+                                                                Generar pagos
+                                                            </v-btn>
+                                                        </template>
+                                                        <span>Generar pagos</span>
+                                                    </v-tooltip>
+                                                    <v-tooltip v-if="mobile">
+                                                        <template v-slot:activator="{ props }">
+                                                            <v-btn v-bind="props" class="me-2" icon="mdi-cash-multiple"
+                                                                color="primary" @click="onClickGeneratePayments()">
+                                                            </v-btn>
+                                                        </template>
+                                                        <span>Generar pagos</span>
+                                                    </v-tooltip> -->
+                                                </v-col>
                                             </v-card-title>
                                             <v-card-text v-if="companyFetch">
+                                                <!-- {{ addMethodsPayment }} -->
                                                 <div v-if="addMethodsPayment.length !== 0"
                                                     v-for="(payment, index) in addMethodsPayment" :key="index"
                                                     :class="mobile ? 'py-4' : ''">
@@ -696,10 +839,9 @@ const onClickDeletePaymentMethods = async (index: number) => {
                         </v-col>
                         <!--DESPLEGABLE PAGOS -->
 
-                        <!--DESPLEGABLE GENERACION PAGOS -->
-
+                        <!--DESPLEGABLE GENERACION DE PAGOS -->
                         <v-col cols="12" lg="12">
-                            <v-card color="deep-orange">
+                            <v-card color="indigo">
                                 <v-card-actions>
                                     <v-list width="100%" class="py-0" bg-color="transparent">
                                         <v-list-item link :prepend-icon="process[2].icon"
@@ -710,12 +852,15 @@ const onClickDeletePaymentMethods = async (index: number) => {
                                             <template v-slot:title>
                                                 <span>{{ process[2].name }}</span>
                                                 <p class="text-body-2 font-weight-bold">
-                                                    SALDO: {{ moneyDecimal(String(customerSelected.pending_amount)) }}
+                                                    PENDIENTE A PAGAR: {{
+                                                        moneyDecimal(String(customerSelected.pending_amount -
+                                                            sumOfAmountPaid(addMethodsPayment)))
+                                                    }}
                                                 </p>
                                             </template>
                                             <template v-slot:append>
-                                                <v-badge color="deep-orange"
-                                                    :content="customerSelected.sale_notes.length" inline></v-badge>
+                                                <v-badge color="indigo"
+                                                    :content="distributePayments().sale_notes.length" inline></v-badge>
                                             </template>
                                         </v-list-item>
                                     </v-list>
@@ -723,12 +868,50 @@ const onClickDeletePaymentMethods = async (index: number) => {
                                 <v-divider></v-divider>
                                 <v-expand-transition>
                                     <div v-if="process[2].show">
-                                        FF
+                                        <!-- {{ distributePayments().sale_notes }} -->
+                                        <v-data-table v-model:page="page_generate_payments"
+                                            :headers="headers_generate_payments"
+                                            :items="distributePayments().sale_notes" :items-per-page="itemsPerPage"
+                                            class="elevation-1">
+                                            <template v-slot:item.customer.number="{ index }">
+                                                {{ index + 1 + itemsPerPage * (page - 1) }}
+                                            </template>
+                                            <template v-slot:item.date_of_issue="{ item }">
+                                                <p>{{ formatDate(item.raw.date_of_issue) }}</p>
+                                                <div class="text-caption">
+                                                    {{ formatTime(item.raw.date_of_issue) }}
+                                                </div>
+                                            </template>
+                                            <template v-slot:item.series="{ item }">
+                                                <p>{{ item.raw.series }} - {{ item.raw.number }}</p>
+                                                <v-chip size="x-small" :color="colorStateType[item.raw.state_type.id]">
+                                                    {{ item.raw.state_type.description }}
+                                                </v-chip>
+                                            </template>
+                                            <template v-slot:item.pending_amount_after="{ item }">
+                                                <p>{{ moneyDecimal(item.raw.pending_amount_after) }}</p>
+                                                <div class="text-caption">
+                                                    {{ item.raw.currency_type_id }}
+                                                </div>
+                                            </template>
+                                            <template v-slot:item.method_payment="{ item }">
+                                                <p>{{ moneyDecimal(item.raw.payment.payment) }}</p>
+                                                <div class="text-caption">
+                                                    {{ item.raw.payment.payment_method_type.description }}
+                                                </div>
+                                            </template>
+                                            <template v-slot:bottom>
+                                                <div class="text-center pt-2">
+                                                    <v-pagination v-model="page"
+                                                        :length="pageCount_generate_payments"></v-pagination>
+                                                </div>
+                                            </template>
+                                        </v-data-table>
                                     </div>
                                 </v-expand-transition>
                             </v-card>
                         </v-col>
-                        <!--DESPLEGABLE GENERACION PAGOS -->
+                        <!--DESPLEGABLE NOTAS de ventas  -->
                         <v-card-actions>
                             <v-spacer></v-spacer>
                             <v-btn color="success" variant="elevated" @click="saveMethodsPayments()">Guardar
