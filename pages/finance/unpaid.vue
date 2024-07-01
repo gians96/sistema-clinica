@@ -7,8 +7,8 @@ import { useDisplay } from 'vuetify'
 const { mobile } = useDisplay()
 import { companyStore } from '@/store/company'
 import type { Companies } from '~/interfaces/Company.interface'
-import type { Unpaid, SaleNote, StateType } from '~/interfaces/Unpaid.interface'
-import type { SaleNotePayment } from '~/interfaces/SaleNotesFetch.interace';
+import type { Unpaid, StateType, SaleNote } from '~/interfaces/Unpaid.interface'
+import type { SaleNoteItem, SaleNotePayment } from '~/interfaces/SaleNotesFetch.interace';
 const { data: unpaidFetch, refresh: unpaidRefresh } = await useFetch<
     Unpaid[]
 >(`${apiURL.value}/finance/unpaid`, { method: 'GET' })
@@ -27,7 +27,7 @@ const headers = ref([
     // { key: 'series', title: 'Nota de venta', value: (item: any) => `${item.series} - ${item.number}` },
     { key: 'pending_amount', title: 'Por pagar' },
     { key: 'total', title: 'Total' },
-    // { key: 'actions', title: 'Acciones', value: '' }
+    { key: 'actions', title: 'Acciones', value: '' }
 ])
 
 const page = ref(1)
@@ -106,22 +106,6 @@ const saveMethodsPayments = async () => {
     }
 }
 
-const deletePayment = async (id: number) => {
-    const response = await fetch(`${apiURL.value}/sales_notes/payments/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json'
-            // Authorization: `Bearer ${userCookie.value.token}`,
-        }
-    })
-    if (response.ok) {
-        return response.ok
-    } else {
-        return
-    }
-}
-
-const tab = ref(null)
 
 const exportItemsXLS = async () => {
     // try {
@@ -145,41 +129,41 @@ const moneyDecimal = (x: string) => {
     return Number.parseFloat(x).toFixed(2)
 }
 
-const formatPrintType = (item: Unpaid) => {
-    // let description = item.item.description.toString()
-    // let itemTypeId = item.item_type_id
+const formatPrintItemType = (item: SaleNoteItem) => {
+    let description = item.item.description.toString()
+    let itemTypeId = item.item_type_id
     let allDescription = {}
-    // console.log(itemTypeId);
-    // if (!itemTypeId) {
-    //     return allDescription = {
-    //         text: description,
-    //         style: { fontSize: 11, alignment: "left" }
-    //     }
-    // }
-    // if (itemTypeId === 1) {
-    //     allDescription = {
-    //         text: description + `\nN° Pollos: ${item.quantity_chicken}\nPeso promedio: ${item.average_weight}`,
-    //         style: { fontSize: 11, alignment: "left" }
-    //     }
-    // }
-    // if (itemTypeId === 2) {
-    //     allDescription = {
-    //         text: description + `\nN° Pollos: ${item.quantity_chicken}\nN° Jaba: ${item.quantity_box}\nPeso bruto: ${item.gross_weight}\nTara: ${item.tare}`,
-    //         style: { fontSize: 11, alignment: "left" }
-    //     }
-    // }
-    // if (itemTypeId === 3) {
-    //     allDescription = {
-    //         text: description + `\nN° Pollos: ${item.quantity_chicken}`,
-    //         style: { fontSize: 11, alignment: "left" }
-    //     }
-    // }
+    if (!itemTypeId) {
+        return allDescription = {
+            text: description,
+            style: { fontSize: 11, alignment: "left" }
+        }
+    }
+    if (itemTypeId === 1) {
+        allDescription = {
+            text: description + `\nN° Pollos: ${item.quantity_chicken}\nPeso promedio: ${item.average_weight}`,
+            style: { fontSize: 11, alignment: "left" }
+        }
+    }
+    if (itemTypeId === 2) {
+        allDescription = {
+            text: description + `\nN° Pollos: ${item.quantity_chicken}\nN° Jaba: ${item.quantity_box}\nPeso bruto: ${item.gross_weight}\nTara: ${item.tare}`,
+            style: { fontSize: 11, alignment: "left" }
+        }
+    }
+    if (itemTypeId === 3) {
+        allDescription = {
+            text: description + `\nN° Pollos: ${item.quantity_chicken}`,
+            style: { fontSize: 11, alignment: "left" }
+        }
+    }
     return allDescription
     // return {
     //     text: `F\nAdditional Data 1: ${item.additionalData1}\nAdditional Data 2: ${item.additionalData2}\nAdditional Data 3: ${item.additionalData3}`,
     //     style: { fontSize: 11, alignment: "left" }
     // },
 }
+
 
 const dialogListPayments = ref(false)
 const customerSelected = ref<Unpaid>()
@@ -189,178 +173,6 @@ const dialogListPaymentSaleNote = async (item: Unpaid) => {
 
     dialogListPayments.value = true
     customerSelected.value = item
-    // customerSelected.value.sale_notes.forEach(sale_note => {
-    //     if (!sale_note.date_of_issue) return
-    //     sale_note.date_of_issue = new Date(sale_note.date_of_issue).toISOString().split('T')[0];
-    // })
-}
-
-const printItems = (items: Unpaid[]) => {
-    const header = [
-        {
-            text: 'DESCRIPCIÓN',
-            style: { fontSize: 12, bold: true, alignment: 'center' }
-        },
-        {
-            text: 'UNIDAD',
-            style: { fontSize: 12, bold: true, alignment: 'center' }
-        },
-        {
-            text: 'CANTIDAD',
-            style: { fontSize: 12, bold: true, alignment: 'center' }
-        },
-        {
-            text: 'P. UNI',
-            style: { fontSize: 12, bold: true, alignment: 'center' }
-        },
-        { text: 'TOTAL', style: { fontSize: 12, bold: true, alignment: 'center' } }
-    ]
-    if (!items) return [header]
-    return /* [header,
-        ...items.map(item => {
-            return [
-                // { text: item.item.description.toString(), style: { fontSize: 11, alignment: "center" } },
-                formatPrintType(item),
-                { text: item.unit_type_id.toString(), style: { fontSize: 11, alignment: "center" } },
-                { text: item.quantity.toString(), style: { fontSize: 11, alignment: "center" } },
-                { text: moneyDecimal(item.unit_price.toString()), style: { fontSize: 11, alignment: "center" } },
-                { text: "S/." + moneyDecimal(item.total.toString()), style: { fontSize: 11, bold: true, alignment: "center" } }
-            ];
-        })
-    ]*/
-}
-
-const printTransfer = async (id: number) => {
-    if (!id) throw Error('El id no es vacio:')
-    const response = await fetch(`${apiURL.value}/sales_notes/get/${id}`, {
-        method: 'GET'
-    })
-    if (!response.ok) return
-    const saleNotes = await response.json()
-
-    // const saleNotes: SaleNote = {}
-    let fecha =
-        formatDate(saleNotes.create_at.toString()) +
-        ' ' +
-        formatTime(saleNotes.create_at.toString())
-    const pdfMake = usePDFMake()
-    pdfMake.tableLayouts = {
-        custom: {
-            paddingLeft: function () {
-                return 5
-            },
-            paddingRight: function () {
-                return 5
-            }
-        }
-    }
-    let isVoided = {
-        text: 'ANULADO',
-        absolutePosition: { x: 100, y: 300 },
-        alignment: 'center', // Centrar el texto
-        fontSize: 70, // Tamaño de la fuente
-        color: 'red' // Color del texto
-    }
-
-    pdfMake
-        .createPdf({
-            pageSize: 'A4',
-            pageMargins: [35, 50, 35, 50],
-            content: [
-                saleNotes.state_type_id === 6 ? isVoided : {},
-                {
-                    columns: [
-                        {
-                            text: ''
-                        },
-                        // {
-                        //     // image: logo,
-                        //     width: 100,
-                        //     alignment: "center"
-                        // },
-                        {
-                            text: ''
-                        },
-                        [
-                            {
-                                text: 'R.U.C. ' + companyFetch.value?.companies.number,
-                                style: { fontSize: 14, bold: true, alignment: 'center' },
-                                margin: [0, 0, 0, 5]
-                            },
-                            {
-                                text: companyFetch.value?.companies.name,
-                                style: { fontSize: 10, bold: true, alignment: 'center' },
-                                margin: [0, 0, 0, 2]
-                            },
-                            {
-                                text: 'NOTA DE VENTA',
-                                style: { fontSize: 14, bold: true, alignment: 'center' },
-                                margin: [0, 0, 0, 5]
-                            },
-                            {
-                                text: saleNotes.series + ' - ' + saleNotes.number,
-                                style: { fontSize: 14, bold: true, alignment: 'center' },
-                                margin: [0, 0, 0, 35]
-                            }
-                        ]
-                    ]
-                },
-                {
-                    text: `Cliente: ${saleNotes.customer.name}`,
-                    margin: [0, 0, 0, 5],
-                    style: { fontSize: 12, bold: true, alignment: 'left' }
-                },
-                {
-                    text: `DNI/RUC: ${saleNotes.customer.number}`,
-                    margin: [0, 0, 0, 5],
-                    style: { fontSize: 12, bold: true, alignment: 'left' }
-                },
-                {
-                    text: `FECHA: ${fecha}`,
-                    margin: [0, 0, 0, 20],
-                    style: { fontSize: 12, bold: true, alignment: 'left' }
-                },
-                {
-                    // layout: "custom",
-                    table: {
-                        heights: 1,
-                        widths: [200, '*', '*', '*', '*'],
-                        margin: [50, 0, 0, 50],
-
-                        alignment: 'center',
-                        body: printItems(saleNotes.sale_note_items)
-                    }
-                },
-                {
-                    text: ''
-                },
-                {
-                    columns: [
-                        {
-                            text: ''
-                        },
-                        {
-                            text: ''
-                        },
-                        [
-                            {
-                                text: 'TOTAL: S/.' + moneyDecimal(saleNotes.total),
-                                style: { fontSize: 14, bold: true, alignment: 'right' },
-                                margin: [0, 20, 0, 0]
-                            }
-                        ]
-                    ]
-                }
-            ]
-        })
-        .print()
-    // modalPrecuenta.value = true
-}
-
-const accountsReceivable = () => {
-    // if (!customerSelected.value?.sale_note_payments) return 0
-    // if (customerSelected.value?.total <= (mountPay() ?? 0)) return 0
-    // return customerSelected.value?.total - (mountPay() ?? 0)
 }
 const page_customer_sale_notes = ref(1)
 
@@ -378,7 +190,7 @@ const headers_customer_sale_notes = ref([
         value: (item: any) => `${item.serie} - ${item.number}`
     },
     { key: 'pending_amount', title: 'Saldo' },
-    { key: 'total', title: 'Total   ' }
+    { key: 'total', title: 'Total' }
 ])
 const colorStateType: Record<StateType['id'], string> = {
     '1': 'default', //Registrado
@@ -444,7 +256,6 @@ const onClickAddPaymentMethods = () => {
     )
 }
 const onClickDeletePaymentMethods = async (index: number) => {
-
     if (!addMethodsPayment) throw Error("No hay que borrar")
     if (!addMethodsPayment.value[index].id) {
         addMethodsPayment.value.splice(index, 1);
@@ -469,13 +280,8 @@ const onClickCloseDialogListPayments = () => {
         payment: 0,
         change: null
     }]
-
 }
 
-// const onClickGeneratePayments = () => {
-//     distributePayments()
-
-// }
 const page_generate_payments = ref(1)
 
 const pageCount_generate_payments = computed(() => {
@@ -496,7 +302,7 @@ const headers_generate_payments = ref([
         key: 'method_payment',
         title: 'Metodo de pago',
         value: (item: any) => `${item.payment.payment} - ${item.payment.payment_method_type.description}`
-    }
+    },
 ])
 
 const distributePayments = () => {
@@ -532,6 +338,7 @@ const distributePayments = () => {
                     pending_amount: pendingAmount,
                     pending_amount_before: pendingAmountBefore,
                     pending_amount_after: pendingAmountAfter,
+                    create_at: note.create_at,
                     payment: {
                         id: currentPayment.id,
                         sale_note_id: currentPayment.sale_note_id,
@@ -571,11 +378,172 @@ const distributePayments = () => {
             }
         }
     });
-
     return result;
 };
 
+//PRINT
 
+
+
+const printSaleNotes = (sale_notes: SaleNote[]) => {
+    let formatSaleNotes = []; // Define the variable as an array
+
+    for (let i = 0; i < sale_notes.length; i++) {
+        const saleNoteItems = sale_notes[i].sale_note_items ?? [];
+
+        let fecha =
+            formatDate(sale_notes[i].create_at.toString()) +
+            ' ' +
+            formatTime(sale_notes[i].create_at.toString());
+
+        formatSaleNotes.push(
+            {
+                text: 'NOTA DE VENTA ' + sale_notes[i].series + ' - ' + sale_notes[i].number,
+                style: { fontSize: 14, bold: true, alignment: 'left' },
+                margin: [0, 35, 0, 0]
+            },
+            {
+                text: `FECHA: ${fecha}`,
+                margin: [0, 0, 0, 10],
+                style: { fontSize: 12, bold: true, alignment: 'left' }
+            },
+            {
+                // layout: "custom",
+                table: {
+                    heights: 1,
+                    widths: [200, '*', '*', '*', '*'],
+                    margin: [50, 0, 0, 50],
+                    alignment: "center",
+                    body: [
+                        [
+                            { text: 'DESCRIPCIÓN', style: { fontSize: 12, bold: true, alignment: 'center' } },
+                            { text: 'UNIDAD', style: { fontSize: 12, bold: true, alignment: 'center' } },
+                            { text: 'CANTIDAD', style: { fontSize: 12, bold: true, alignment: 'center' } },
+                            { text: 'P. UNI', style: { fontSize: 12, bold: true, alignment: 'center' } },
+                            { text: 'TOTAL', style: { fontSize: 12, bold: true, alignment: 'center' } }
+                        ],
+                        ...saleNoteItems.map(item => {
+                            return [
+                                formatPrintItemType(item),
+                                { text: item.unit_type_id.toString(), style: { fontSize: 11, alignment: "center" } },
+                                { text: item.quantity.toString(), style: { fontSize: 11, alignment: "center" } },
+                                { text: moneyDecimal(item.unit_price.toString()), style: { fontSize: 11, alignment: "center" } },
+                                { text: "S/." + moneyDecimal(item.total.toString()), style: { fontSize: 11, bold: true, alignment: "center" } }
+                            ];
+                        })
+                    ]
+                }
+            },
+            {
+                text: `PAGADO: ${moneyDecimal(String(sale_notes[i].total - sale_notes[i].pending_amount))}`,
+                margin: [0, 10, 0, 0],
+                style: { fontSize: 12, bold: true, alignment: 'left' }
+            },
+            {
+                text: `SALDO: ${moneyDecimal(String(sale_notes[i].pending_amount))}`,
+                margin: [0, 0, 0, 0],
+                style: { fontSize: 12, bold: true, alignment: 'left' }
+            },
+            {
+                text: `TOTAL: ${moneyDecimal(String(sale_notes[i].total))}`,
+                margin: [0, 0, 0, 0],
+                style: { fontSize: 12, bold: true, alignment: 'left' }
+            },
+        );
+    }
+
+    console.log({ form: formatSaleNotes });
+
+    return formatSaleNotes;
+};
+
+const print = async (unpaidRaw: Unpaid) => {
+    if (!unpaidRaw) throw Error('El id no es vacio:')
+    let unpaid = JSON.parse(JSON.stringify({ ...unpaidRaw })) as Unpaid
+    // console.log(unpaid);
+
+    const pdfMake = usePDFMake()
+    pdfMake.tableLayouts = {
+        custom: {
+            paddingLeft: function () {
+                return 5
+            },
+            paddingRight: function () {
+                return 5
+            }
+        }
+    }
+
+    pdfMake
+        .createPdf({
+            pageSize: 'A4',
+            pageMargins: [35, 50, 35, 50],
+            content: [
+                // saleNotes.state_type_id === 6 ? isVoided : {},
+                {
+                    columns: [
+                        {
+                            text: ''
+                        },
+                        // {
+                        //     // image: logo,
+                        //     width: 100,
+                        //     alignment: "center"
+                        // },
+                        {
+                            text: ''
+                        },
+                        [
+                            {
+                                text: 'R.U.C. ' + companyFetch.value?.companies.number,
+                                style: { fontSize: 14, bold: true, alignment: 'center' },
+                                margin: [0, 0, 0, 5]
+                            },
+                            {
+                                text: companyFetch.value?.companies.name,
+                                style: { fontSize: 10, bold: true, alignment: 'center' },
+                                margin: [0, 0, 0, 2]
+                            }
+                        ]
+                    ]
+                },
+                {
+                    text: `Cliente: ${unpaid.customer.name}`,
+                    margin: [0, 0, 0, 5],
+                    style: { fontSize: 12, bold: true, alignment: 'left' }
+                },
+                {
+                    text: `DNI/RUC: ${unpaid.customer.number}`,
+                    margin: [0, 0, 0, 5],
+                    style: { fontSize: 12, bold: true, alignment: 'left' }
+                },
+                printSaleNotes(unpaid.sale_notes),
+
+                {
+                    text: "",
+                    margin: [0, 15, 0, 15],
+                },
+                {
+                    // layout: "custom",
+                    table: {
+                        heights: 1,
+                        widths: ['*'],
+                        margin: [50, 40, 0, 50],
+                        style: 'tableHeader',
+                        alignment: "center",
+                        body: [
+                            [
+                                { text: `TOTAL SALDO A PAGAR: ${moneyDecimal(String(unpaid.pending_amount))}`, style: { fontSize: 16, bold: true, alignment: 'center' } },
+
+                            ],
+
+                        ]
+                    }
+                }
+            ]
+        })
+        .print()
+}
 
 </script>
 
@@ -627,16 +595,16 @@ const distributePayments = () => {
                         <template v-slot:item.total="{ item }">
                             {{ moneyDecimal(item.raw.total) }}
                         </template>
-                        <!-- <template v-slot:item.actions="{ item }">
+                        <template v-slot:item.actions="{ item }">
                             <v-tooltip>
                                 <template v-slot:activator="{ props }">
                                     <v-btn v-bind="props" class="me-2" rounded icon="mdi-file" color="blue-grey"
-                                        @click="printTransfer(item.raw.id)">
+                                        @click="print(item.raw)">
                                     </v-btn>
                                 </template>
                                 <span>Imprimir</span>
                             </v-tooltip>
-                        </template> -->
+                        </template>
 
                         <template v-slot:bottom>
                             <div class="text-center pt-2">

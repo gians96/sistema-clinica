@@ -1,4 +1,4 @@
-import type { SaleNotePayment } from "./SaleNotesFetch.interace";
+import type { SaleNotePayment, SaleNoteItem } from "./SaleNotesFetch.interace";
 
 export interface Unpaid {
     id: number;
@@ -26,6 +26,9 @@ export interface SaleNote {
     pending_amount_before?: number
     pending_amount_after?: number
     payment?: SaleNotePayment
+    sale_note_items?: SaleNoteItem[];
+    sale_note_payments?: SaleNotePayment[];
+    create_at: Date;
 }
 
 export enum CurrencyTypeID {
