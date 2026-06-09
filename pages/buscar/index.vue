@@ -5,13 +5,12 @@ import { useDisplay } from 'vuetify'
 const { mobile } = useDisplay()
 const route = useRoute()
 const apiURL = useCookie("apiURL");
+import { moneyDecimal, roundMoney, sumMoney, formatQuantityWithUnit } from '~/utils/money';
+import { useCompanyLogoPdf } from '~/composables/useCompanyLogoPdf';
 // When accessing /posts/1, route.params.id will be 1
 const number = ref(route.params.number)
 const itemsPerPage = ref(10)
 const search = ref('')
-const moneyDecimal = (x: string) => {
-    return Number.parseFloat(x).toFixed(2);
-}
 import type { Companies } from '~/interfaces/Company.interface';
 import { companyStore } from '@/store/company'
 const companyFetch = ref<Companies>()
@@ -103,16 +102,16 @@ const formatTime = (date: string) => {
 
 const mountPay = () => {
     if (!getSaleNote.value?.sale_note_payments) return 0
-    if (getSaleNote.value?.sale_note_payments.length > 0 && getSaleNote.value?.total > 0) {
-        return getSaleNote.value?.sale_note_payments.reduce((acumulador, data) => {
-            return acumulador + Number(data.payment)
-        }, 0)
+    if (getSaleNote.value?.sale_note_payments.length > 0) {
+        return sumMoney(getSaleNote.value.sale_note_payments.map((data) => Number(data.payment)))
     }
+    return 0
 }
 const accountsReceivable = () => {
-    if (!getSaleNote.value?.sale_note_payments) return 0
-    if (getSaleNote.value?.total <= (mountPay() ?? 0)) return 0
-    return getSaleNote.value?.total - (mountPay() ?? 0)
+    if (!getSaleNote.value) return 0
+    const pendingAmount = Number(getSaleNote.value.pending_amount ?? getSaleNote.value.total)
+    if (roundMoney(pendingAmount) <= roundMoney(mountPay() ?? 0)) return 0
+    return roundMoney(pendingAmount - (mountPay() ?? 0))
 }
 const dialogListPayments = ref(false)
 definePageMeta({
@@ -121,7 +120,6 @@ definePageMeta({
 const printItems = (items: SaleNoteItem[]) => {
     const header = [
         { text: "DESCRIPCIÓN", style: { fontSize: 12, bold: true, alignment: "center" } },
-        { text: "UNIDAD", style: { fontSize: 12, bold: true, alignment: "center" } },
         { text: "CANTIDAD", style: { fontSize: 12, bold: true, alignment: "center" } },
         { text: "P. UNI", style: { fontSize: 12, bold: true, alignment: "center" } },
         { text: "TOTAL", style: { fontSize: 12, bold: true, alignment: "center" } }
@@ -131,8 +129,7 @@ const printItems = (items: SaleNoteItem[]) => {
         ...items.map(item => {
             return [
                 { text: item.item.description.toString(), style: { fontSize: 11, alignment: "center" } },
-                { text: item.unit_type_id.toString(), style: { fontSize: 11, alignment: "center" } },
-                { text: item.quantity.toString(), style: { fontSize: 11, alignment: "center" } },
+                { text: formatQuantityWithUnit(Number(item.quantity), item.unit_type_id.toString()), style: { fontSize: 11, alignment: "center" } },
                 { text: moneyDecimal(item.unit_price.toString()), style: { fontSize: 11, alignment: "center" } },
                 { text: "S/." + moneyDecimal(item.total.toString()), style: { fontSize: 11, bold: true, alignment: "center" } }
             ];
@@ -145,8 +142,8 @@ const printTransfer = async (id: number) => {
     if (!response.ok) return
     const saleNotes = await response.json()
 
-    // const saleNotes: SaleNoteFetch = {}
     let fecha = formatDate(saleNotes.create_at.toString()) + " " + formatTime(saleNotes.create_at.toString())
+    const logoBlock = await useCompanyLogoPdf()
     const pdfMake = usePDFMake();
     pdfMake.tableLayouts = {
         custom: {
@@ -173,33 +170,23 @@ const printTransfer = async (id: number) => {
             saleNotes.state_type_id === 6 ? isVoided : {},
             {
                 columns: [
-                    {
-                        text: ""
-                    },
-                    // {
-                    //     // image: logo,
-                    //     width: 100,
-                    //     alignment: "center"
-                    // },
-                    {
-                        text: ""
-                    },
+                    logoBlock ?? { text: "", width: 120 },
                     [{
                         text: 'R.U.C. ' + companyFetch.value?.companies.number,
-                        style: { fontSize: 14, bold: true, alignment: "center" },
+                        style: { fontSize: 14, bold: true, alignment: "right" },
                         margin: [0, 0, 0, 5],
                     }, {
                         text: companyFetch.value?.companies.name,
-                        style: { fontSize: 10, bold: true, alignment: "center" },
+                        style: { fontSize: 10, bold: true, alignment: "right" },
                         margin: [0, 0, 0, 2],
                     }, {
                         text: "NOTA DE VENTA",
-                        style: { fontSize: 14, bold: true, alignment: "center" },
+                        style: { fontSize: 14, bold: true, alignment: "right" },
                         margin: [0, 0, 0, 5],
                     },
                     {
                         text: saleNotes.series + " - " + saleNotes.number,
-                        style: { fontSize: 14, bold: true, alignment: "center" },
+                        style: { fontSize: 14, bold: true, alignment: "right" },
                         margin: [0, 0, 0, 35],
                     },]
                 ],
@@ -223,7 +210,7 @@ const printTransfer = async (id: number) => {
                 // layout: "custom",
                 table: {
                     heights: 1,
-                    widths: [200, '*', '*', '*', '*'],
+                    widths: [200, '*', '*', '*'],
                     margin: [50, 0, 0, 50],
 
                     alignment: "center",

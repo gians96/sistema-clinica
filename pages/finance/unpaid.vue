@@ -9,6 +9,8 @@ import { companyStore } from '@/store/company'
 import type { Companies } from '~/interfaces/Company.interface'
 import type { Unpaid, StateType, SaleNote } from '~/interfaces/Unpaid.interface'
 import type { SaleNoteItem, SaleNotePayment } from '~/interfaces/SaleNotesFetch.interace';
+import { moneyDecimal, roundMoney, sumMoney, formatQuantityWithUnit } from '~/utils/money';
+import { useCompanyLogoPdf } from '~/composables/useCompanyLogoPdf';
 const { data: unpaidFetch, refresh: unpaidRefresh } = await useFetch<
     Unpaid[]
 >(`${apiURL.value}/finance/unpaid`, { method: 'GET' })
@@ -83,7 +85,7 @@ const saveMethodsPayments = async () => {
     if (!addMethodsPayment.value) throw Error('')
     if (distributePayments().sale_notes.length === 0) throw Error("")
 
-    if (sumOfAmountPaid(addMethodsPayment.value) > customerSelected.value.pending_amount) {
+    if (roundMoney(sumOfAmountPaid(addMethodsPayment.value)) > roundMoney(Number(customerSelected.value.pending_amount))) {
         snackbarStore.setStatus('error', 'El suma total del monto a pagar no debe ser mayor al saldo', "PAGAR: " + sumOfAmountPaid(addMethodsPayment.value) + " SALDO: " + moneyDecimal(String(customerSelected.value.pending_amount)))
         return
     }
@@ -125,10 +127,6 @@ const exportItemsXLS = async () => {
     //     console.error('Error al descargar el archivo Excel:', error);
     // }
 }
-const moneyDecimal = (x: string) => {
-    return Number.parseFloat(x).toFixed(2)
-}
-
 const formatPrintItemType = (item: SaleNoteItem) => {
     let description = item.item.description.toString()
     let itemTypeId = item.item_type_id
@@ -264,9 +262,7 @@ const onClickDeletePaymentMethods = async (index: number) => {
 
 const sumOfAmountPaid = (addMethodsPayment: SaleNotePayment[]) => {
     if (!addMethodsPayment) return 0
-    return addMethodsPayment.reduce((acumulador, data) => {
-        return acumulador + Number(data.payment)
-    }, 0)
+    return sumMoney(addMethodsPayment.map((data) => Number(data.payment)))
 }
 
 const onClickCloseDialogListPayments = () => {
@@ -321,12 +317,12 @@ const distributePayments = () => {
     let remainingPaymentAmount = currentPayment.payment;
 
     customerSelected.value.sale_notes.forEach(note => {
-        let pendingAmount = note.pending_amount;
-        while (pendingAmount > 0 && paymentIndex < addMethodsPayment.value.length) {
-            if (remainingPaymentAmount > 0) {
-                let paymentAmount = Math.min(remainingPaymentAmount, pendingAmount);
+        let pendingAmount = roundMoney(Number(note.pending_amount));
+        while (roundMoney(pendingAmount) > 0 && paymentIndex < addMethodsPayment.value.length) {
+            if (roundMoney(remainingPaymentAmount) > 0) {
+                let paymentAmount = roundMoney(Math.min(remainingPaymentAmount, pendingAmount));
                 let pendingAmountBefore = pendingAmount;
-                let pendingAmountAfter = pendingAmountBefore - paymentAmount;
+                let pendingAmountAfter = roundMoney(pendingAmountBefore - paymentAmount);
                 if (!companyFetch.value) throw Error("Error al obtener company");
                 let method_payment = companyFetch.value.payment_method_types.filter(method => currentPayment.payment_method_type_id === method.id)[0]
                 result.sale_notes.push({
@@ -362,9 +358,9 @@ const distributePayments = () => {
                 });
 
                 pendingAmount = pendingAmountAfter;
-                remainingPaymentAmount -= paymentAmount;
+                remainingPaymentAmount = roundMoney(remainingPaymentAmount - paymentAmount);
 
-                if (remainingPaymentAmount === 0 && paymentIndex < addMethodsPayment.value.length - 1) {
+                if (roundMoney(remainingPaymentAmount) <= 0 && paymentIndex < addMethodsPayment.value.length - 1) {
                     paymentIndex++;
                     currentPayment = addMethodsPayment.value[paymentIndex];
                     remainingPaymentAmount = currentPayment.payment;
@@ -411,13 +407,12 @@ const printSaleNotes = (sale_notes: SaleNote[]) => {
                 // layout: "custom",
                 table: {
                     heights: 1,
-                    widths: [200, '*', '*', '*', '*'],
+                    widths: [200, '*', '*', '*'],
                     margin: [50, 0, 0, 50],
                     alignment: "center",
                     body: [
                         [
                             { text: 'DESCRIPCIÓN', style: { fontSize: 12, bold: true, alignment: 'center' } },
-                            { text: 'UNIDAD', style: { fontSize: 12, bold: true, alignment: 'center' } },
                             { text: 'CANTIDAD', style: { fontSize: 12, bold: true, alignment: 'center' } },
                             { text: 'P. UNI', style: { fontSize: 12, bold: true, alignment: 'center' } },
                             { text: 'TOTAL', style: { fontSize: 12, bold: true, alignment: 'center' } }
@@ -425,8 +420,7 @@ const printSaleNotes = (sale_notes: SaleNote[]) => {
                         ...saleNoteItems.map(item => {
                             return [
                                 formatPrintItemType(item),
-                                { text: item.unit_type_id.toString(), style: { fontSize: 11, alignment: "center" } },
-                                { text: item.quantity.toString(), style: { fontSize: 11, alignment: "center" } },
+                                { text: formatQuantityWithUnit(Number(item.quantity), item.unit_type_id.toString()), style: { fontSize: 11, alignment: "center" } },
                                 { text: moneyDecimal(item.unit_price.toString()), style: { fontSize: 11, alignment: "center" } },
                                 { text: "S/." + moneyDecimal(item.total.toString()), style: { fontSize: 11, bold: true, alignment: "center" } }
                             ];
@@ -460,8 +454,8 @@ const printSaleNotes = (sale_notes: SaleNote[]) => {
 const print = async (unpaidRaw: Unpaid) => {
     if (!unpaidRaw) throw Error('El id no es vacio:')
     let unpaid = JSON.parse(JSON.stringify({ ...unpaidRaw })) as Unpaid
-    // console.log(unpaid);
 
+    const logoBlock = await useCompanyLogoPdf()
     const pdfMake = usePDFMake()
     pdfMake.tableLayouts = {
         custom: {
@@ -482,26 +476,16 @@ const print = async (unpaidRaw: Unpaid) => {
                 // saleNotes.state_type_id === 6 ? isVoided : {},
                 {
                     columns: [
-                        {
-                            text: ''
-                        },
-                        // {
-                        //     // image: logo,
-                        //     width: 100,
-                        //     alignment: "center"
-                        // },
-                        {
-                            text: ''
-                        },
+                        logoBlock ?? { text: '', width: 120 },
                         [
                             {
                                 text: 'R.U.C. ' + companyFetch.value?.companies.number,
-                                style: { fontSize: 14, bold: true, alignment: 'center' },
+                                style: { fontSize: 14, bold: true, alignment: 'right' },
                                 margin: [0, 0, 0, 5]
                             },
                             {
                                 text: companyFetch.value?.companies.name,
-                                style: { fontSize: 10, bold: true, alignment: 'center' },
+                                style: { fontSize: 10, bold: true, alignment: 'right' },
                                 margin: [0, 0, 0, 2]
                             }
                         ]

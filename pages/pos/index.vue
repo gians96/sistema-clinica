@@ -99,9 +99,11 @@ const changeValuesListItemPOS = (product: Product, index: number) => {
             listItemsPOS.value[index].tare_weight = (product.tare ?? 0) * (product.quantity_box ?? 0)
             listItemsPOS.value[index].tare_weight = String(product.tare_weight) + " kg"
         }
-        listItemsPOS.value[index].quantity = Number(moneyDecimal(String(product.quantity)))
-        listItemsPOS.value[index].total = product.quantity * product.price -
+        listItemsPOS.value[index].quantity = roundQuantity(Number(product.quantity))
+        listItemsPOS.value[index].total = roundMoney(
+            product.quantity * product.price -
             (product.isDiscount ? (product.item_type_id === 1 ? product.discount * product.quantity_chicken : 0) : 0)
+        )
     } catch (error) {
         console.log(error);
     }
@@ -129,35 +131,26 @@ const deleteItemPOS = (id: number) => {
 
 const totalListPOS = () => {
     if (listItemsPOS.value.length === 0) return 0
-    return listItemsPOS.value.reduce((acumulador, data) => {
+    return roundMoney(listItemsPOS.value.reduce((acumulador, data) => {
         return acumulador + data.total
-        // return acumulador +
-        //     (data.price * data.quantity -
-        //         (data.isDiscount ? (data.type_item_id === 1 ? data.discount * data.quantity_chicken : 0) : 0)
-        //     )
-    }, 0)
+    }, 0))
 }
 const isShowModalComprobante = ref(false)
 const mountPay = () => {
     if (!listItemsPOS.value) return 0
     if (listItemsPOS.value.length > 0 && totalListPOS() > 0) {
-        return paymentsMethodTypes.value.reduce((acumulador, data) => {
-            return acumulador + Number(data.mount)
-        }, 0)
+        return sumMoney(paymentsMethodTypes.value.map((data) => Number(data.mount)))
     }
 }
 const vuelto = () => {
     if (!mountPay()) return 0
-    if ((mountPay() ?? 0) < totalListPOS()) return 0
-    return (mountPay() ?? 0) - totalListPOS()
+    if (roundMoney(mountPay() ?? 0) < totalListPOS()) return 0
+    return roundMoney((mountPay() ?? 0) - totalListPOS())
 }
 
 const accountsReceivable = () => {
-    if (totalListPOS() <= (mountPay() ?? 0)) return 0
-    return totalListPOS() - (mountPay() ?? 0)
-}
-const moneyDecimal = (x: string) => {
-    return Number.parseFloat(x).toFixed(2);
+    if (totalListPOS() <= roundMoney(mountPay() ?? 0)) return 0
+    return roundMoney(totalListPOS() - (mountPay() ?? 0))
 }
 const documentSelectedOnClick = ref("80")
 
@@ -315,8 +308,8 @@ const sendSaleNotes = () => {
             return {
                 item_id: Number(data.id),
                 item_lots_group_id: null,
-                quantity: Number(data.quantity),
-                unit_price: Number(data.price),
+                quantity: roundQuantity(Number(data.quantity)),
+                unit_price: roundMoney(Number(data.price)),
                 item_type_id: data.item_type_id ?? null,
                 quantity_chicken: Number(data.quantity_chicken),
                 average_weight: Number(data.average_weight),
@@ -332,7 +325,7 @@ const sendSaleNotes = () => {
                 payment_method_type_id: Number(data.payment_method_type_id),
                 reference: "",
                 date_of_payment: new Date(dateNow()).toISOString().split('T')[0],
-                payment: Number(data.mount)
+                payment: roundMoney(Number(data.mount))
             }
         }),
     }
@@ -346,6 +339,7 @@ const dateNow = () => {
     return formattedDate
 }
 import { useSnackbarStore } from '@/store/index';
+import { moneyDecimal, roundMoney, roundQuantity, sumMoney } from '~/utils/money';
 const snackbarStore = useSnackbarStore()
 const onClickPay = async () => {
     const response = await fetch(
