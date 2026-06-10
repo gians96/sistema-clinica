@@ -38,6 +38,8 @@ const search = ref('')
 const selected = ref([])
 const dialog = ref(false)
 const dialogDelete = ref(false)
+const dialogVoided = ref(false)
+const voidedItem = ref<SaleNoteFetch>()
 const editedItem = ref<SaleNoteFetch>()
 
 const defaultItem = ref<SaleNoteFetch>()
@@ -215,6 +217,44 @@ const deleteItemConfirm = () => {
     }
 
 }
+const voidedOpenDialog = (item: SaleNoteFetch) => {
+    dialogVoided.value = true
+    voidedItem.value = JSON.parse(JSON.stringify(item))
+}
+
+const closeDialogVoided = () => {
+    dialogVoided.value = false
+    nextTick(() => {
+        voidedItem.value = undefined
+    })
+}
+
+const voidedSaleNoteFetch = async (id: number) => {
+    const response = await fetch(`${apiURL.value}/sales_notes/voided`,
+        {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id })
+        }
+    )
+    return response
+}
+
+const voidedSaleNoteConfirm = async () => {
+    if (!voidedItem.value) return
+    const response = await voidedSaleNoteFetch(voidedItem.value.id)
+    if (response.ok) {
+        snackbarStore.setStatus("success", "Anulado correctamente")
+        closeDialogVoided()
+        saleNotesRefresh()
+    } else {
+        snackbarStore.setStatus("error", "Error al anular la nota de venta")
+        console.error('Error al anular la nota de venta:', response);
+    }
+}
+
 const tab = ref(null)
 
 const exportItemsXLS = async () => {
@@ -543,6 +583,14 @@ const accountsReceivable = () => {
                                 </template>
                                 <span>Imprimir</span>
                             </v-tooltip>
+                            <v-tooltip>
+                                <template v-slot:activator="{ props }">
+                                    <v-btn v-bind="props" v-if="item.raw.state_type.id !== 6" class="me-2" rounded
+                                        icon="mdi-minus-circle" color="red" @click="voidedOpenDialog(item.raw)">
+                                    </v-btn>
+                                </template>
+                                <span>Anular</span>
+                            </v-tooltip>
                         </template>
 
                         <template v-slot:bottom>
@@ -729,6 +777,21 @@ const accountsReceivable = () => {
                             <v-spacer></v-spacer>
                             <v-btn color="blue-darken-1" variant="text" @click="closeDialogDeleteItem">Cancelar</v-btn>
                             <v-btn color="red-darken-1" variant="flat" @click="deleteItemConfirm">Eliminar</v-btn>
+                            <v-spacer></v-spacer>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+                <!-- DIALOG -->
+                <!-- DIALOG ANULAR -->
+                <v-dialog v-model="dialogVoided" max-width="500px" persistent>
+                    <v-card>
+                        <v-card class="text-h5 px-4 py-4 text-center">¿Está seguro de que desea anular esta nota de venta?
+                            <span v-if="voidedItem"> - {{ voidedItem.series }} - {{ voidedItem.number }}</span>
+                        </v-card>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="blue-darken-1" variant="text" @click="closeDialogVoided">Cancelar</v-btn>
+                            <v-btn color="red-darken-1" variant="flat" @click="voidedSaleNoteConfirm">Anular</v-btn>
                             <v-spacer></v-spacer>
                         </v-card-actions>
                     </v-card>
